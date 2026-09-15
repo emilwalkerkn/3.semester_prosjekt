@@ -1,0 +1,9 @@
+# .NET build files
+bin/
+obj/
+
+# JetBrains Rider
+.idea/
+
+# macOS
+.DS_Store
