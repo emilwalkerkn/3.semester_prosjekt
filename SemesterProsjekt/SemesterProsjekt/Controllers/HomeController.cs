@@ -11,6 +11,20 @@ public class HomeController : Controller
         return View();
     }
 
+    public IActionResult Need()
+    {
+        var model = new NeedViewModel();
+        return View(model);
+    }
+    
+    [HttpPost]
+    public IActionResult Need(NeedViewModel model)
+    {
+        ViewData["Message"] = $"Behov registrert: {model.Type}, {model.Description}, {model.Location}";
+
+        return View(model);
+    }
+
     public IActionResult Privacy()
     {
         return View();
