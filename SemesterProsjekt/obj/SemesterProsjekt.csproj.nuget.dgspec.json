@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/Users/eriktveiten/RiderProjects/3.semester_prosjekt/SemesterProsjekt/SemesterProsjekt.csproj": {}
+    "/Users/emilwalkerknudsen/RiderProjects/3.semester_prosjekt/SemesterProsjekt/SemesterProsjekt.csproj": {}
   },
   "projects": {
-    "/Users/eriktveiten/RiderProjects/3.semester_prosjekt/SemesterProsjekt/SemesterProsjekt.csproj": {
+    "/Users/emilwalkerknudsen/RiderProjects/3.semester_prosjekt/SemesterProsjekt/SemesterProsjekt.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/eriktveiten/RiderProjects/3.semester_prosjekt/SemesterProsjekt/SemesterProsjekt.csproj",
+        "projectUniqueName": "/Users/emilwalkerknudsen/RiderProjects/3.semester_prosjekt/SemesterProsjekt/SemesterProsjekt.csproj",
         "projectName": "SemesterProsjekt",
-        "projectPath": "/Users/eriktveiten/RiderProjects/3.semester_prosjekt/SemesterProsjekt/SemesterProsjekt.csproj",
-        "packagesPath": "/Users/eriktveiten/.nuget/packages/",
-        "outputPath": "/Users/eriktveiten/RiderProjects/3.semester_prosjekt/SemesterProsjekt/obj/",
+        "projectPath": "/Users/emilwalkerknudsen/RiderProjects/3.semester_prosjekt/SemesterProsjekt/SemesterProsjekt.csproj",
+        "packagesPath": "/Users/emilwalkerknudsen/.nuget/packages/",
+        "outputPath": "/Users/emilwalkerknudsen/RiderProjects/3.semester_prosjekt/SemesterProsjekt/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/Users/eriktveiten/.nuget/NuGet/NuGet.Config"
+          "/Users/emilwalkerknudsen/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -38,7 +38,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.100"
+        "SdkAnalysisLevel": "10.0.400"
       },
       "frameworks": {
         "net10.0": {
