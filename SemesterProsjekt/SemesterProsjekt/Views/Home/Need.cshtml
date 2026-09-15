@@ -1,0 +1,33 @@
+@model SemesterProsjekt.Models.NeedViewModel
+
+@{
+    ViewData["Title"] = "Registrer behov";
+}
+
+<h1>Registrer behov</h1>
+
+@if (ViewData["Message"] != null)
+{
+    <p>@ViewData["Message"]</p>
+}
+
+<form method="post">
+
+    <div>
+        <label>Type behov</label>
+        <input asp-for="Type" />
+    </div>
+
+    <div>
+        <label>Beskrivelse</label>
+        <input asp-for="Description" />
+    </div>
+
+    <div>
+        <label>Sted</label>
+        <input asp-for="Location" />
+    </div>
+
+    <button type="submit">Registrer behov</button>
+
+</form>
