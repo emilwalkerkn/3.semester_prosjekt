@@ -1,0 +1,69 @@
+# =========================
+# .NET build files
+# =========================
+bin/
+obj/
+**/bin/
+**/obj/
+
+# =========================
+# JetBrains Rider
+# =========================
+.idea/
+**/.idea/
+*.sln.iml
+
+# =========================
+# Visual Studio
+# =========================
+.vs/
+**/.vs/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio build output
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+
+# =========================
+# macOS
+# =========================
+.DS_Store
+**/.DS_Store
+.AppleDouble
+.LSOverride
+
+# =========================
+# Windows
+# =========================
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+
+# =========================
+# Logs / temporary files
+# =========================
+*.log
+*.tmp
+*.temp
+
+# =========================
+# Test results / coverage
+# =========================
+TestResults/
+**/TestResults/
+coverage/
+**/coverage/
+
+# =========================
+# Environment / secrets
+# =========================
+.env
+.env.*
+!.env.example
