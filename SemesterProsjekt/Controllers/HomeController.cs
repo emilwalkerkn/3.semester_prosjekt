@@ -10,7 +10,7 @@ public class HomeController : Controller
     {
         return View();
     }
-
+// NEED
     public IActionResult Need()
     {
         var model = new NeedViewModel();
@@ -20,11 +20,29 @@ public class HomeController : Controller
     [HttpPost]
     public IActionResult Need(NeedViewModel model)
     {
-        return RedirectToAction("Result", model);
+        return RedirectToAction("NeedResult", model);
     }
 
 
-    public IActionResult Result(NeedViewModel model)
+    public IActionResult NeedResult(NeedViewModel model)
+    {
+        return View(model);
+    }
+    
+//RESOURCE    
+    public IActionResult Resource()
+    {
+        var model = new ResourceViewModel();
+        return View(model);
+    }
+
+    [HttpPost]
+    public IActionResult Resource(ResourceViewModel model)
+    {
+        return RedirectToAction("ResourceResult", model);
+    }
+    
+    public IActionResult ResourceResult(ResourceViewModel model)
     {
         return View(model);
     }
