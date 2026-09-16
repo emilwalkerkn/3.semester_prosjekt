@@ -3,38 +3,54 @@
 @{
     ViewData["Title"] = "Registrer behov";
 }
+<div class="need-container">
 
-<h1>Registrer behov</h1>
+    <h1>Registrer behov</h1>
 
-@if (ViewData["Message"] != null)
-{
-    <p>@ViewData["Message"]</p>
-}
+    @if (ViewData["Message"] != null)
+    {
+        <p>@ViewData["Message"]</p>
+    }
 
-<form method="post">
+    <form method="post" class="need-form">
 
-    <div>
-        <label>Type behov</label>
-        <input asp-for="Type" />
-    </div>
+        <div>
+            <label>Type behov</label>
+            <input asp-for="Type" />
+        </div>
 
-    <div>
-        <label>Beskrivelse</label>
-        <input asp-for="Description" />
-    </div>
+        <div>
+            <label>Beskrivelse</label>
+            <input asp-for="Description" />
+        </div>
 
-    <div>
-        <label>Sted</label>
-        <input asp-for="Location" />
-    </div>
+        <div>
+            <label>Sted</label>
+            <input asp-for="Location" />
+        </div>
+    
+        <p>Valgt posisjon fra kartet:</p>
+        <div>
+        
+            <label>Latitude</label>
+            <input asp-for="Latitude" readonly/>
+        </div>
 
-    <button type="submit">Registrer behov</button>
+        <div>
+            <label>Longitude</label>
+            <input asp-for="Longitude" readonly />
+        </div>
 
-</form>
+        <button type="submit" class="need-button">Registrer behov</button>
 
-<h2>Velg sted på kartet</h2>
+    </form>
 
-<div id="map" style="height: 400px;"></div>
+    <h2>Velg sted på kartet</h2>
+
+    <div id="map"></div>
+
+</div>
+
 
 @section Scripts {
     <script>
@@ -43,5 +59,24 @@
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
+
+        var marker;
+
+        map.on('click', function (e) {
+            if (marker) {
+                map.removeLayer(marker);
+            }
+
+            marker = L.marker(e.latlng).addTo(map)
+                .bindPopup(
+                    "Valgt posisjon<br>" +
+                    "Latitude: " + e.latlng.lat.toFixed(6) + "<br>" +
+                    "Longitude: " + e.latlng.lng.toFixed(6)
+                )
+                .openPopup();
+
+            document.getElementById('Latitude').value = e.latlng.lat.toString();
+            document.getElementById('Longitude').value = e.latlng.lng.toString();
+        });
     </script>
 }
