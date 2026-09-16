@@ -1,25 +1,26 @@
 @model SemesterProsjekt.Models.NeedViewModel
-
 @{
-    ViewData["Title"] = "Behov registert";
+   
+    ViewData["Title"] = "Behov registrert";
+
 }
 
 <div class="text-center">
 
-    <h1>behov registrert</h1>
+    <h1>Behov registrert</h1>
 
     <div class="mt-4">
 
-        <p> Type behov: @Model.Type</p>
-        <p> Beskrivelse: @Model.Description</p>
-        <p> Sted: @Model.Location</p>
-        <p>Latitude: @Model.Latitude</p>
-        <p>Longitude: @Model.Longitude</p>
+        <p><strong>Type behov:</strong> @Model.Type</p>
+        <p><strong>Beskrivelse:</strong> @Model.Description</p>
+        <p><strong>Sted:</strong> @Model.Location</p>
+        <p><strong>Latitude:</strong> @Model.Latitude</p>
+        <p><strong>Longitude:</strong> @Model.Longitude</p>
     </div>
 
     <a asp-controller="Home"
-        asp-action="Need"
-        class="btn btn-primary mt-3">
+       asp-action="Need"
+       class="btn btn-primary mt-3">
         Registrer et nytt behov
     </a>
 </div>
