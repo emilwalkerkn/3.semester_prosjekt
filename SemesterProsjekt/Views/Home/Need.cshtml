@@ -28,9 +28,11 @@
         <input asp-for="Location" />
     </div>
     
+    <p>Valgt posisjon fra kartet:</p>
     <div>
+        
         <label>Latitude</label>
-        <input asp-for="Latitude" readonly />
+        <input asp-for="Latitude" readonly/>
     </div>
 
     <div>
@@ -61,7 +63,13 @@
                 map.removeLayer(marker);
             }
 
-            marker = L.marker(e.latlng).addTo(map);
+            marker = L.marker(e.latlng).addTo(map)
+                .bindPopup(
+                    "Valgt posisjon<br>" +
+                    "Latitude: " + e.latlng.lat.toFixed(6) + "<br>" +
+                    "Longitude: " + e.latlng.lng.toFixed(6)
+                )
+                .openPopup();
 
             document.getElementById('Latitude').value = e.latlng.lat.toString();
             document.getElementById('Longitude').value = e.latlng.lng.toString();
