@@ -11,6 +11,24 @@ public class HomeController : Controller
         return View();
     }
 
+    public IActionResult Need()
+    {
+        var model = new NeedViewModel();
+        return View(model);
+    }
+    
+    [HttpPost]
+    public IActionResult Need(NeedViewModel model)
+    {
+        return RedirectToAction("Result", model);
+    }
+
+
+    public IActionResult Result(NeedViewModel model)
+    {
+        return View(model);
+    }
+    
     public IActionResult Privacy()
     {
         return View();
