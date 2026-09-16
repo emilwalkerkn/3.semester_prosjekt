@@ -29,3 +29,69 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+
+/*Styling for behovsskjema og Leaflet-kart */
+
+form div {
+  margin-bottom: 10px;
+}
+
+form input {
+  width: 100%;
+  max-width: 400px;
+  padding: 8px;
+}
+
+#map {
+  height: 400px;
+  width: 100%;
+  margin-top: 15px;
+  border-radius: 8px;
+}
+
+.need-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.need-form {
+  max-width: 500px;
+}
+
+.need-form div {
+  margin-bottom: 15px;
+}
+
+.need-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.need-form input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.need-button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+@media (max-width: 600px) {
+  #map {
+    height: 300px;
+  }
+
+  .need-container {
+    padding: 10px;
+  }
+}
