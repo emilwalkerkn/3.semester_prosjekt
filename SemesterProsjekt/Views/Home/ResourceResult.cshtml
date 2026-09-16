@@ -1,0 +1,25 @@
+@model SemesterProsjekt.Models.ResourceViewModel
+
+@{
+    ViewData["Title"] = "Ressurs registrert";
+}
+
+<div class="text-center">
+    
+    <h1>Ressurs registrert</h1>
+    
+    <div class="mt-4">
+        
+        <p> Type ressurs: @Model.Type</p>
+        <p> Beskrivelse: @Model.Description</p>
+        <p> Sted: @Model.Location</p>
+    </div>
+    
+    <a asp-controller="Home"
+       asp-action="Resource"
+       class="btn btn-primary mt-3">
+        Registrer en ny ressurs
+    </a>
+    
+</div>
+

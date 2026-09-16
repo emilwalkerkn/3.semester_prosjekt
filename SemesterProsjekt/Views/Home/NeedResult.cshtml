@@ -1,6 +1,6 @@
 @model SemesterProsjekt.Models.NeedViewModel
-
 @{
+   
     ViewData["Title"] = "Behov registrert";
 
 }
@@ -16,12 +16,12 @@
         <p><strong>Sted:</strong> @Model.Location</p>
         <p><strong>Latitude:</strong> @Model.Latitude</p>
         <p><strong>Longitude:</strong> @Model.Longitude</p>
-</div>
+    </div>
 
-<a asp-controller="Home"
-   asp-action="Need"
-   class="btn btn-primary mt-3">
-    Registrer et nytt behov
-</a>
+    <a asp-controller="Home"
+       asp-action="Need"
+       class="btn btn-primary mt-3">
+        Registrer et nytt behov
+    </a>
 </div>
 

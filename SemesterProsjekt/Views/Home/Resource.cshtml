@@ -1,0 +1,28 @@
+@model SemesterProsjekt.Models.ResourceViewModel
+
+@{
+    ViewData["Title"] = "Registrer ressurs";
+}
+
+<h1>Registrer ressurs</h1>
+
+<form method="post">
+    <div>
+        <label>Type ressurs</label>
+        <input asp-for="Type"/>
+    </div>
+    
+    <div>
+        <label>Beksrivelse</label>
+        <input asp-for="Description"/>
+    </div>
+    
+    <div>
+        <label>Sted</label>
+        <input asp-for="Location"/>
+    </div>
+    
+    <button type="submit">Registrer ressurs</button>
+    
+    
+</form>
