@@ -10,13 +10,15 @@ public class HomeController : Controller
     {
         return View();
     }
-// NEED
+    // GET: Viser skjemaet for registrering av et behov.
     public IActionResult Need()
     {
         var model = new NeedViewModel();
         return View(model);
     }
     
+    // POST: Mottar informasjonen fra behovsskjemaet
+    // og sender dataene videre til resultatsiden.
     [HttpPost]
     public IActionResult Need(NeedViewModel model)
     {
@@ -29,13 +31,15 @@ public class HomeController : Controller
         return View(model);
     }
     
-//RESOURCE    
+    // GET: Viser skjemaet for registrering av en ressurs. 
     public IActionResult Resource()
     {
         var model = new ResourceViewModel();
         return View(model);
     }
 
+    // POST: Mottar informasjonen fra ressursskjemaet
+    // og sender dataene videre til resultatsiden.
     [HttpPost]
     public IActionResult Resource(ResourceViewModel model)
     {
