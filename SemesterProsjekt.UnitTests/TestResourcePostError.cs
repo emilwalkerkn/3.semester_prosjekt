@@ -4,28 +4,26 @@ using SemesterProsjekt.Models;
 
 namespace SemesterProsjekt.UnitTests;
 
-public class UnitTestNeedPost
+public class TestResourcePostError
 {
     [Fact]
-    public void Need_Post_RedirectsToNeedResult()
+    public void ResourcePost_ShouldFail()
     {
-        // Arrange
+        // Arange
         var controller = new HomeController();
-
-        var model = new NeedViewModel
+        var model = new ResourceViewModel
         {
-            Type = "Brann",
-            Description = "Tre har falt over vei",
-            Location = "Kristiansand",
-            Latitude = "58.1467",
-            Longitude = "7.9956"
+            Type = "Gravemaskin",
+            Description = "Stor gravemaskin",
+            Location = "Kristiansand"
         };
-
+        
         // Act
-        var result = controller.Need(model);
-
+        var result = controller.Resource(model);
+        
         // Assert
         var redirectResult = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal("NeedResult", redirectResult.ActionName);
     }
 }
+
