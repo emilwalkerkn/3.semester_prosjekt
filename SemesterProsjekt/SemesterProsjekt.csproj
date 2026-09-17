@@ -7,4 +7,9 @@
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="SemesterProsjekt.UnitTests\obj\project.assets.json" />
+      <_ContentIncludedByDefault Remove="SemesterProsjekt.UnitTests\obj\SemesterProsjekt.UnitTests.csproj.nuget.dgspec.json" />
+    </ItemGroup>
+
 </Project>
