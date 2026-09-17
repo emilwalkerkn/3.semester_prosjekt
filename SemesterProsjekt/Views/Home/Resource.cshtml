@@ -49,6 +49,10 @@
 </div>
 @section Scripts {
     <script>
+
+        // Oppretter Leaflet-kartet og setter startposisjonen
+        // til Kristiansand.
+        
         var map = L.map('map').setView([58.1467, 7.9956], 13);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -57,7 +61,13 @@
 
         var marker;
 
+        // Når brukeren klikker på kartet,
+        // lagres den valgte posisjonen som latitude og longitude.
+
         map.on('click', function (e) {
+
+            // Fjerner den forrige markøren slik at bare
+            // den sist valgte posisjonen vises.
             if (marker) {
                 map.removeLayer(marker);
             }
@@ -70,6 +80,9 @@
                 )
                 .openPopup();
 
+
+            // Fyller ut latitude og longitude i skjemaet
+            // slik at koordinatene sendes videre ved POST.
             document.getElementById('Latitude').value = e.latlng.lat.toString();
             document.getElementById('Longitude').value = e.latlng.lng.toString();
         });
