@@ -1,15 +1,21 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Registrerer MVC-tjenestene som brukes av applikasjonen,
+// inkludert Controllers og Views.
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+
+// Konfigurerer HTTP-forespørselsflyten.
+// Ved kjøring utenfor utviklingsmiljø brukes en egen feilhåndteringsside
+// og HSTS for sikrere HTTPS-tilkoblinger.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    
+    // Standardverdien for HSTS er 30 dager.
+    // Denne kan endres ved behov for produksjonsmiljø.
     app.UseHsts();
 }
 
@@ -20,10 +26,14 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
+// Setter opp standard routing slik at URL-er kobles
+// til riktig Controller og Action.
 app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
 
+// Starter ASP.NET Core-applikasjonen og gjør den klar
+// til å motta HTTP-forespørsler.
 app.Run();
