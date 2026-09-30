@@ -22,21 +22,21 @@ I denne versjonen av applikasjonen er hovedfokuset frontend, registrering av beh
 
 
 ## Drift
-Prosjektet er en ASP.NET Core MVC applikasjon som kan kjøres i Docker. Prosjektet inneholder en Dockerfile og en compose.yml som brukes til å bygge og starte applikasjonen. Vi bruker Git til versjonskontroll og Github til å dele prosjektet og samarbeide i gruppen. Git registrerer endringer i koden gjennom commits. Dette gjør det mulig for oss å følge utviklingen og se hvem som har gjort endringer og hente frem tidligere versjoner ved behov. 
+Prosjektet er en ASP.NET Core MVC-applikasjon som kan kjøres i Docker. Prosjektet inneholder en Dockerfile og en compose.yml som brukes til å bygge og starte applikasjonen. Vi bruker Git til versjonskontroll og GitHub til å dele prosjektet og samarbeide i gruppen. Git registrerer endringer i koden gjennom commits. Dette gjør det mulig for oss å følge utviklingen og se hvem som har gjort endringer og hente frem tidligere versjoner ved behov. 
  
 **Krav**
 For å kjøre prosjektet trenger man Git og Docker installert. Repositoryet kan klones fra GitHub, og applikasjonen startes fra mappen som inneholder compose.yml.
  
 **Kommando for å starte applikasjonen:**
-´´´bash
-docker compose up –build
-´´´
+```bash
+docker compose up --build
+```
 
 Når containeren er startet, er applikasjonen tilgjengelig på http://localhost:8080. 
 **Applikasjonen kan stoppes med:**
-´´´bash
+```bash
 docker compose down
-´´´
+```
 
 
 ## Systemarkitektur
@@ -52,7 +52,7 @@ Vi bruker MVC-arkitektur (Model-View-Controller). Dette gjør at vi kan skille m
 
  
 **Dataflyt**
-Dataflyten for registrering av behov er: brukeren fyller ut skjemaet → POST sendes til HomeController → dataen bindes til NeedViewModel → brukeren sendes til NeedResult, hvor informasjonen vises. Ressursregistreringen fungerer på samme måte, men dataene bindes til ResourceViewModel og brukeren sendes til ResourceResult.
+Dataflyten for registrering av behov er: brukeren fyller ut skjemaet → POST sendes til HomeController → dataene bindes til NeedViewModel → brukeren sendes til NeedResult, hvor informasjonen vises. Ressursregistreringen fungerer på samme måte, men dataene bindes til ResourceViewModel og brukeren sendes til ResourceResult.
 **Bruker → Skjema → POST → HomeController → NeedViewModel → NeedResult → Bruker**
 
 Kartet er koblet opp til skjemaet med JavaScript. Når brukeren klikker på kartet, lagres latitude og longitude i ViewModel-en. Disse koordinatene blir deretter sendt videre og vises på resultatsiden.
@@ -103,10 +103,10 @@ Testen kontrollerer at GET-metoden  Need() returnerer et view med riktig ViewMod
 
 
 
-#### Test 4 - TestRescourcePost
+#### Test 4 - TestResourcePost
 TestResourcePost (‘ResourcePost_RedirectsToResourceResult’)
 ```csharp
-car controller = new HomeController();
+var controller = new HomeController();
 var model = new ResourceViewModel
 {Type = "Brannbil",
 Description = "Brannbil med mannskap",
@@ -120,7 +120,7 @@ Assert.Equal("ResourceResult", redirectResult.ActionName);
 
 **Hva skjer:**
 Testen oppretter en HomeController og en ResourceViewModel med testdata. ResourceViewModel inneholder type, beskrivelse, sted, latitude og longitude. Modellen representerer data som kan bli sendt inn fra ressursskjemaet.
-Så kalles den første POST-metoden Resource(model), hvor modellen sendes inn som parameter.
+Så kalles POST-metoden Resource(model), hvor modellen sendes inn som parameter.
 Den første sjekken kontrollerer at resultatet er et RedirectToActionResult. Dette betyr at controlleren skal sende brukeren videre til en action etter at skjemaet er sendt.
 Den andre sjekken kontrollerer at brukeren faktisk sendes videre til ResourceResult. Testen består fordi Resource() sender brukeren videre til ResourceResult.
 
@@ -176,9 +176,9 @@ I dette prosjektet har vi hovedsakelig brukt KI-verktøyet ChatGPT som et hjelpe
 
 ### Eksempler på prompts
 - "Kan dette sammenlignes med OOP i C#? Om det går, forklar i mens du sammenligner"
-- "Forkalr hvordan Model, View og Controller fungerer i MVC, og hvordan de henger sammen"
-- "Kan du forklare GitHub-workflows? Steg for steg slik vi jobber mest mulig effektivt og ungår konflikt"
-- "Kan du vise hvordan jeg kan konvertere tabellene fra google docs dokumentet slik det ser riktgi ut i README-filen?"
+- "Forklar hvordan Model, View og Controller fungerer i MVC, og hvordan de henger sammen"
+- "Kan du forklare GitHub-workflows? Steg for steg slik vi jobber mest mulig effektivt og unngår konflikt"
+- "Kan du vise hvordan jeg kan konvertere tabellene fra google docs dokumentet slik det ser riktig ut i README-filen?"
 - "Hva er feil her? Hvorfor er det grå farge i teksten på Rider?"
 - "Skal enhetstestene ligge i samme fil som applikasjonen? Eller i samme prosjekt-mappe som applikasjonen?"
 
