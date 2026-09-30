@@ -171,6 +171,14 @@ I tillegg til enhetstestene har vi gjennomført manuelle tester av applikasjonen
 ## Dokumentasjon i koden
 Vi bruker korte kommentarer på sentrale klasser og metoder for å forklare hva koden gjør. Fokuset ligger spesielt på controller-metodene og ViewModel-klassene. Dokumentasjonen i koden er kort og forklarer hensikten med sentrale deler av løsningen, og forklarer ikke hver enkelt linje.
 
-## Bruk av KI i oppgave
-I dette prosjektet har vi brukt KI-verktøy som et hjelpemiddel i utviklingen. KI har i hovedsak blitt brukt til korreksjon av syntaksfeil, rydde opp i og forkorte unødvendig kode, og gi forslag til hvordan koden kan bli bedre strukturert. I tillegg har vi brukt KI for å få bedre forståelse av enkelte konsepter underveis. Løsninger og faglige vurderinger i prosjektet er våre egne.
+## Bruk av KI i prosjektet
+I dette prosjektet har vi hovedsakelig brukt KI-verktøyet ChatGPT som et hjelpemiddel i utviklingen. KI har i hovedsak blitt brukt til korreksjon av syntaksfeil, rydde opp i og forkorte unødvendig kode, og gi forslag til hvordan koden kan bli bedre strukturert. I tillegg har vi brukt KI for å få bedre forståelse av enkelte konsepter underveis. Løsninger og faglige vurderinger i prosjektet er våre egne.
+
+### Eksempler på prompts
+- "Kan dette sammenlignes med OOP i C#? Om det går, forklar i mens du sammenligner"
+- "Forkalr hvordan Model, View og Controller fungerer i MVC, og hvordan de henger sammen"
+- "Kan du forklare GitHub-workflows? Steg for steg slik vi jobber mest mulig effektivt og ungår konflikt"
+- "Kan du vise hvordan jeg kan konvertere tabellene fra google docs dokumentet slik det ser riktgi ut i README-filen?"
+- "Hva er feil her? Hvorfor er det grå farge i teksten på Rider?"
+- "Skal enhetstestene ligge i samme fil som applikasjonen? Eller i samme prosjekt-mappe som applikasjonen?"
 
