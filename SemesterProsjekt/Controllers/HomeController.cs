@@ -1,11 +1,25 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using SemesterProsjekt.Models;
+using SemesterProsjekt.Data;
+using SemesterProsjekt.Models;
 
 namespace SemesterProsjekt.Controllers;
 
 public class HomeController : Controller
 {
+    
+    private readonly IResourceRepository _resourceRepository;
+    private readonly INeedRepository _needRepository;
+
+    public HomeController(
+        IResourceRepository resourceRepository,
+        INeedRepository needRepository)
+    {
+        _resourceRepository = resourceRepository;
+        _needRepository = needRepository;
+    }
+    
     public IActionResult Index()
     {
         return View();
@@ -20,8 +34,19 @@ public class HomeController : Controller
     // POST: Mottar informasjonen fra behovsskjemaet
     // og sender dataene videre til resultatsiden.
     [HttpPost]
-    public IActionResult Need(NeedViewModel model)
+    public async Task<IActionResult> Need(NeedViewModel model)
     {
+        var need = new Need
+        {
+            Type = model.Type,
+            Description = model.Description,
+            Location = model.Location,
+            Latitude = model.Latitude,
+            Longitude = model.Longitude
+        };
+
+        await _needRepository.CreateAsync(need);
+
         return RedirectToAction("NeedResult", model);
     }
 
@@ -41,8 +66,19 @@ public class HomeController : Controller
     // POST: Mottar informasjonen fra ressursskjemaet
     // og sender dataene videre til resultatsiden.
     [HttpPost]
-    public IActionResult Resource(ResourceViewModel model)
+    public async Task<IActionResult> Resource(ResourceViewModel model)
     {
+        var resource = new Resource
+        {
+            Type = model.Type,
+            Description = model.Description,
+            Location = model.Location,
+            Latitude = model.Latitude,
+            Longitude = model.Longitude
+        };
+
+        await _resourceRepository.CreateAsync(resource);
+
         return RedirectToAction("ResourceResult", model);
     }
     
@@ -50,7 +86,6 @@ public class HomeController : Controller
     {
         return View(model);
     }
-    
     
     public IActionResult Privacy()
     {
