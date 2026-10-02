@@ -43,6 +43,32 @@ public class HomeController : Controller
     }
     
     
+    public async Task<IActionResult> NeedDetails(int id)
+    {
+        var need = await _needRepository.GetByIdAsync(id);
+
+        if (need == null)
+        {
+            return NotFound();
+        }
+
+        return View(need);
+    }
+    
+    
+    public async Task<IActionResult> ResourceDetails(int id)
+    {
+        var resource = await _resourceRepository.GetByIdAsync(id);
+
+        if (resource == null)
+        {
+            return NotFound();
+        }
+
+        return View(resource);
+    }
+    
+    
     // GET: Viser skjemaet for registrering av et behov.
     public IActionResult Need()
     {
