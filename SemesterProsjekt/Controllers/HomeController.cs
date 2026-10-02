@@ -20,10 +20,29 @@ public class HomeController : Controller
         _needRepository = needRepository;
     }
     
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
+        var needs = await _needRepository.GetAllAsync();
+        var resources = await _resourceRepository.GetAllAsync();
+
+        var model = new DashboardViewModel
+        {
+            TotalNeeds = needs.Count(),
+            TotalResources = resources.Count(),
+
+            RecentNeeds = needs
+                .OrderByDescending(n => n.Id)
+                .Take(3),
+
+            RecentResources = resources
+                .OrderByDescending(r => r.Id)
+                .Take(3)
+        };
+
+        return View(model);
     }
+    
+    
     // GET: Viser skjemaet for registrering av et behov.
     public IActionResult Need()
     {
