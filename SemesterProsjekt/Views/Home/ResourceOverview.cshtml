@@ -1,0 +1,30 @@
+@model IEnumerable<SemesterProsjekt.Models.Resource>
+
+@{
+    ViewData["Title"] = "Resource Overview";
+}
+
+<h1>Resource Overview</h1>
+
+@if (!Model.Any())
+{
+    <p>No resources have been registered yet.</p>
+}
+else
+{
+    @foreach (var resource in Model)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">@resource.Type</h5>
+
+                <p class="card-text">@resource.Description</p>
+
+                <p>
+                    <strong>Location:</strong>
+                    @resource.Location
+                </p>
+            </div>
+        </div>
+    }
+}

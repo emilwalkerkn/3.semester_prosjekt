@@ -1,0 +1,30 @@
+@model IEnumerable<SemesterProsjekt.Models.Need>
+
+@{
+    ViewData["Title"] = "Need Overview";
+}
+
+<h1>Need Overview</h1>
+
+@if (!Model.Any())
+{
+    <p>No needs have been registered yet.</p>
+}
+else
+{
+    @foreach (var need in Model)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">@need.Type</h5>
+
+                <p class="card-text">@need.Description</p>
+
+                <p>
+                    <strong>Location:</strong>
+                    @need.Location
+                </p>
+            </div>
+        </div>
+    }
+}

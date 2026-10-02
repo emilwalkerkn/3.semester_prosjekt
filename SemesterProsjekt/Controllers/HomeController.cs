@@ -87,6 +87,22 @@ public class HomeController : Controller
         return View(model);
     }
     
+    public async Task<IActionResult> ResourceOverview()
+    {
+        var resources = await _resourceRepository.GetAllAsync();
+
+        return View(resources);
+    }
+    
+    public async Task<IActionResult> NeedOverview()
+    {
+        var needs = await _needRepository.GetAllAsync();
+
+        return View(needs);
+    }
+    
+    
+    
     public IActionResult Privacy()
     {
         return View();
