@@ -42,7 +42,9 @@ public class HomeController : Controller
             Description = model.Description,
             Location = model.Location,
             Latitude = model.Latitude,
-            Longitude = model.Longitude
+            Longitude = model.Longitude,
+            GeometryType = model.GeometryType,
+            GeometryData = model.GeometryData
         };
 
         await _needRepository.CreateAsync(need);
@@ -74,7 +76,9 @@ public class HomeController : Controller
             Description = model.Description,
             Location = model.Location,
             Latitude = model.Latitude,
-            Longitude = model.Longitude
+            Longitude = model.Longitude,
+            GeometryType = model.GeometryType,
+            GeometryData = model.GeometryData
         };
 
         await _resourceRepository.CreateAsync(resource);

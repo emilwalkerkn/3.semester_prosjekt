@@ -17,7 +17,7 @@ public class ResourceRepository : IResourceRepository
         using var connection = _connectionFactory.CreateConnection();
 
         const string sql = """
-                           SELECT Id, Type, Description, Location, Latitude, Longitude
+                           SELECT Id, Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData
                            FROM Resources;
                            """;
 
@@ -43,12 +43,11 @@ public class ResourceRepository : IResourceRepository
     public async Task<int> CreateAsync(Resource resource)
     {
         using var connection = _connectionFactory.CreateConnection();
-
         const string sql = """
                            INSERT INTO Resources
-                               (Type, Description, Location, Latitude, Longitude)
+                               (Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData)
                            VALUES
-                               (@Type, @Description, @Location, @Latitude, @Longitude);
+                               (@Type, @Description, @Location, @Latitude, @Longitude, @GeometryType, @GeometryData);
                            """;
 
         return await connection.ExecuteAsync(sql, resource);

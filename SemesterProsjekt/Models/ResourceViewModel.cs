@@ -18,6 +18,10 @@ public class ResourceViewModel
     
     // Longitude valgt fra kartet.
     public string Longitude { get; set; } = "";
+    
+    public string GeometryType { get; set; } = "";
+   
+    public string GeometryData { get; set; } = "";
 
 }
 

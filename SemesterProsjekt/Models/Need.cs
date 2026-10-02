@@ -13,4 +13,8 @@ public class Need
     public string Latitude { get; set; } = "";
 
     public string Longitude { get; set; } = "";
+    
+    public string GeometryType { get; set; } = "";
+    
+    public string GeometryData { get; set; } = "";
 }

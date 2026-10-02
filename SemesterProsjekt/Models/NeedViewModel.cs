@@ -20,5 +20,9 @@ public class NeedViewModel
     
     // Longitude valgt fra Leaflet-kartet.
     public string Longitude { get; set; } = "";
+    
+    public string GeometryType { get; set; } = "";
+    
+    public string GeometryData { get; set; } = "";
   
 }

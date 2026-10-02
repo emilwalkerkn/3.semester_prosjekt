@@ -6,6 +6,9 @@
 
 <h1>Resource Overview</h1>
 
+<h2>Registrerte ressurser på kartet</h2>
+<div id="resourceMap" style="height: 500px; margin-bottom: 30px;"></div>
+
 @if (!Model.Any())
 {
     <p>No resources have been registered yet.</p>
@@ -27,4 +30,47 @@ else
             </div>
         </div>
     }
+}
+
+
+
+@section Scripts {
+    <script>
+        // Oppretter kartet med Kristiansand som startposisjon.
+        var resourceMap = L.map('resourceMap')
+            .setView([58.1467, 7.9956], 12);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(resourceMap);
+
+        @foreach (var resource in Model)
+        {
+        if (resource.GeometryType == "marker" &&
+        !string.IsNullOrEmpty(resource.Latitude) &&
+        !string.IsNullOrEmpty(resource.Longitude))
+        {
+        <text>
+        L.marker([
+            @resource.Latitude,
+            @resource.Longitude
+        ])
+            .addTo(resourceMap)
+            .bindPopup('@resource.Type - @resource.Location');
+        </text>
+        }
+
+        if (resource.GeometryType == "polyline" &&
+        !string.IsNullOrEmpty(resource.GeometryData))
+        {
+        <text>
+        var geoJsonData = @Html.Raw(resource.GeometryData);
+
+        L.geoJSON(geoJsonData)
+            .addTo(resourceMap)
+            .bindPopup('@resource.Type - @resource.Location');
+        </text>
+        }
+        }
+    </script>
 }
