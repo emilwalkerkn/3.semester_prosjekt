@@ -17,7 +17,7 @@ public class NeedRepository : INeedRepository
         using var connection = _connectionFactory.CreateConnection();
 
         const string sql = """
-                           SELECT Id, Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData
+                           SELECT Id, Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData, Status
                            FROM Needs;
                            """;
         
@@ -29,7 +29,7 @@ public class NeedRepository : INeedRepository
         using var connection = _connectionFactory.CreateConnection();
 
         const string sql = """
-                           SELECT Id, Type, Description, Location, Latitude, Longitude
+                           SELECT Id, Type, Description, Location, Latitude, Longitude, Status
                            FROM Needs
                            WHERE Id = @Id;
                            """;
@@ -46,11 +46,28 @@ public class NeedRepository : INeedRepository
 
         const string sql = """
                            INSERT INTO Needs
-                               (Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData)
+                               (Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData, Status)
                            VALUES
-                               (@Type, @Description, @Location, @Latitude, @Longitude, @GeometryType, @GeometryData);
+                               (@Type, @Description, @Location, @Latitude, @Longitude, @GeometryType, @GeometryData, @Status);
                            """;
 
         return await connection.ExecuteAsync(sql, need);
+    }
+    
+    public async Task UpdateStatusAsync(int id, string status)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        const string sql = """
+                           UPDATE Needs
+                           SET Status = @Status
+                           WHERE Id = @Id;
+                           """;
+
+        await connection.ExecuteAsync(sql, new
+        {
+            Id = id,
+            Status = status
+        });
     }
 }

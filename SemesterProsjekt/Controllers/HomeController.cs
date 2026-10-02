@@ -89,7 +89,8 @@ public class HomeController : Controller
             Latitude = model.Latitude,
             Longitude = model.Longitude,
             GeometryType = model.GeometryType,
-            GeometryData = model.GeometryData
+            GeometryData = model.GeometryData,
+            Status = model.Status
         };
 
         await _needRepository.CreateAsync(need);
@@ -161,5 +162,14 @@ public class HomeController : Controller
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+    
+    
+    [HttpPost]
+    public async Task<IActionResult> UpdateNeedStatus(int id, string status)
+    {
+        await _needRepository.UpdateStatusAsync(id, status);
+
+        return RedirectToAction("NeedOverview");
     }
 }

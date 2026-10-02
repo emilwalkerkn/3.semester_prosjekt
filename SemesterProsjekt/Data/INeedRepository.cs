@@ -9,4 +9,6 @@ public interface INeedRepository
     Task<Need?> GetByIdAsync(int id);
 
     Task<int> CreateAsync(Need need);
+    
+    Task UpdateStatusAsync(int id, string status);
 }

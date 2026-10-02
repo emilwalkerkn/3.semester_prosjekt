@@ -28,6 +28,23 @@ else
                     <strong>Location:</strong>
                     @need.Location
                 </p>
+                <p>
+                    <strong>Status:</strong> @need.Status
+                </p>
+                <form asp-action="UpdateNeedStatus" method="post">
+                    <input type="hidden" name="id" value="@need.Id" />
+
+                    <select name="status">
+                        <option value="New" selected="@(need.Status == "New")">New</option>
+                        <option value="In progress" selected="@(need.Status == "In progress")">In progress</option>
+                        <option value="Resolved" selected="@(need.Status == "Resolved")">Resolved</option>
+                    </select>
+
+                    <button type="submit" class="btn btn-primary">
+                        Update status
+                    </button>
+                </form>
+
             </div>
         </div>
     }
