@@ -1,0 +1,75 @@
+@model IEnumerable<SemesterProsjekt.Models.Need>
+
+@{
+    ViewData["Title"] = "Need Overview";
+}
+
+<h1>Need Overview</h1>
+
+
+<h2>Registrerte behov på kartet</h2>
+<div id="needMap" style="height: 500px; margin-bottom: 30px;"></div>
+
+@if (!Model.Any())
+{
+    <p>No needs have been registered yet.</p>
+}
+else
+{
+    @foreach (var need in Model)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">@need.Type</h5>
+
+                <p class="card-text">@need.Description</p>
+
+                <p>
+                    <strong>Location:</strong>
+                    @need.Location
+                </p>
+            </div>
+        </div>
+    }
+}
+
+@section Scripts {
+    <script>
+        // Oppretter kartet med Kristiansand som startposisjon.
+        var needMap = L.map('needMap')
+            .setView([58.1467, 7.9956], 12);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(needMap);
+
+        @foreach (var need in Model)
+        {
+        if (need.GeometryType == "marker" &&
+        !string.IsNullOrEmpty(need.Latitude) &&
+        !string.IsNullOrEmpty(need.Longitude))
+        {
+        <text>
+        L.marker([
+            @need.Latitude,
+            @need.Longitude
+        ])
+            .addTo(needMap)
+            .bindPopup('@need.Type - @need.Location');
+        </text>
+        }
+
+        if (need.GeometryType == "polyline" &&
+        !string.IsNullOrEmpty(need.GeometryData))
+        {
+        <text>
+        var geoJsonData = @Html.Raw(need.GeometryData);
+
+        L.geoJSON(geoJsonData)
+            .addTo(needMap)
+            .bindPopup('@need.Type - @need.Location');
+        </text>
+        }
+        }
+    </script>
+}

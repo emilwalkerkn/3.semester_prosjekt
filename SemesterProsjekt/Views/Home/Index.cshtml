@@ -1,24 +1,118 @@
 ﻿@{
+@model SemesterProsjekt.Models.DashboardViewModel
+    
+
+
+
+<div class="text-center">
+        <h1 class="display-4">Velkommen</h1>
+
+        <p>
+            Registrer et behov og velg posisjon på kartet.
+        </p>
+
+        <a asp-controller="Home"
+           asp-action="Need"
+           class="btn btn-primary">
+            Registrer behov
+        </a>
+    
+        <a asp-controller="Home"
+           asp-action="Resource"
+           class="btn btn-primary">
+            Registrer ressurs
+        </a>
+    </div>
+
+    <div class="row mt-4 mb-4">
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Registered Needs</h5>
+                    <h2>@Model.TotalNeeds</h2>
+                    <p class="card-text">Needs currently registered in the portal.</p>
+
+                    <a asp-controller="Home"
+                       asp-action="NeedOverview"
+                       class="btn btn-primary">
+                        View Needs
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Registered Resources</h5>
+                    <h2>@Model.TotalResources</h2>
+                    <p class="card-text">Resources currently registered in the portal.</p>
+
+                    <a asp-controller="Home"
+                       asp-action="ResourceOverview"
+                       class="btn btn-primary">
+                        View Resources
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <h3 class="mt-4 mb-3">Recent Registrations</h3>
+
+    <div class="row">
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">Recent Needs</h5>
+
+                @foreach (var need in Model.RecentNeeds)
+                {
+                    <div class="border-bottom py-2">
+                        <strong>@need.Type</strong>
+                        <br />
+                        <small>@need.Location</small>
+                        <br />
+
+                        <a asp-controller="Home"
+                           asp-action="NeedDetails"
+                           asp-route-id="@need.Id"
+                           class="btn btn-outline-primary btn-sm mt-2">
+                            Se detaljer
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Resources</h5>
+
+                    @foreach (var resource in Model.RecentResources)
+                    {
+                        <div class="border-bottom py-2">
+                            <strong>@resource.Type</strong>
+                            <br />
+                            <small>@resource.Location</small>
+                            <br />
+
+                            <a asp-controller="Home"
+                               asp-action="ResourceDetails"
+                               asp-route-id="@resource.Id"
+                               class="btn btn-outline-primary btn-sm mt-2">
+                                Se detaljer
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Velkommen</h1>
-
-    <p>
-        Registrer et behov og velg posisjon på kartet.
-    </p>
-
-    <a asp-controller="Home"
-       asp-action="Need"
-       class="btn btn-primary">
-        Registrer behov
-    </a>
-    
-    <a asp-controller="Home"
-       asp-action="Resource"
-       class="btn btn-primary">
-        Registrer ressurs
-    </a>
-</div>
 

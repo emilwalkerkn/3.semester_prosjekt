@@ -5,4 +5,18 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
-  
+
+  mariadb:
+    image: mariadb:latest
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpassword
+      MARIADB_DATABASE: semesterprosjekt
+      MARIADB_USER: appuser
+      MARIADB_PASSWORD: apppassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+volumes:
+  mariadb_data:

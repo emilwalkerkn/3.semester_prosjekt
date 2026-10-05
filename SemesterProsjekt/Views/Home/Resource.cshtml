@@ -39,6 +39,11 @@
             <input asp-for="Longitude" readonly/>
         </div>
 
+        
+        <input asp-for="GeometryType" type="hidden" id="GeometryType" />
+        <input asp-for="GeometryData" type="hidden" id="GeometryData" />
+        
+        
         <button type="submit">Registrer ressurs</button>
         
     </form>
@@ -59,33 +64,57 @@
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        var marker;
+        // Holder objektene som brukeren tegner på kartet.
+        var drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+
+
+        // Legger til tegneverktøy for markør og linje.
+        var drawControl = new L.Control.Draw({
+            draw: {
+                polygon: false,
+                polyline: true,
+                circle: false,
+                rectangle: false,
+                marker: true
+            },
+            edit: {
+                featureGroup: drawnItems,
+                remove: true
+            },
+});
+
+        map.addControl(drawControl);
 
         // Når brukeren klikker på kartet,
         // lagres den valgte posisjonen som latitude og longitude.
 
-        map.on('click', function (e) {
+        // Kjøres når brukeren tegner et nytt objekt på kartet.
+        map.on('draw:created', function (e) {
+            var layer = e.layer;
 
-            // Fjerner den forrige markøren slik at bare
-            // den sist valgte posisjonen vises.
-            if (marker) {
-                map.removeLayer(marker);
+            // Legger det tegnede objektet til kartet.
+            drawnItems.addLayer(layer);
+
+            document.getElementById('GeometryType').value = e.layerType;
+
+            // Hvis objektet er en markør, lagres koordinatene i skjemaet.
+            if (e.layerType === 'marker') {
+                var latlng = layer.getLatLng();
+
+                console.log("Marker:", latlng.lat, latlng.lng);
+
+                document.getElementById('Latitude').value = latlng.lat;
+                document.getElementById('Longitude').value = latlng.lng;
             }
 
-            marker = L.marker(e.latlng).addTo(map)
-                .bindPopup(
-                    "Valgt posisjon<br>" +
-                    "Latitude: " + e.latlng.lat.toFixed(6) + "<br>" +
-                    "Longitude: " + e.latlng.lng.toFixed(6)
-                )
-                .openPopup();
+            if (e.layerType === 'polyline') {
+                var geoJson = layer.toGeoJSON();
 
-
-            // Fyller ut latitude og longitude i skjemaet
-            // slik at koordinatene sendes videre ved POST.
-            document.getElementById('Latitude').value = e.latlng.lat.toString();
-            document.getElementById('Longitude').value = e.latlng.lng.toString();
-        });
+                document.getElementById('GeometryData').value =
+                    JSON.stringify(geoJson);
+            }
+});
     </script>
 }
 
