@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using SemesterProsjekt.Controllers;
+using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
 
 namespace SemesterProsjekt.UnitTests;
@@ -7,10 +9,16 @@ namespace SemesterProsjekt.UnitTests;
 public class UnitTestNeedPost
 {
     [Fact]
-    public void Need_Post_RedirectsToNeedResult()
+    public async Task Need_Post_RedirectsToNeedResult()
     {
         // Arrange
-        var controller = new HomeController();
+        var resourceRepository = new Mock<IResourceRepository>();
+        var needRepository = new Mock<INeedRepository>();
+
+        var controller = new HomeController(
+            resourceRepository.Object,
+            needRepository.Object
+        );
 
         var model = new NeedViewModel
         {
@@ -22,7 +30,7 @@ public class UnitTestNeedPost
         };
 
         // Act
-        var result = controller.Need(model);
+        var result = await controller.Need(model);
 
         // Assert
         var redirectResult = Assert.IsType<RedirectToActionResult>(result);

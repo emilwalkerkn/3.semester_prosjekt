@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using SemesterProsjekt.Controllers;
+using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
 
 namespace SemesterProsjekt.UnitTests;
@@ -7,23 +9,31 @@ namespace SemesterProsjekt.UnitTests;
 public class TestResourcePostError
 {
     [Fact]
-    public void ResourcePost_ShouldFail()
+    public async Task ResourcePost_ShouldNotRedirectToNeedResult()
     {
-        // Arange
-        var controller = new HomeController();
+        // Arrange
+        var resourceRepository = new Mock<IResourceRepository>();
+        var needRepository = new Mock<INeedRepository>();
+
+        var controller = new HomeController(
+            resourceRepository.Object,
+            needRepository.Object
+        );
+
         var model = new ResourceViewModel
         {
             Type = "Gravemaskin",
             Description = "Stor gravemaskin",
             Location = "Kristiansand"
         };
-        
+
         // Act
-        var result = controller.Resource(model);
-        
+        var result = await controller.Resource(model);
+
         // Assert
         var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal("NeedResult", redirectResult.ActionName);
+
+        // Resource() skal ikke sende brukeren til NeedResult
+        Assert.NotEqual("NeedResult", redirectResult.ActionName);
     }
 }
-

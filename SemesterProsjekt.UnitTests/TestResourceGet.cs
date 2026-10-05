@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using SemesterProsjekt.Controllers;
+using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
 
 namespace SemesterProsjekt.UnitTests;
@@ -10,7 +12,13 @@ public class UnitTestResourceGet
     public void Resource_Get_ReturnsViewWithResourceViewModel()
     {
         // Arrange
-        var controller = new HomeController();
+        var resourceRepository = new Mock<IResourceRepository>();
+        var needRepository = new Mock<INeedRepository>();
+
+        var controller = new HomeController(
+            resourceRepository.Object,
+            needRepository.Object
+        );
 
         // Act
         var result = controller.Resource();
