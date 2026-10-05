@@ -25,4 +25,5 @@ public class NeedViewModel
     
     public string GeometryData { get; set; } = "";
   
+    public string Status { get; set; } = "New";
 }
