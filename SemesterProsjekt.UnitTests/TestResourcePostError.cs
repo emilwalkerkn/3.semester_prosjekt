@@ -9,16 +9,12 @@ namespace SemesterProsjekt.UnitTests;
 public class TestResourcePostError
 {
     [Fact]
-    public async Task ResourcePost_ShouldNotRedirectToNeedResult()
+    public async Task ResourcePost_InvalidModel_ReturnsViewWithoutSaving()
     {
         // Arrange
         var resourceRepository = new Mock<IResourceRepository>();
-        var needRepository = new Mock<INeedRepository>();
 
-        var controller = new HomeController(
-            resourceRepository.Object,
-            needRepository.Object
-        );
+        var controller = new ResourceController(resourceRepository.Object);
 
         var model = new ResourceViewModel
         {
@@ -27,13 +23,23 @@ public class TestResourcePostError
             Location = "Kristiansand"
         };
 
+        // Simulerer at skjemadataene er ugyldige
+        controller.ModelState.AddModelError(
+            "Location",
+            "Ugyldig lokasjon"
+        );
+
         // Act
-        var result = await controller.Resource(model);
+        var result = await controller.Create(model);
 
         // Assert
-        var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+        var viewResult = Assert.IsType<ViewResult>(result);
 
-        // Resource() skal ikke sende brukeren til NeedResult
-        Assert.NotEqual("NeedResult", redirectResult.ActionName);
+        Assert.Same(model, viewResult.Model);
+
+        resourceRepository.Verify(
+            r => r.CreateAsync(It.IsAny<Resource>()),
+            Times.Never
+        );
     }
 }

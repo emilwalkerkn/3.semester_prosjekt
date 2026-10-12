@@ -9,16 +9,12 @@ namespace SemesterProsjekt.UnitTests;
 public class UnitTestNeedPost
 {
     [Fact]
-    public async Task Need_Post_RedirectsToNeedResult()
+    public async Task Need_Post_RedirectsToResult()
     {
         // Arrange
-        var resourceRepository = new Mock<IResourceRepository>();
         var needRepository = new Mock<INeedRepository>();
 
-        var controller = new HomeController(
-            resourceRepository.Object,
-            needRepository.Object
-        );
+        var controller = new NeedController(needRepository.Object);
 
         var model = new NeedViewModel
         {
@@ -30,10 +26,10 @@ public class UnitTestNeedPost
         };
 
         // Act
-        var result = await controller.Need(model);
+        var result = await controller.Create(model);
 
         // Assert
         var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal("NeedResult", redirectResult.ActionName);
+        Assert.Equal("Result", redirectResult.ActionName);
     }
 }
