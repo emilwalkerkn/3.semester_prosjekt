@@ -14,9 +14,9 @@ public class Need
 
     public string Longitude { get; set; } = "";
     
-    public string GeometryType { get; set; } = "";
+    public string? GeometryType { get; set; } = "";
     
-    public string GeometryData { get; set; } = "";
+    public string? GeometryData { get; set; } = "";
     
     public string Status { get; set; } = "New";
 }

@@ -1,7 +1,8 @@
-﻿@{
-@model SemesterProsjekt.Models.DashboardViewModel
-    
+﻿@model SemesterProsjekt.Models.DashboardViewModel
 
+@{
+    ViewData["Title"] = "Home Page";
+}
 
 
 <div class="text-center">
@@ -11,14 +12,14 @@
             Registrer et behov og velg posisjon på kartet.
         </p>
 
-        <a asp-controller="Home"
-           asp-action="Need"
+        <a asp-controller="Need"
+           asp-action="Create"
            class="btn btn-primary">
             Registrer behov
         </a>
     
-        <a asp-controller="Home"
-           asp-action="Resource"
+        <a asp-controller="Resource"
+           asp-action="Create"
            class="btn btn-primary">
             Registrer ressurs
         </a>
@@ -32,8 +33,8 @@
                     <h2>@Model.TotalNeeds</h2>
                     <p class="card-text">Needs currently registered in the portal.</p>
 
-                    <a asp-controller="Home"
-                       asp-action="NeedOverview"
+                    <a asp-controller="Need"
+                       asp-action="Overview"
                        class="btn btn-primary">
                         View Needs
                     </a>
@@ -48,8 +49,8 @@
                     <h2>@Model.TotalResources</h2>
                     <p class="card-text">Resources currently registered in the portal.</p>
 
-                    <a asp-controller="Home"
-                       asp-action="ResourceOverview"
+                    <a asp-controller="Resource"
+                       asp-action="Overview"
                        class="btn btn-primary">
                         View Resources
                     </a>
@@ -74,8 +75,8 @@
                         <small>@need.Location</small>
                         <br />
 
-                        <a asp-controller="Home"
-                           asp-action="NeedDetails"
+                        <a asp-controller="Need"
+                           asp-action="Details"
                            asp-route-id="@need.Id"
                            class="btn btn-outline-primary btn-sm mt-2">
                             Se detaljer
@@ -98,8 +99,8 @@
                             <small>@resource.Location</small>
                             <br />
 
-                            <a asp-controller="Home"
-                               asp-action="ResourceDetails"
+                            <a asp-controller="Resource"
+                               asp-action="Details"
                                asp-route-id="@resource.Id"
                                class="btn btn-outline-primary btn-sm mt-2">
                                 Se detaljer
@@ -110,9 +111,6 @@
             </div>
         </div>
     </div>
-    
-    
-    ViewData["Title"] = "Home Page";
-}
+
 
 
