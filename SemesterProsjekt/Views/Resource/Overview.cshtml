@@ -6,12 +6,40 @@
 
 <h1>Resource Overview</h1>
 
+<form asp-controller="Home"
+      asp-action="ResourceOverview"
+      method="get"
+      class="mb-4">
+
+    <label for="location" class="form-label">Filter by location</label>
+
+    <div class="d-flex flex-wrap gap-2">
+        <input type="text"
+               id="location"
+               name="location"
+               value="@ViewData["LocationFilter"]"
+               class="form-control"
+               style="max-width: 300px;"
+               placeholder="For example: Kristiansand" />
+
+        <button type="submit" class="btn btn-primary">
+            Filter
+        </button>
+
+        <a asp-controller="Home"
+           asp-action="ResourceOverview"
+           class="btn btn-outline-secondary">
+            Show all
+        </a>
+    </div>
+</form>
+
 <h2>Registrerte ressurser på kartet</h2>
 <div id="resourceMap" style="height: 500px; margin-bottom: 30px;"></div>
 
 @if (!Model.Any())
 {
-    <p>No resources have been registered yet.</p>
+    <p>No resources found.</p>
 }
 else
 {
