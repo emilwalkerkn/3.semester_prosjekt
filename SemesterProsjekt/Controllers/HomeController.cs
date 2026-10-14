@@ -137,24 +137,9 @@ public class HomeController : Controller
         return View(model);
     }
     
-    public async Task<IActionResult> ResourceOverview(string? location)
+    public async Task<IActionResult> ResourceOverview()
     {
         var resources = await _resourceRepository.GetAllAsync();
-
-        // Beholder søket slik at det kan vises i søkefeltet.
-        ViewData["LocationFilter"] = location;
-
-        // Filtrerer på sted dersom brukeren har skrevet noe.
-        if (!string.IsNullOrWhiteSpace(location))
-        {
-            resources = resources.Where(resource =>
-                resource.Location != null &&
-                resource.Location.Contains(
-                    location.Trim(),
-                    StringComparison.OrdinalIgnoreCase
-                )
-            ).ToList();
-        }
 
         return View(resources);
     }
@@ -165,6 +150,8 @@ public class HomeController : Controller
 
         return View(needs);
     }
+    
+    
     
     public IActionResult Privacy()
     {

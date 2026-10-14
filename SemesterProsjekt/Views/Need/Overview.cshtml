@@ -31,8 +31,11 @@ else
                 <p>
                     <strong>Status:</strong> @need.Status
                 </p>
-                <form asp-action="UpdateNeedStatus" method="post">
-                    <input type="hidden" name="id" value="@need.Id" />
+                <form asp-controller="Need"
+                      asp-action="UpdateStatus"
+                      method="post">
+                    
+                    <input type="hidden" name="id" value="@need.Id"/>
 
                     <select name="status">
                         <option value="New" selected="@(need.Status == "New")">New</option>

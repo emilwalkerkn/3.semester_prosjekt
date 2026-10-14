@@ -13,15 +13,11 @@ public class UnitTestResourceGet
     {
         // Arrange
         var resourceRepository = new Mock<IResourceRepository>();
-        var needRepository = new Mock<INeedRepository>();
 
-        var controller = new HomeController(
-            resourceRepository.Object,
-            needRepository.Object
-        );
+        var controller = new ResourceController(resourceRepository.Object);
 
         // Act
-        var result = controller.Resource();
+        var result = controller.Create();
 
         // Assert
         var viewResult = Assert.IsType<ViewResult>(result);

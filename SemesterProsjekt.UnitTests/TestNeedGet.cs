@@ -12,16 +12,12 @@ public class UnitTestNeedGet
     public void Need_Get_ReturnsViewWithNeedViewModel()
     {
         // Arrange
-        var resourceRepository = new Mock<IResourceRepository>();
         var needRepository = new Mock<INeedRepository>();
 
-        var controller = new HomeController(
-            resourceRepository.Object,
-            needRepository.Object
-        );
+        var controller = new NeedController(needRepository.Object);
 
         // Act
-        var result = controller.Need();
+        var result = controller.Create();
 
         // Assert
         var viewResult = Assert.IsType<ViewResult>(result);
