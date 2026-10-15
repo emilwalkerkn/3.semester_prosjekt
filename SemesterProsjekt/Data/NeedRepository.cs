@@ -17,7 +17,7 @@ public class NeedRepository : INeedRepository
         using var connection = _connectionFactory.CreateConnection();
 
         const string sql = """
-                           SELECT Id, Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData, Status
+                           SELECT Id, Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData, Status, Priority, ContactPoint, NeededFrom, Deadline
                            FROM Needs;
                            """;
         
@@ -29,7 +29,7 @@ public class NeedRepository : INeedRepository
         using var connection = _connectionFactory.CreateConnection();
 
         const string sql = """
-                           SELECT Id, Type, Description, Location, Latitude, Longitude, Status
+                           SELECT Id, Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData, Status, Priority, ContactPoint, NeededFrom, Deadline
                            FROM Needs
                            WHERE Id = @Id;
                            """;
@@ -46,9 +46,9 @@ public class NeedRepository : INeedRepository
 
         const string sql = """
                            INSERT INTO Needs
-                               (Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData, Status)
+                               (Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData, Status, Priority, ContactPoint, NeededFrom, Deadline)
                            VALUES
-                               (@Type, @Description, @Location, @Latitude, @Longitude, @GeometryType, @GeometryData, @Status);
+                               (@Type, @Description, @Location, @Latitude, @Longitude, @GeometryType, @GeometryData, @Status, @Priority, @ContactPoint, @NeededFrom, @Deadline);
                            """;
 
         return await connection.ExecuteAsync(sql, need);

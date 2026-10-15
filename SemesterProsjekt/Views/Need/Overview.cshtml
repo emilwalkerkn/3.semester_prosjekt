@@ -31,6 +31,13 @@ else
                 <p>
                     <strong>Status:</strong> @need.Status
                 </p>
+                <p>
+                    <strong>Prioritet:</strong> @need.Priority
+                </p>
+
+                <p>
+                    <strong>Frist:</strong> @need.Deadline
+                </p>
                 <form asp-controller="Need"
                       asp-action="UpdateStatus"
                       method="post">

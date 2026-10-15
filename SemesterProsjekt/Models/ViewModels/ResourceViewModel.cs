@@ -23,7 +23,13 @@ public class ResourceViewModel
    
     public string? GeometryData { get; set; } = "";
     
+    public string ContactPoint { get; set; } = "";
+    
+    public DateTime? AvailableFrom { get; set; }
+    
+    public DateTime? AvailableTo { get; set; }
+    
+    public string Status { get; set; } = "Available";
 
 }
-
 
