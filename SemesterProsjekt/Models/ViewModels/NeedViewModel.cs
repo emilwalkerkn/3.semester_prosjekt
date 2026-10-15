@@ -26,4 +26,12 @@ public class NeedViewModel
     public string? GeometryData { get; set; } = "";
   
     public string Status { get; set; } = "New";
+    
+    public string Priority { get; set; } = "Normal";
+    
+    public string ContactPoint { get; set; } = "";
+    
+    public DateTime? NeededFrom { get; set; }
+    
+    public DateTime? Deadline { get; set; }
 }

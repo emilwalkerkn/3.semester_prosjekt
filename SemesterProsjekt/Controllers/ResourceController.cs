@@ -58,7 +58,11 @@ public class ResourceController : Controller
             Latitude = model.Latitude,
             Longitude = model.Longitude,
             GeometryType = model.GeometryType,
-            GeometryData = model.GeometryData
+            GeometryData = model.GeometryData,
+            ContactPoint = model.ContactPoint,
+            AvailableFrom = model.AvailableFrom,
+            AvailableTo = model.AvailableTo,
+            Status = model.Status
         };
 
         await _resourceRepository.CreateAsync(resource);

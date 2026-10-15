@@ -28,6 +28,31 @@
         </div>
 
         <div>
+            <label>Prioritet</label>
+            <select asp-for="Priority">
+                <option value="Low">Lav</option>
+                <option value="Normal">Normal</option>
+                <option value="High">Høy</option>
+                <option value="Critical">Kritisk</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Kontaktpunkt</label>
+            <input asp-for="ContactPoint" />
+        </div>
+
+        <div>
+            <label>Behov fra</label>
+            <input asp-for="NeededFrom" type="datetime-local" />
+        </div>
+
+        <div>
+            <label>Frist</label>
+            <input asp-for="Deadline" type="datetime-local" />
+        </div>
+
+        <div>
             <label>Sted</label>
             <input asp-for="Location" />
         </div>

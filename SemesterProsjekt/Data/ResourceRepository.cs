@@ -17,7 +17,7 @@ public class ResourceRepository : IResourceRepository
         using var connection = _connectionFactory.CreateConnection();
 
         const string sql = """
-                           SELECT Id, Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData
+                           SELECT Id, Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData, ContactPoint, AvailableFrom, AvailableTo, Status
                            FROM Resources;
                            """;
 
@@ -29,7 +29,7 @@ public class ResourceRepository : IResourceRepository
         using var connection = _connectionFactory.CreateConnection();
 
         const string sql = """
-                           SELECT Id, Type, Description, Location, Latitude, Longitude
+                           SELECT Id, Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData, ContactPoint, AvailableFrom, AvailableTo, Status
                            FROM Resources
                            WHERE Id = @Id;
                            """;
@@ -45,9 +45,9 @@ public class ResourceRepository : IResourceRepository
         using var connection = _connectionFactory.CreateConnection();
         const string sql = """
                            INSERT INTO Resources
-                               (Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData)
+                               (Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData, ContactPoint, AvailableFrom, AvailableTo, Status)
                            VALUES
-                               (@Type, @Description, @Location, @Latitude, @Longitude, @GeometryType, @GeometryData);
+                               (@Type, @Description, @Location, @Latitude, @Longitude, @GeometryType, @GeometryData, @ContactPoint, @AvailableFrom, @AvailableTo, @Status);
                            """;
 
         return await connection.ExecuteAsync(sql, resource);

@@ -47,7 +47,11 @@ public class NeedController : Controller
             Longitude = model.Longitude,
             GeometryType = model.GeometryType,
             GeometryData = model.GeometryData,
-            Status = model.Status
+            Status = model.Status,
+            Priority = model.Priority,
+            ContactPoint = model.ContactPoint,
+            NeededFrom = model.NeededFrom,
+            Deadline = model.Deadline
         };
 
         await _needRepository.CreateAsync(need);

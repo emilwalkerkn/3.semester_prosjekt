@@ -7,6 +7,10 @@ CREATE TABLE IF NOT EXISTS Resources (
     Longitude VARCHAR(50),
     GeometryType VARCHAR(50),
     GeometryData TEXT
+    ContactPoint VARCHAR(255),
+    AvailableFrom DATETIME NULL,
+    AvailableTo DATETIME NULL,
+    Status VARCHAR(50) NOT NULL DEFAULT 'Available'
     );
 
 CREATE TABLE IF NOT EXISTS Needs (
@@ -19,5 +23,9 @@ CREATE TABLE IF NOT EXISTS Needs (
     GeometryType VARCHAR(50),
     GeometryData TEXT,
     Status VARCHAR(50) NOT NULL DEFAULT 'New'
+    Priority VARCHAR(20) NOT NULL DEFAULT 'Normal',
+    ContactPoint VARCHAR(255),
+    NeededFrom DATETIME NULL,
+    Deadline DATETIME NULL
     );
 

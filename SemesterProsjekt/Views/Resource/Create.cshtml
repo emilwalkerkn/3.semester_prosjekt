@@ -27,6 +27,29 @@
         </div>
 
         <div>
+            <label>Kontaktpunkt</label>
+            <input asp-for="ContactPoint" />
+        </div>
+
+        <div>
+            <label>Tilgjengelig fra</label>
+            <input asp-for="AvailableFrom" type="datetime-local" />
+        </div>
+
+        <div>
+            <label>Tilgjengelig til</label>
+            <input asp-for="AvailableTo" type="datetime-local" />
+        </div>
+
+        <div>
+            <label>Status</label>
+            <select asp-for="Status">
+                <option value="Available">Tilgjengelig</option>
+                <option value="Unavailable">Ikke tilgjengelig</option>
+            </select>
+        </div>
+
+        <div>
             <label>Sted</label>
             <input asp-for="Location"/>
         </div>
@@ -120,6 +143,5 @@
 });
     </script>
 }
-
 
 
