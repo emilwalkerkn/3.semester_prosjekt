@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS Needs (
     Longitude VARCHAR(50),
     GeometryType VARCHAR(50),
     GeometryData TEXT,
-    Status VARCHAR(50) NOT NULL DEFAULT 'New'
+    Status VARCHAR(50) NOT NULL DEFAULT 'New',
     Priority VARCHAR(20) NOT NULL DEFAULT 'Normal',
     ContactPoint VARCHAR(255),
     NeededFrom DATETIME NULL,
