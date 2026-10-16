@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS Resources (
     Latitude VARCHAR(50),
     Longitude VARCHAR(50),
     GeometryType VARCHAR(50),
-    GeometryData TEXT
+    GeometryData TEXT,
     ContactPoint VARCHAR(255),
     AvailableFrom DATETIME NULL,
     AvailableTo DATETIME NULL,
