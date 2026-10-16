@@ -13,10 +13,45 @@ public class ResourceController : Controller
         _resourceRepository = resourceRepository;
     }
 
-    // Viser alle ressurser
-    public async Task<IActionResult> Overview()
+    // Viser en utskriftsvennlig ressursliste, eventuelt filtrert på sted.
+    public async Task<IActionResult> Print(string? location = null)
     {
         var resources = await _resourceRepository.GetAllAsync();
+
+        ViewData["LocationFilter"] = location;
+
+        if (!string.IsNullOrWhiteSpace(location))
+        {
+            resources = resources.Where(resource =>
+                resource.Location != null &&
+                resource.Location.Contains(
+                    location.Trim(),
+                    StringComparison.OrdinalIgnoreCase
+                )
+            ).ToList();
+        }
+
+        return View(resources);
+    }
+    
+    // Viser ressurser og filtrerer på sted hvis et søk er oppgitt.
+    public async Task<IActionResult> Overview(string? location = null)
+    {
+        var resources = await _resourceRepository.GetAllAsync();
+
+        // Beholder søket i søkefeltet.
+        ViewData["LocationFilter"] = location;
+
+        if (!string.IsNullOrWhiteSpace(location))
+        {
+            resources = resources.Where(resource =>
+                resource.Location != null &&
+                resource.Location.Contains(
+                    location.Trim(),
+                    StringComparison.OrdinalIgnoreCase
+                )
+            ).ToList();
+        }
 
         return View(resources);
     }
