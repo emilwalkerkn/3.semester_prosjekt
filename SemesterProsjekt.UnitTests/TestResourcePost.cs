@@ -14,15 +14,22 @@ public class UnitTestResourcePost
         // Arrange
         var resourceRepository = new Mock<IResourceRepository>();
 
+        resourceRepository
+            .Setup(repository => repository.CreateAsync(It.IsAny<Resource>()))
+            .ReturnsAsync(1);
+
         var controller = new ResourceController(resourceRepository.Object);
 
         var model = new ResourceViewModel
         {
-            Type = "Brannbil",
-            Description = "Brannbil med mannskap",
-            Location = "Kristiansand",
-            Latitude = "58.1467",
-            Longitude = "7.9956"
+            ProviderId = 1,
+            ResourceTypeId = 1,
+            LocationId = 1,
+            Title = "Brannbil",
+            Description = "Brannbil med mannskap.",
+            Quantity = 1,
+            Unit = "stk",
+            Status = "Available"
         };
 
         // Act
@@ -30,6 +37,13 @@ public class UnitTestResourcePost
 
         // Assert
         var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+
         Assert.Equal("Result", redirectResult.ActionName);
+        Assert.Equal(1, redirectResult.RouteValues?["id"]);
+
+        resourceRepository.Verify(
+            repository => repository.CreateAsync(It.IsAny<Resource>()),
+            Times.Once
+        );
     }
 }

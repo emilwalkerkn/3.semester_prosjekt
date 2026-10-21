@@ -1,83 +1,84 @@
 ﻿@model SemesterProsjekt.Models.DashboardViewModel
 
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Forside";
 }
 
-
 <div class="text-center">
-        <h1 class="display-4">Velkommen</h1>
+    <h1 class="display-4">Velkommen</h1>
 
-        <p>
-            Registrer et behov og velg posisjon på kartet.
-        </p>
+    <p>Registrer et behov eller en ressurs.</p>
 
-        <a asp-controller="Need"
-           asp-action="Create"
-           class="btn btn-primary">
-            Registrer behov
-        </a>
-    
-        <a asp-controller="Resource"
-           asp-action="Create"
-           class="btn btn-primary">
-            Registrer ressurs
-        </a>
-    </div>
+    <a asp-controller="Need"
+       asp-action="Create"
+       class="btn btn-primary">
+        Registrer behov
+    </a>
 
-    <div class="row mt-4 mb-4">
-        <div class="col-md-6 mb-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Registered Needs</h5>
-                    <h2>@Model.TotalNeeds</h2>
-                    <p class="card-text">Needs currently registered in the portal.</p>
+    <a asp-controller="Resource"
+       asp-action="Create"
+       class="btn btn-primary">
+        Registrer ressurs
+    </a>
+</div>
 
-                    <a asp-controller="Need"
-                       asp-action="Overview"
-                       class="btn btn-primary">
-                        View Needs
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6 mb-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Registered Resources</h5>
-                    <h2>@Model.TotalResources</h2>
-                    <p class="card-text">Resources currently registered in the portal.</p>
-
-                    <a asp-controller="Resource"
-                       asp-action="Overview"
-                       class="btn btn-primary">
-                        View Resources
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <h3 class="mt-4 mb-3">Recent Registrations</h3>
-
-    <div class="row">
+<div class="row mt-4 mb-4">
     <div class="col-md-6 mb-3">
         <div class="card shadow-sm h-100">
             <div class="card-body">
-                <h5 class="card-title">Recent Needs</h5>
+                <h5 class="card-title">Registrerte behov</h5>
+                <h2>@Model.TotalNeeds</h2>
+                <p class="card-text">
+                    Behov som er registrert i portalen.
+                </p>
+
+                <a asp-controller="Need"
+                   asp-action="Overview"
+                   class="btn btn-primary">
+                    Vis behov
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">Registrerte ressurser</h5>
+                <h2>@Model.TotalResources</h2>
+                <p class="card-text">
+                    Ressurser som er registrert i portalen.
+                </p>
+
+                <a asp-controller="Resource"
+                   asp-action="Overview"
+                   class="btn btn-primary">
+                    Vis ressurser
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="mt-4 mb-3">Siste registreringer</h3>
+
+<div class="row">
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">Siste behov</h5>
 
                 @foreach (var need in Model.RecentNeeds)
                 {
                     <div class="border-bottom py-2">
-                        <strong>@need.Type</strong>
+                        <strong>@need.Title</strong>
                         <br />
-                        <small>@need.Location</small>
+                        <small>@need.Description</small>
                         <br />
 
                         <a asp-controller="Need"
                            asp-action="Details"
-                           asp-route-id="@need.Id"
+                           asp-route-id="@need.NeedId"
                            class="btn btn-outline-primary btn-sm mt-2">
                             Se detaljer
                         </a>
@@ -86,31 +87,29 @@
             </div>
         </div>
     </div>
-        <div class="col-md-6 mb-3">
-            <div class="card shadow-sm h-100">
-                <div class="card-body">
-                    <h5 class="card-title">Recent Resources</h5>
 
-                    @foreach (var resource in Model.RecentResources)
-                    {
-                        <div class="border-bottom py-2">
-                            <strong>@resource.Type</strong>
-                            <br />
-                            <small>@resource.Location</small>
-                            <br />
+    <div class="col-md-6 mb-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <h5 class="card-title">Siste ressurser</h5>
 
-                            <a asp-controller="Resource"
-                               asp-action="Details"
-                               asp-route-id="@resource.Id"
-                               class="btn btn-outline-primary btn-sm mt-2">
-                                Se detaljer
-                            </a>
-                        </div>
-                    }
-                </div>
+                @foreach (var resource in Model.RecentResources)
+                {
+                    <div class="border-bottom py-2">
+                        <strong>@resource.Title</strong>
+                        <br />
+                        <small>@resource.Description</small>
+                        <br />
+
+                        <a asp-controller="Resource"
+                           asp-action="Details"
+                           asp-route-id="@resource.ResourceId"
+                           class="btn btn-outline-primary btn-sm mt-2">
+                            Se detaljer
+                        </a>
+                    </div>
+                }
             </div>
         </div>
     </div>
-
-
-
+</div>

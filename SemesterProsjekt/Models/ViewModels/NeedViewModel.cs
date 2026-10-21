@@ -1,37 +1,33 @@
 namespace SemesterProsjekt.Models;
 
-
-// ViewModel som inneholder informasjonen som sendes
-// mellom behovsskjemaet, controlleren og resultatsiden.
+// Informasjon fra behovsskjemaet.
 public class NeedViewModel
 {
-    
-    // Type behov som registreres.
-    public string Type { get; set; } = "";
-    
-    // Beskrivelse av behovet.
+    public int PublicActorId { get; set; }
+
+    public int NeedTypeId { get; set; }
+
+    public int LocationId { get; set; }
+
+    public string Title { get; set; } = "";
+
     public string Description { get; set; } = "";
-    
-    // Stedet hvor behovet gjelder.
-    public string Location { get; set; } = "";
-    
-    // Latitude valgt fra Leaflet-kartet.
-    public string Latitude { get; set; } = "";
-    
-    // Longitude valgt fra Leaflet-kartet.
-    public string Longitude { get; set; } = "";
-    
-    public string? GeometryType { get; set; } = "";
-    
-    public string? GeometryData { get; set; } = "";
-  
-    public string Status { get; set; } = "New";
-    
-    public string Priority { get; set; } = "Normal";
-    
-    public string ContactPoint { get; set; } = "";
-    
+
+    public string? GeometryType { get; set; }
+
+    public string? GeometryData { get; set; }
+
+    public string? ContactPoint { get; set; }
+
     public DateTime? NeededFrom { get; set; }
-    
+
     public DateTime? Deadline { get; set; }
+
+    public decimal Quantity { get; set; }
+
+    public string Unit { get; set; } = "";
+
+    public string Status { get; set; } = "New";
+
+    public string Priority { get; set; } = "Normal";
 }

@@ -17,10 +17,25 @@ public class NeedRepository : INeedRepository
         using var connection = _connectionFactory.CreateConnection();
 
         const string sql = """
-                           SELECT Id, Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData, Status, Priority, ContactPoint, NeededFrom, Deadline
-                           FROM Needs;
-                           """;
-        
+            SELECT
+                NeedId,
+                PublicActorId,
+                NeedTypeId,
+                LocationId,
+                Title,
+                Description,
+                GeometryType,
+                GeometryData,
+                ContactPoint,
+                NeededFrom,
+                Deadline,
+                Quantity,
+                Unit,
+                Status,
+                Priority
+            FROM Needs;
+            """;
+
         return await connection.QueryAsync<Need>(sql);
     }
 
@@ -29,14 +44,29 @@ public class NeedRepository : INeedRepository
         using var connection = _connectionFactory.CreateConnection();
 
         const string sql = """
-                           SELECT Id, Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData, Status, Priority, ContactPoint, NeededFrom, Deadline
-                           FROM Needs
-                           WHERE Id = @Id;
-                           """;
+            SELECT
+                NeedId,
+                PublicActorId,
+                NeedTypeId,
+                LocationId,
+                Title,
+                Description,
+                GeometryType,
+                GeometryData,
+                ContactPoint,
+                NeededFrom,
+                Deadline,
+                Quantity,
+                Unit,
+                Status,
+                Priority
+            FROM Needs
+            WHERE NeedId = @NeedId;
+            """;
 
         return await connection.QuerySingleOrDefaultAsync<Need>(
             sql,
-            new { Id = id }
+            new { NeedId = id }
         );
     }
 
@@ -45,29 +75,62 @@ public class NeedRepository : INeedRepository
         using var connection = _connectionFactory.CreateConnection();
 
         const string sql = """
-                           INSERT INTO Needs
-                               (Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData, Status, Priority, ContactPoint, NeededFrom, Deadline)
-                           VALUES
-                               (@Type, @Description, @Location, @Latitude, @Longitude, @GeometryType, @GeometryData, @Status, @Priority, @ContactPoint, @NeededFrom, @Deadline);
-                           """;
+            INSERT INTO Needs (
+                PublicActorId,
+                NeedTypeId,
+                LocationId,
+                Title,
+                Description,
+                GeometryType,
+                GeometryData,
+                ContactPoint,
+                NeededFrom,
+                Deadline,
+                Quantity,
+                Unit,
+                Status,
+                Priority
+            )
+            VALUES (
+                @PublicActorId,
+                @NeedTypeId,
+                @LocationId,
+                @Title,
+                @Description,
+                @GeometryType,
+                @GeometryData,
+                @ContactPoint,
+                @NeededFrom,
+                @Deadline,
+                @Quantity,
+                @Unit,
+                @Status,
+                @Priority
+            );
 
-        return await connection.ExecuteAsync(sql, need);
+            SELECT LAST_INSERT_ID();
+            """;
+
+        return await connection.ExecuteScalarAsync<int>(sql, need);
     }
-    
+
     public async Task UpdateStatusAsync(int id, string status)
     {
         using var connection = _connectionFactory.CreateConnection();
 
         const string sql = """
-                           UPDATE Needs
-                           SET Status = @Status
-                           WHERE Id = @Id;
-                           """;
+            UPDATE Needs
+            SET Status = @Status
+            WHERE NeedId = @NeedId;
+            """;
 
-        await connection.ExecuteAsync(sql, new
-        {
-            Id = id,
-            Status = status
-        });
+        await connection.ExecuteAsync(
+            sql,
+            new
+            {
+                NeedId = id,
+                Status = status
+            }
+        );
     }
 }

@@ -2,29 +2,33 @@ namespace SemesterProsjekt.Models;
 
 public class Need
 {
-    public int Id { get; set; }
+    public int NeedId { get; set; }
 
-    public string Type { get; set; } = "";
+    public int PublicActorId { get; set; }
+
+    public int NeedTypeId { get; set; }
+
+    public int LocationId { get; set; }
+
+    public string Title { get; set; } = "";
 
     public string Description { get; set; } = "";
 
-    public string Location { get; set; } = "";
+    public string? GeometryType { get; set; }
 
-    public string Latitude { get; set; } = "";
+    public string? GeometryData { get; set; }
 
-    public string Longitude { get; set; } = "";
-    
-    public string? GeometryType { get; set; } = "";
-    
-    public string? GeometryData { get; set; } = "";
-    
-    public string Status { get; set; } = "New";
-    
-    public string Priority { get; set; } = "Normal";
-    
-    public string ContactPoint { get; set; } = "";
-    
+    public string? ContactPoint { get; set; }
+
     public DateTime? NeededFrom { get; set; }
-    
+
     public DateTime? Deadline { get; set; }
+
+    public decimal Quantity { get; set; }
+
+    public string Unit { get; set; } = "";
+
+    public string Status { get; set; } = "New";
+
+    public string Priority { get; set; } = "Normal";
 }

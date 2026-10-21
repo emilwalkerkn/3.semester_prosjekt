@@ -1,8 +1,11 @@
 ﻿@model IEnumerable<SemesterProsjekt.Models.Resource>
 
 @{
-    Layout = null;
-    var location = ViewData["LocationFilter"] as string;
+Layout = null;
+
+var locationId = ViewData["LocationIdFilter"] is int id
+? id
+: (int?)null;
 }
 
 <!DOCTYPE html>
@@ -55,11 +58,13 @@
 </head>
 <body>
 <div class="actions">
-    <button type="button" onclick="window.print()">Skriv ut</button>
+    <button type="button" onclick="window.print()">
+        Skriv ut
+    </button>
 
     <a asp-controller="Resource"
        asp-action="Overview"
-       asp-route-location="@location">
+       asp-route-locationId="@locationId">
         Tilbake til oversikten
     </a>
 </div>
@@ -67,41 +72,52 @@
 <h1>Ressursliste</h1>
 
 <p>
-    <strong>Sted:</strong>
-    @(string.IsNullOrWhiteSpace(location) ? "Alle steder" : location)
+    <strong>Lokasjon-ID:</strong>
+    @(locationId?.ToString() ?? "Alle lokasjoner")
 </p>
 
 @if (!Model.Any())
 {
-    <p>Ingen ressurser funnet.</p>
+<p>Ingen ressurser funnet.</p>
 }
 else
 {
-    <table>
-        <thead>
-        <tr>
-            <th>Type</th>
-            <th>Sted</th>
-            <th>Kontaktpunkt</th>
-            <th>Status</th>
-            <th>Tilgjengelig fra</th>
-            <th>Tilgjengelig til</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var resource in Model)
-        {
-            <tr>
-                <td>@resource.Type</td>
-                <td>@resource.Location</td>
-                <td>@resource.ContactPoint</td>
-                <td>@resource.Status</td>
-                <td>@(resource.AvailableFrom?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")</td>
-                <td>@(resource.AvailableTo?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")</td>
-            </tr>
-        }
-        </tbody>
-    </table>
+<table>
+    <thead>
+    <tr>
+        <th>Tittel</th>
+        <th>Ressurstype-ID</th>
+        <th>Lokasjon-ID</th>
+        <th>Mengde</th>
+        <th>Kontaktpunkt</th>
+        <th>Status</th>
+        <th>Tilgjengelig fra</th>
+        <th>Tilgjengelig til</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    @foreach (var resource in Model)
+    {
+    <tr>
+        <td>@resource.Title</td>
+        <td>@resource.ResourceTypeId</td>
+        <td>@resource.LocationId</td>
+        <td>@resource.Quantity @resource.Unit</td>
+        <td>@(resource.ContactPoint ?? "Ikke oppgitt")</td>
+        <td>@resource.Status</td>
+        <td>
+            @(resource.AvailableFrom?.ToString("dd.MM.yyyy HH:mm")
+            ?? "Ikke oppgitt")
+        </td>
+        <td>
+            @(resource.AvailableTo?.ToString("dd.MM.yyyy HH:mm")
+            ?? "Ikke oppgitt")
+        </td>
+    </tr>
+    }
+    </tbody>
+</table>
 }
 </body>
 </html>

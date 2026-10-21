@@ -3,99 +3,101 @@
 @{
     ViewData["Title"] = "Registrer ressurs";
 }
-<div class="need-container">
-    
+
+<div class="resource-container">
     <h1>Registrer ressurs</h1>
-    
-    @if (ViewData["Message"] != null)
-    {
-        <p>@ViewData["Message"]</p>
-    }
 
     <form asp-controller="Resource"
           asp-action="Create"
           method="post"
           class="resource-form">
+
         <div>
-            <label>Type ressurs</label>
-            <input asp-for="Type"/>
+            <label asp-for="ProviderId">Tilbyder-ID</label>
+            <input asp-for="ProviderId" type="number" />
         </div>
 
         <div>
-            <label>Beskrivelse</label>
-            <input asp-for="Description"/>
+            <label asp-for="ResourceTypeId">Ressurstype-ID</label>
+            <input asp-for="ResourceTypeId" type="number" />
         </div>
 
         <div>
-            <label>Kontaktpunkt</label>
+            <label asp-for="LocationId">Lokasjon-ID</label>
+            <input asp-for="LocationId" type="number" />
+        </div>
+
+        <div>
+            <label asp-for="Title">Tittel</label>
+            <input asp-for="Title" />
+        </div>
+
+        <div>
+            <label asp-for="Description">Beskrivelse</label>
+            <textarea asp-for="Description"></textarea>
+        </div>
+
+        <div>
+            <label asp-for="Quantity">Mengde</label>
+            <input asp-for="Quantity" type="number" step="0.01" />
+        </div>
+
+        <div>
+            <label asp-for="Unit">Enhet</label>
+            <input asp-for="Unit" placeholder="For eksempel stk, kg eller liter" />
+        </div>
+
+        <div>
+            <label asp-for="ContactPoint">Kontaktpunkt</label>
             <input asp-for="ContactPoint" />
         </div>
 
         <div>
-            <label>Tilgjengelig fra</label>
+            <label asp-for="AvailableFrom">Tilgjengelig fra</label>
             <input asp-for="AvailableFrom" type="datetime-local" />
         </div>
 
         <div>
-            <label>Tilgjengelig til</label>
+            <label asp-for="AvailableTo">Tilgjengelig til</label>
             <input asp-for="AvailableTo" type="datetime-local" />
         </div>
 
         <div>
-            <label>Status</label>
+            <label asp-for="Status">Status</label>
             <select asp-for="Status">
                 <option value="Available">Tilgjengelig</option>
                 <option value="Unavailable">Ikke tilgjengelig</option>
             </select>
         </div>
 
-        <div>
-            <label>Sted</label>
-            <input asp-for="Location"/>
-        </div>
-
-        <p>Valgt posisjon fra kartet:</p>
-        <div>
-            <label>Latitude</label>
-            <input asp-for="Latitude" readonly/>
-        </div>
-
-        <div>
-            <label>Longitude</label>
-            <input asp-for="Longitude" readonly/>
-        </div>
-
-        
         <input asp-for="GeometryType" type="hidden" id="GeometryType" />
         <input asp-for="GeometryData" type="hidden" id="GeometryData" />
-        
-        
-        <button type="submit">Registrer ressurs</button>
-        
+
+        <button type="submit">
+            Registrer ressurs
+        </button>
     </form>
-    <h2>Velg sted på kartet</h2>
-    
+
+    <h2>Velg område på kartet</h2>
+
     <div id="map"></div>
-    
 </div>
+
 @section Scripts {
     <script>
+        // Oppretter Leaflet-kartet med Kristiansand som startposisjon.
+        var map = L.map("map").setView([58.1467, 7.9956], 13);
 
-        // Oppretter Leaflet-kartet og setter startposisjonen
-        // til Kristiansand.
-        
-        var map = L.map('map').setView([58.1467, 7.9956], 13);
+        L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+                attribution: "&copy; OpenStreetMap contributors"
+            }
+        ).addTo(map);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Holder objektene som brukeren tegner på kartet.
         var drawnItems = new L.FeatureGroup();
         map.addLayer(drawnItems);
 
-
-        // Legger til tegneverktøy for markør og linje.
         var drawControl = new L.Control.Draw({
             draw: {
                 polygon: false,
@@ -107,41 +109,23 @@
             edit: {
                 featureGroup: drawnItems,
                 remove: true
-            },
-});
+            }
+        });
 
         map.addControl(drawControl);
 
-        // Når brukeren klikker på kartet,
-        // lagres den valgte posisjonen som latitude og longitude.
-
-        // Kjøres når brukeren tegner et nytt objekt på kartet.
-        map.on('draw:created', function (e) {
+        // Lagrer den sist tegnede geometrien som GeoJSON.
+        map.on("draw:created", function (e) {
             var layer = e.layer;
 
-            // Legger det tegnede objektet til kartet.
             drawnItems.addLayer(layer);
 
-            document.getElementById('GeometryType').value = e.layerType;
+            document.getElementById("GeometryType").value = e.layerType;
 
-            // Hvis objektet er en markør, lagres koordinatene i skjemaet.
-            if (e.layerType === 'marker') {
-                var latlng = layer.getLatLng();
+            var geoJson = layer.toGeoJSON();
 
-                console.log("Marker:", latlng.lat, latlng.lng);
-
-                document.getElementById('Latitude').value = latlng.lat;
-                document.getElementById('Longitude').value = latlng.lng;
-            }
-
-            if (e.layerType === 'polyline') {
-                var geoJson = layer.toGeoJSON();
-
-                document.getElementById('GeometryData').value =
-                    JSON.stringify(geoJson);
-            }
-});
+            document.getElementById("GeometryData").value =
+                JSON.stringify(geoJson);
+        });
     </script>
 }
-
-

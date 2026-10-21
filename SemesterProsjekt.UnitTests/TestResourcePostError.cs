@@ -18,14 +18,19 @@ public class TestResourcePostError
 
         var model = new ResourceViewModel
         {
-            Type = "Gravemaskin",
+            ProviderId = 1,
+            ResourceTypeId = 1,
+            LocationId = 1,
+            Title = "Gravemaskin",
             Description = "Stor gravemaskin",
-            Location = "Kristiansand"
+            Quantity = 1,
+            Unit = "stk",
+            Status = "Available"
         };
 
-        // Simulerer at skjemadataene er ugyldige
+        // Simulerer at skjemadataene er ugyldige.
         controller.ModelState.AddModelError(
-            "Location",
+            "LocationId",
             "Ugyldig lokasjon"
         );
 
@@ -38,7 +43,7 @@ public class TestResourcePostError
         Assert.Same(model, viewResult.Model);
 
         resourceRepository.Verify(
-            r => r.CreateAsync(It.IsAny<Resource>()),
+            repository => repository.CreateAsync(It.IsAny<Resource>()),
             Times.Never
         );
     }

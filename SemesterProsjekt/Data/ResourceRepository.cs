@@ -17,9 +17,23 @@ public class ResourceRepository : IResourceRepository
         using var connection = _connectionFactory.CreateConnection();
 
         const string sql = """
-                           SELECT Id, Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData, ContactPoint, AvailableFrom, AvailableTo, Status
-                           FROM Resources;
-                           """;
+            SELECT
+                ResourceId,
+                ProviderId,
+                ResourceTypeId,
+                LocationId,
+                Title,
+                Description,
+                GeometryType,
+                GeometryData,
+                ContactPoint,
+                AvailableFrom,
+                AvailableTo,
+                Quantity,
+                Unit,
+                Status
+            FROM Resources;
+            """;
 
         return await connection.QueryAsync<Resource>(sql);
     }
@@ -29,27 +43,70 @@ public class ResourceRepository : IResourceRepository
         using var connection = _connectionFactory.CreateConnection();
 
         const string sql = """
-                           SELECT Id, Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData, ContactPoint, AvailableFrom, AvailableTo, Status
-                           FROM Resources
-                           WHERE Id = @Id;
-                           """;
+            SELECT
+                ResourceId,
+                ProviderId,
+                ResourceTypeId,
+                LocationId,
+                Title,
+                Description,
+                GeometryType,
+                GeometryData,
+                ContactPoint,
+                AvailableFrom,
+                AvailableTo,
+                Quantity,
+                Unit,
+                Status
+            FROM Resources
+            WHERE ResourceId = @ResourceId;
+            """;
 
         return await connection.QuerySingleOrDefaultAsync<Resource>(
             sql,
-            new { Id = id }
+            new { ResourceId = id }
         );
     }
 
     public async Task<int> CreateAsync(Resource resource)
     {
         using var connection = _connectionFactory.CreateConnection();
-        const string sql = """
-                           INSERT INTO Resources
-                               (Type, Description, Location, Latitude, Longitude, GeometryType, GeometryData, ContactPoint, AvailableFrom, AvailableTo, Status)
-                           VALUES
-                               (@Type, @Description, @Location, @Latitude, @Longitude, @GeometryType, @GeometryData, @ContactPoint, @AvailableFrom, @AvailableTo, @Status);
-                           """;
 
-        return await connection.ExecuteAsync(sql, resource);
+        const string sql = """
+            INSERT INTO Resources (
+                ProviderId,
+                ResourceTypeId,
+                LocationId,
+                Title,
+                Description,
+                GeometryType,
+                GeometryData,
+                ContactPoint,
+                AvailableFrom,
+                AvailableTo,
+                Quantity,
+                Unit,
+                Status
+            )
+            VALUES (
+                @ProviderId,
+                @ResourceTypeId,
+                @LocationId,
+                @Title,
+                @Description,
+                @GeometryType,
+                @GeometryData,
+                @ContactPoint,
+                @AvailableFrom,
+                @AvailableTo,
+                @Quantity,
+                @Unit,
+                @Status
+            );
+
+            SELECT LAST_INSERT_ID();
+            """;
+
+        return await connection.ExecuteScalarAsync<int>(sql, resource);
     }
 }

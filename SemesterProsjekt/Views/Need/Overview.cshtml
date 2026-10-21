@@ -1,18 +1,19 @@
+@using System.Text.Json
 @model IEnumerable<SemesterProsjekt.Models.Need>
 
 @{
-    ViewData["Title"] = "Need Overview";
+    ViewData["Title"] = "Behovsoversikt";
 }
 
-<h1>Need Overview</h1>
-
+<h1>Behovsoversikt</h1>
 
 <h2>Registrerte behov på kartet</h2>
+
 <div id="needMap" style="height: 500px; margin-bottom: 30px;"></div>
 
 @if (!Model.Any())
 {
-    <p>No needs have been registered yet.</p>
+    <p>Ingen behov er registrert ennå.</p>
 }
 else
 {
@@ -20,41 +21,81 @@ else
     {
         <div class="card mb-3">
             <div class="card-body">
-                <h5 class="card-title">@need.Type</h5>
+                <h5 class="card-title">@need.Title</h5>
 
-                <p class="card-text">@need.Description</p>
-
-                <p>
-                    <strong>Location:</strong>
-                    @need.Location
-                </p>
-                <p>
-                    <strong>Status:</strong> @need.Status
-                </p>
-                <p>
-                    <strong>Prioritet:</strong> @need.Priority
+                <p class="card-text">
+                    @need.Description
                 </p>
 
                 <p>
-                    <strong>Frist:</strong> @need.Deadline
+                    <strong>Behovstype-ID:</strong>
+                    @need.NeedTypeId
                 </p>
+
+                <p>
+                    <strong>Lokasjon-ID:</strong>
+                    @need.LocationId
+                </p>
+
+                <p>
+                    <strong>Mengde:</strong>
+                    @need.Quantity @need.Unit
+                </p>
+
+                <p>
+                    <strong>Status:</strong>
+                    @need.Status
+                </p>
+
+                <p>
+                    <strong>Prioritet:</strong>
+                    @need.Priority
+                </p>
+
+                <p>
+                    <strong>Frist:</strong>
+                    @(need.Deadline?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")
+                </p>
+
+                <a asp-controller="Need"
+                   asp-action="Details"
+                   asp-route-id="@need.NeedId"
+                   class="btn btn-outline-secondary">
+                    Se detaljer
+                </a>
+
                 <form asp-controller="Need"
                       asp-action="UpdateStatus"
-                      method="post">
-                    
-                    <input type="hidden" name="id" value="@need.Id"/>
+                      method="post"
+                      class="mt-3">
+
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden"
+                           name="id"
+                           value="@need.NeedId" />
 
                     <select name="status">
-                        <option value="New" selected="@(need.Status == "New")">New</option>
-                        <option value="In progress" selected="@(need.Status == "In progress")">In progress</option>
-                        <option value="Resolved" selected="@(need.Status == "Resolved")">Resolved</option>
+                        <option value="New"
+                                selected="@(need.Status == "New")">
+                            Ny
+                        </option>
+
+                        <option value="In progress"
+                                selected="@(need.Status == "In progress")">
+                            Under behandling
+                        </option>
+
+                        <option value="Resolved"
+                                selected="@(need.Status == "Resolved")">
+                            Løst
+                        </option>
                     </select>
 
                     <button type="submit" class="btn btn-primary">
-                        Update status
+                        Oppdater status
                     </button>
                 </form>
-
             </div>
         </div>
     }
@@ -63,40 +104,41 @@ else
 @section Scripts {
     <script>
         // Oppretter kartet med Kristiansand som startposisjon.
-        var needMap = L.map('needMap')
+        var needMap = L.map("needMap")
             .setView([58.1467, 7.9956], 12);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(needMap);
+        L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+                attribution: "&copy; OpenStreetMap contributors"
+            }
+        ).addTo(needMap);
 
         @foreach (var need in Model)
         {
-        if (need.GeometryType == "marker" &&
-        !string.IsNullOrEmpty(need.Latitude) &&
-        !string.IsNullOrEmpty(need.Longitude))
-        {
-        <text>
-        L.marker([
-            @need.Latitude,
-            @need.Longitude
-        ])
-            .addTo(needMap)
-            .bindPopup('@need.Type - @need.Location');
-        </text>
-        }
+            if (!string.IsNullOrWhiteSpace(need.GeometryData))
+            {
+                <text>
+                try {
+                    var geometryData =
+                        @Html.Raw(JsonSerializer.Serialize(need.GeometryData));
 
-        if (need.GeometryType == "polyline" &&
-        !string.IsNullOrEmpty(need.GeometryData))
-        {
-        <text>
-        var geoJsonData = @Html.Raw(need.GeometryData);
+                    var geoJson = JSON.parse(geometryData);
 
-        L.geoJSON(geoJsonData)
-            .addTo(needMap)
-            .bindPopup('@need.Type - @need.Location');
-        </text>
-        }
+                    var popupText =
+                        @Html.Raw(JsonSerializer.Serialize(need.Title));
+
+                    L.geoJSON(geoJson)
+                        .addTo(needMap)
+                        .bindPopup(popupText);
+                }
+                catch {
+                    console.error(
+                        "Kunne ikke vise geometri for behov @need.NeedId"
+                    );
+                }
+                </text>
+            }
         }
     </script>
 }

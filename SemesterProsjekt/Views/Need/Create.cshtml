@@ -3,14 +3,9 @@
 @{
     ViewData["Title"] = "Registrer behov";
 }
+
 <div class="need-container">
-
     <h1>Registrer behov</h1>
-
-    @if (ViewData["Message"] != null)
-    {
-        <p>@ViewData["Message"]</p>
-    }
 
     <form asp-controller="Need"
           asp-action="Create"
@@ -18,17 +13,42 @@
           class="need-form">
 
         <div>
-            <label>Type behov</label>
-            <input asp-for="Type" />
+            <label asp-for="PublicActorId">Offentlig aktør-ID</label>
+            <input asp-for="PublicActorId" type="number" />
         </div>
 
         <div>
-            <label>Beskrivelse</label>
-            <input asp-for="Description" />
+            <label asp-for="NeedTypeId">Type behov-ID</label>
+            <input asp-for="NeedTypeId" type="number" />
         </div>
 
         <div>
-            <label>Prioritet</label>
+            <label asp-for="LocationId">Lokasjon-ID</label>
+            <input asp-for="LocationId" type="number" />
+        </div>
+
+        <div>
+            <label asp-for="Title">Tittel</label>
+            <input asp-for="Title" />
+        </div>
+
+        <div>
+            <label asp-for="Description">Beskrivelse</label>
+            <textarea asp-for="Description"></textarea>
+        </div>
+
+        <div>
+            <label asp-for="Quantity">Mengde</label>
+            <input asp-for="Quantity" type="number" step="0.01" />
+        </div>
+
+        <div>
+            <label asp-for="Unit">Enhet</label>
+            <input asp-for="Unit" placeholder="For eksempel stk, kg eller liter" />
+        </div>
+
+        <div>
+            <label asp-for="Priority">Prioritet</label>
             <select asp-for="Priority">
                 <option value="Low">Lav</option>
                 <option value="Normal">Normal</option>
@@ -38,68 +58,50 @@
         </div>
 
         <div>
-            <label>Kontaktpunkt</label>
+            <label asp-for="ContactPoint">Kontaktpunkt</label>
             <input asp-for="ContactPoint" />
         </div>
 
         <div>
-            <label>Behov fra</label>
+            <label asp-for="NeededFrom">Behov fra</label>
             <input asp-for="NeededFrom" type="datetime-local" />
         </div>
 
         <div>
-            <label>Frist</label>
+            <label asp-for="Deadline">Frist</label>
             <input asp-for="Deadline" type="datetime-local" />
         </div>
 
-        <div>
-            <label>Sted</label>
-            <input asp-for="Location" />
-        </div>
-    
-        <p>Valgt posisjon fra kartet:</p>
-        <div>
-        
-            <label>Latitude</label>
-            <input asp-for="Latitude" readonly/>
-        </div>
+        <input asp-for="Status" type="hidden" />
 
-        <div>
-            <label>Longitude</label>
-            <input asp-for="Longitude" readonly />
-        </div>
-        
         <input asp-for="GeometryType" type="hidden" id="GeometryType" />
-        
         <input asp-for="GeometryData" type="hidden" id="GeometryData" />
 
-        <button type="submit" class="need-button">Registrer behov</button>
-
+        <button type="submit" class="need-button">
+            Registrer behov
+        </button>
     </form>
 
-    <h2>Velg sted på kartet</h2>
+    <h2>Velg område på kartet</h2>
 
     <div id="map"></div>
-
 </div>
-
 
 @section Scripts {
     <script>
-
-        // Oppretter Leaflet-kartet og setter startposisjonen
-        // til Kristiansand.
+        // Oppretter Leaflet-kartet med Kristiansand som startposisjon.
         var map = L.map('map').setView([58.1467, 7.9956], 13);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
+        L.tileLayer(
+            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            {
+                attribution: '&copy; OpenStreetMap contributors'
+            }
+        ).addTo(map);
 
-        // Holder objektene som brukeren tegner på kartet.
         var drawnItems = new L.FeatureGroup();
         map.addLayer(drawnItems);
 
-        // Legger til tegneverktøy for markør og linje.
         var drawControl = new L.Control.Draw({
             draw: {
                 polygon: false,
@@ -111,37 +113,23 @@
             edit: {
                 featureGroup: drawnItems,
                 remove: true
-            },
-});
+            }
+        });
 
         map.addControl(drawControl);
 
-        // Kjøres når brukeren tegner et nytt objekt på kartet.
+        // Lagrer valgt geometri når brukeren tegner på kartet.
         map.on('draw:created', function (e) {
             var layer = e.layer;
 
-            // Legger objektet til kartet.
             drawnItems.addLayer(layer);
 
-            // Lagrer hvilken type objekt som ble tegnet.
             document.getElementById('GeometryType').value = e.layerType;
 
-            // Hvis brukeren tegner en markør, lagres koordinatene.
-            if (e.layerType === 'marker') {
-                var latlng = layer.getLatLng();
+            var geoJson = layer.toGeoJSON();
 
-                document.getElementById('Latitude').value = latlng.lat;
-                document.getElementById('Longitude').value = latlng.lng;
-            }
-
-            // Hvis brukeren tegner en linje, lagres hele linjen som GeoJSON.
-            if (e.layerType === 'polyline') {
-                var geoJson = layer.toGeoJSON();
-
-                document.getElementById('GeometryData').value =
-                    JSON.stringify(geoJson);
-            }
-});
-       
+            document.getElementById('GeometryData').value =
+                JSON.stringify(geoJson);
+        });
     </script>
 }
