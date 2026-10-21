@@ -8,7 +8,7 @@
 
 <div class="card">
     <div class="card-body">
-        <h5 class="card-title">@Model.Type</h5>
+        <h5 class="card-title">@Model.Title</h5>
 
         <p class="card-text">
             <strong>Beskrivelse:</strong><br />
@@ -16,30 +16,47 @@
         </p>
 
         <p class="card-text">
-            <strong>Sted:</strong><br />
-            @Model.Location
+            <strong>Ressurstype-ID:</strong>
+            @Model.ResourceTypeId
         </p>
 
         <p class="card-text">
-            <strong>Koordinater:</strong><br />
-            @Model.Latitude, @Model.Longitude
-        </p>
-        
-        <p class="card-text">
-            <strong>Kontaktpunkt:</strong> @Model.ContactPoint
+            <strong>Lokasjon-ID:</strong>
+            @Model.LocationId
         </p>
 
         <p class="card-text">
-            <strong>Tilgjengelig fra:</strong> @Model.AvailableFrom
+            <strong>Mengde:</strong>
+            @Model.Quantity @Model.Unit
         </p>
 
         <p class="card-text">
-            <strong>Tilgjengelig til:</strong> @Model.AvailableTo
+            <strong>Kontaktpunkt:</strong>
+            @(Model.ContactPoint ?? "Ikke oppgitt")
         </p>
 
         <p class="card-text">
-            <strong>Status:</strong> @Model.Status
+            <strong>Tilgjengelig fra:</strong>
+            @(Model.AvailableFrom?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")
         </p>
+
+        <p class="card-text">
+            <strong>Tilgjengelig til:</strong>
+            @(Model.AvailableTo?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")
+        </p>
+
+        <p class="card-text">
+            <strong>Status:</strong>
+            @Model.Status
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.GeometryType))
+        {
+            <p class="card-text">
+                <strong>Geometri:</strong>
+                @Model.GeometryType
+            </p>
+        }
     </div>
 </div>
 

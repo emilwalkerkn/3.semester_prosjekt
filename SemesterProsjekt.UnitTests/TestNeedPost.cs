@@ -14,15 +14,23 @@ public class UnitTestNeedPost
         // Arrange
         var needRepository = new Mock<INeedRepository>();
 
+        needRepository
+            .Setup(repository => repository.CreateAsync(It.IsAny<Need>()))
+            .ReturnsAsync(1);
+
         var controller = new NeedController(needRepository.Object);
 
         var model = new NeedViewModel
         {
-            Type = "Brann",
-            Description = "Tre har falt over vei",
-            Location = "Kristiansand",
-            Latitude = "58.1467",
-            Longitude = "7.9956"
+            PublicActorId = 1,
+            NeedTypeId = 1,
+            LocationId = 1,
+            Title = "Tre over vei",
+            Description = "Et tre har falt over veien i Kristiansand.",
+            Quantity = 1,
+            Unit = "stk",
+            Status = "New",
+            Priority = "High"
         };
 
         // Act
@@ -30,6 +38,13 @@ public class UnitTestNeedPost
 
         // Assert
         var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+
         Assert.Equal("Result", redirectResult.ActionName);
+        Assert.Equal(1, redirectResult.RouteValues?["id"]);
+
+        needRepository.Verify(
+            repository => repository.CreateAsync(It.IsAny<Need>()),
+            Times.Once
+        );
     }
 }

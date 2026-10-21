@@ -1,30 +1,54 @@
-@* ViewModelen inneholder informasjonen som ble sendt inn
-   fra ressursskjemaet og brukes til å vise resultatet. *@
-
-@model SemesterProsjekt.Models.ResourceViewModel
+@model SemesterProsjekt.Models.Resource
 
 @{
     ViewData["Title"] = "Ressurs registrert";
 }
 
 <div class="text-center">
-    
     <h1>Ressurs registrert</h1>
-    
+
     <div class="mt-4">
-        
-        <p><strong>Type ressurs: </strong> @Model.Type</p>
-        <p><strong>Beskrivelse: </strong> @Model.Description</p>
-        <p><strong>Sted: </strong> @Model.Location</p>
-        <p><strong>Latitude: </strong> @Model.Latitude</p>
-        <p><strong>Longitude: </strong> @Model.Longitude</p>
+        <p>
+            <strong>Tittel:</strong>
+            @Model.Title
+        </p>
+
+        <p>
+            <strong>Beskrivelse:</strong>
+            @Model.Description
+        </p>
+
+        <p>
+            <strong>Ressurstype-ID:</strong>
+            @Model.ResourceTypeId
+        </p>
+
+        <p>
+            <strong>Lokasjon-ID:</strong>
+            @Model.LocationId
+        </p>
+
+        <p>
+            <strong>Mengde:</strong>
+            @Model.Quantity @Model.Unit
+        </p>
+
+        <p>
+            <strong>Status:</strong>
+            @Model.Status
+        </p>
     </div>
-    
+
+    <a asp-controller="Resource"
+       asp-action="Details"
+       asp-route-id="@Model.ResourceId"
+       class="btn btn-outline-secondary mt-3">
+        Se detaljer
+    </a>
+
     <a asp-controller="Resource"
        asp-action="Create"
        class="btn btn-primary mt-3">
         Registrer en ny ressurs
     </a>
-    
 </div>
-

@@ -1,0 +1,28 @@
+services:
+  semesterprosjekt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8080"
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=mariadb;Port=3306;Database=semesterprosjekt_test;User=appuser;Password=apppassword;"
+    depends_on:
+      - mariadb
+
+  mariadb:
+    image: mariadb:latest
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpassword
+      MARIADB_DATABASE: semesterprosjekt_test
+      MARIADB_USER: appuser
+      MARIADB_PASSWORD: apppassword
+    ports:
+      - "3307:3306"
+    volumes:
+      - mariadb_test_data:/var/lib/mysql
+      - ./Database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./Database/test-data.sql:/docker-entrypoint-initdb.d/02-test-data.sql
+
+volumes:
+  mariadb_test_data:

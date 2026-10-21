@@ -1,25 +1,55 @@
-  @*ViewModelen inneholder informasjonen som ble sendt inn
-   fra behovsskjemaet og brukes til å vise resultatet. *@
+@model SemesterProsjekt.Models.Need
 
-@model SemesterProsjekt.Models.NeedViewModel
 @{
-   
     ViewData["Title"] = "Behov registrert";
-
 }
 
 <div class="text-center">
-
     <h1>Behov registrert</h1>
 
     <div class="mt-4">
+        <p>
+            <strong>Tittel:</strong>
+            @Model.Title
+        </p>
 
-        <p><strong>Type behov:</strong> @Model.Type</p>
-        <p><strong>Beskrivelse:</strong> @Model.Description</p>
-        <p><strong>Sted:</strong> @Model.Location</p>
-        <p><strong>Latitude:</strong> @Model.Latitude</p>
-        <p><strong>Longitude:</strong> @Model.Longitude</p>
+        <p>
+            <strong>Beskrivelse:</strong>
+            @Model.Description
+        </p>
+
+        <p>
+            <strong>Behovstype-ID:</strong>
+            @Model.NeedTypeId
+        </p>
+
+        <p>
+            <strong>Lokasjon-ID:</strong>
+            @Model.LocationId
+        </p>
+
+        <p>
+            <strong>Mengde:</strong>
+            @Model.Quantity @Model.Unit
+        </p>
+
+        <p>
+            <strong>Status:</strong>
+            @Model.Status
+        </p>
+
+        <p>
+            <strong>Prioritet:</strong>
+            @Model.Priority
+        </p>
     </div>
+
+    <a asp-controller="Need"
+       asp-action="Details"
+       asp-route-id="@Model.NeedId"
+       class="btn btn-outline-secondary mt-3">
+        Se detaljer
+    </a>
 
     <a asp-controller="Need"
        asp-action="Create"
@@ -27,4 +57,3 @@
         Registrer et nytt behov
     </a>
 </div>
-
