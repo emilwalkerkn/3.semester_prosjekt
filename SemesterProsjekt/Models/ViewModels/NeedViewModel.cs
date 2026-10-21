@@ -1,11 +1,20 @@
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 namespace SemesterProsjekt.Models;
 
 // Informasjon fra behovsskjemaet.
 public class NeedViewModel
 {
+    [Required(ErrorMessage = "Velg type behov")]
+    [Display(Name= "Type behov")]
+    public int? NeedTypeId { get; set; }
+
+    // samling av dropdown valg
+    public IEnumerable<SelectListItem> NeedTypes { get; set; }
+        = Enumerable.Empty<SelectListItem>();
+    
     public int PublicActorId { get; set; }
 
-    public int NeedTypeId { get; set; }
 
     public int LocationId { get; set; }
 

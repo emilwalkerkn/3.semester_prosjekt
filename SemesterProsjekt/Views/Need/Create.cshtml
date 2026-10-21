@@ -18,8 +18,12 @@
         </div>
 
         <div>
-            <label asp-for="NeedTypeId">Type behov-ID</label>
-            <input asp-for="NeedTypeId" type="number" />
+            <label asp-for="NeedTypeId"> </label>
+            <select asp-for="NeedTypeId"
+                    asp-items="Model.NeedTypes">
+                <option value="">Velg type behov</option>
+            </select>
+            <span asp-validation-for="NeedTypeId"></span>
         </div>
 
         <div>

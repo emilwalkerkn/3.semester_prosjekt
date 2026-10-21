@@ -70,6 +70,20 @@ public class NeedRepository : INeedRepository
         );
     }
 
+    public async Task<IEnumerable<NeedType>> GetNeedTypesAsync()
+    {
+        const string sql = """
+                           SELECT
+                           NeedTypeId,
+                           name AS Name
+                           FROM NeedType
+                           ORDER BY name;
+                           """;
+        using var connection = _connectionFactory.CreateConnection();
+        return await connection.QueryAsync<NeedType>(sql);
+
+    }
+
     public async Task<int> CreateAsync(Need need)
     {
         using var connection = _connectionFactory.CreateConnection();

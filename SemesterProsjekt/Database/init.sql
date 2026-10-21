@@ -16,6 +16,15 @@ CREATE TABLE IF NOT EXISTS NeedType (
     name VARCHAR(80) NOT NULL UNIQUE
     );
 
+INSERT IGNORE INTO NeedType (name)
+       VALUES
+       ('Transport'), 
+       ('Medisinsk utstyr'),
+       ('Mannskap'),
+       ('Overnatting'),
+       ('Brannvesen');
+       
+       
 CREATE TABLE IF NOT EXISTS ResourceType (
     ResourceTypeId INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(80) NOT NULL UNIQUE
