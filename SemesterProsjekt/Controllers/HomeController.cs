@@ -84,7 +84,7 @@ public class HomeController : Controller
         var need = new Need
         {
             PublicActorId = model.PublicActorId,
-            NeedTypeId = model.NeedTypeId,
+            NeedTypeId = model.NeedTypeId!.Value,
             LocationId = model.LocationId,
             Title = model.Title,
             Description = model.Description,

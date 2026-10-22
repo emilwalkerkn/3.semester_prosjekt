@@ -11,4 +11,6 @@ public interface INeedRepository
     Task<int> CreateAsync(Need need);
 
     Task UpdateStatusAsync(int id, string status);
+
+    Task<IEnumerable<NeedType>> GetNeedTypesAsync();
 }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
 
@@ -13,6 +14,16 @@ public class NeedController : Controller
         _needRepository = needRepository;
     }
 
+    private async Task LoadNeedTypesAsync(NeedViewModel model)
+    {
+        var needTypes = await _needRepository.GetNeedTypesAsync();
+        model.NeedTypes = needTypes.Select(needType => new SelectListItem
+        {
+            Value = needType.NeedTypeId.ToString(),
+            Text = needType.Name
+        });
+    }
+
     // Viser alle behov.
     public async Task<IActionResult> Overview()
     {
@@ -23,9 +34,11 @@ public class NeedController : Controller
 
     // Viser registreringsskjemaet.
     [HttpGet]
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
-        return View(new NeedViewModel());
+        var model = new NeedViewModel();
+        await LoadNeedTypesAsync(model);
+        return View(model);
     }
 
     // Lagrer et nytt behov.
@@ -35,13 +48,14 @@ public class NeedController : Controller
     {
         if (!ModelState.IsValid)
         {
+            await LoadNeedTypesAsync(model);
             return View(model);
         }
 
         var need = new Need
         {
             PublicActorId = model.PublicActorId,
-            NeedTypeId = model.NeedTypeId,
+            NeedTypeId = model.NeedTypeId!.Value,
             LocationId = model.LocationId,
             Title = model.Title,
             Description = model.Description,
