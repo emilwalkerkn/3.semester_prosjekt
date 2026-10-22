@@ -59,6 +59,17 @@ public class ResourceController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(ResourceViewModel model)
     {
+        // Kontrollerer datoene når begge er fylt ut.
+        if (model.AvailableFrom.HasValue &&
+            model.AvailableTo.HasValue &&
+            model.AvailableTo.Value < model.AvailableFrom.Value)
+        {
+            ModelState.AddModelError(
+                nameof(model.AvailableTo),
+                "Sluttdato kan ikke være før startdato."
+            );
+        }
+        
         if (!ModelState.IsValid)
         {
             return View(model);
