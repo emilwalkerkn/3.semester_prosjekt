@@ -16,15 +16,6 @@ CREATE TABLE IF NOT EXISTS NeedType (
     name VARCHAR(80) NOT NULL UNIQUE
     );
 
-INSERT IGNORE INTO NeedType (name)
-       VALUES
-       ('Transport'), 
-       ('Medisinsk utstyr'),
-       ('Mannskap'),
-       ('Overnatting'),
-       ('Brannvesen');
-       
-       
 CREATE TABLE IF NOT EXISTS ResourceType (
     ResourceTypeId INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(80) NOT NULL UNIQUE
@@ -145,6 +136,96 @@ CREATE TABLE IF NOT EXISTS `Match` (
     );
 
 
+--Testdata--
+-- Startverdier for behovstyper
+INSERT IGNORE INTO NeedType (name)
+VALUES
+    ('Mat og drikke'),
+    ('Transport'),
+    ('Medisinsk utstyr'),
+    ('Mannskap'),
+    ('Overnatting');
 
 
+-- Testbrukere
+INSERT IGNORE INTO AppUsers (
+    UserId,
+    Username,
+    Email,
+    FirstName,
+    LastName,
+    Phone
+)
+VALUES
+    (
+        1,
+        'testaktor',
+        'testaktor@example.com',
+        'Test',
+        'Aktør',
+        '00000000'
+    ),
+    (
+        2,
+        'testtilbyder',
+        'testtilbyder@example.com',
+        'Test',
+        'Tilbyder',
+        '11111111'
+    );
+
+-- Offentlig testaktør
+INSERT IGNORE INTO PublicActors (
+    UserId,
+    OrganizationName,
+    OrganizationType
+)
+VALUES
+    (
+        1,
+        'Testkommune',
+        'Kommune'
+    );
+
+
+-- Testtilbyder
+INSERT IGNORE INTO ResourceProviders (
+    UserId,
+    ProviderType,
+    OrganizationName
+)
+VALUES
+    (
+        2,
+        'Frivillig organisasjon',
+        'Testorganisasjon'
+    );
+
+
+-- Startverdi for ressurstype
+INSERT IGNORE INTO ResourceType (
+    ResourceTypeId,
+    name
+)
+VALUES
+    (
+        1,
+        'Kjøretøy'
+    );
+
+
+-- Testlokasjon
+INSERT IGNORE INTO Location (
+    LocationId,
+    Description,
+    Latitude,
+    Longitude
+)
+VALUES
+    (
+        1,
+        'Kristiansand sentrum',
+        '58.1467',
+        '7.9956'
+    );
 
