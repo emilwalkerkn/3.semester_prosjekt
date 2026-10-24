@@ -19,9 +19,8 @@ public class NeedRepository : INeedRepository
         const string sql = """
             SELECT
                 NeedId,
-                PublicActorId,
+                UserId,
                 NeedTypeId,
-                LocationId,
                 Title,
                 Description,
                 GeometryType,
@@ -46,9 +45,8 @@ public class NeedRepository : INeedRepository
         const string sql = """
             SELECT
                 NeedId,
-                PublicActorId,
+                UserId,
                 NeedTypeId,
-                LocationId,
                 Title,
                 Description,
                 GeometryType,
@@ -90,9 +88,8 @@ public class NeedRepository : INeedRepository
 
         const string sql = """
             INSERT INTO Needs (
-                PublicActorId,
+                UserId,
                 NeedTypeId,
-                LocationId,
                 Title,
                 Description,
                 GeometryType,
@@ -106,9 +103,8 @@ public class NeedRepository : INeedRepository
                 Priority
             )
             VALUES (
-                @PublicActorId,
+                @UserId,
                 @NeedTypeId,
-                @LocationId,
                 @Title,
                 @Description,
                 @GeometryType,

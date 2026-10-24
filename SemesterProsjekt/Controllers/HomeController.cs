@@ -1,10 +1,12 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
 
 namespace SemesterProsjekt.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
     private readonly IResourceRepository _resourceRepository;
@@ -83,9 +85,8 @@ public class HomeController : Controller
 
         var need = new Need
         {
-            PublicActorId = model.PublicActorId,
+            UserId = model.UserId,
             NeedTypeId = model.NeedTypeId!.Value,
-            LocationId = model.LocationId,
             Title = model.Title,
             Description = model.Description,
             GeometryType = model.GeometryType,
@@ -126,9 +127,8 @@ public class HomeController : Controller
 
         var resource = new Resource
         {
-            ProviderId = model.ProviderId,
+            UserId = model.UserId,
             ResourceTypeId = model.ResourceTypeId,
-            LocationId = model.LocationId,
             Title = model.Title,
             Description = model.Description,
             GeometryType = model.GeometryType,

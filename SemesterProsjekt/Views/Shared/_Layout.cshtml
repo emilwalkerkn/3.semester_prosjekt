@@ -1,77 +1,120 @@
-﻿<!DOCTYPE html>
-<html lang="en">
+﻿
+<!DOCTYPE html>
+<html lang="no">
 <head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <title>@ViewData["Title"] - SemesterProsjekt</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
+
+    <!-- Bootstrap -->
     <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
-    <link rel="stylesheet" href="~/SemesterProsjekt.styles.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Prosjektets CSS -->
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
           crossorigin="" />
+
+    <!-- Leaflet Draw CSS -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+
+    <!-- Razor-generert CSS -->
+    <link rel="stylesheet"
+          href="~/SemesterProsjekt.styles.css"
+          asp-append-version="true" />
+
+    <!-- CSS for individuelle sider -->
+    @await RenderSectionAsync("Styles", required: false)
 </head>
+
 <body>
-<header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-        <div class="container-fluid">
-            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SemesterProsjekt</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
-                    <li class="nav-item">
-                        <a class="nav-link text-dark"
-                           asp-controller="Need"
-                           asp-action="Create">Register Need</a>
-                    </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link text-dark"
-                           asp-controller="Resource"
-                           asp-action="Create">Register Resource</a>
-                    </li>
+    <div class="portal-layout">
 
-                    <li class="nav-item">
-                        <a class="nav-link text-dark"
-                           asp-controller="Need"
-                           asp-action="Overview">Need Overview</a>
-                    </li>
+        <!-- SIDEMENY -->
+        <aside class="portal-sidebar">
+            <div class="portal-brand"><span class="portal-brand-mark">K</span><span>Kriseportal</span></div>
+            <p class="portal-sidebar-label">Arbeidsområde</p>
 
-                    <li class="nav-item">
-                        <a class="nav-link text-dark"
-                           asp-controller="Resource"
-                           asp-action="Overview">Resource Overview</a>
-                    </li>
-                </ul>
-            </div>
+            <nav aria-label="Hovedmeny">
+
+                <a asp-controller="Home" asp-action="Index" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Home") ? "active" : "")">
+                    Dashboard
+                </a>
+
+                <a asp-controller="Need" asp-action="Overview" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Need" && ViewContext.RouteData.Values["action"]?.ToString() != "Create") ? "active" : "")">
+                    Behov
+                </a>
+
+                <a asp-controller="Resource" asp-action="Overview" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Resource" && ViewContext.RouteData.Values["action"]?.ToString() != "Create") ? "active" : "")">
+                    Tilgjengelige ressurser
+                </a>
+
+                <a asp-controller="Need" asp-action="Create" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Need" && ViewContext.RouteData.Values["action"]?.ToString() == "Create") ? "active" : "")">
+                    Registrer behov
+                </a>
+
+                <a asp-controller="Resource" asp-action="Create" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Resource" && ViewContext.RouteData.Values["action"]?.ToString() == "Create") ? "active" : "")">
+                    Registrer ressurs
+                </a>
+
+                <a asp-controller="Settings" asp-action="Index" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Settings") ? "active" : "")">
+                    Innstillinger
+                </a>
+
+            </nav>
+
+        </aside>
+
+        <!-- HOVEDINNHOLD -->
+        <div class="portal-main">
+
+            <!-- Toppmeny -->
+            <header class="portal-topbar">
+                <p class="portal-context">Ressurs- og behovsoppfølging</p>
+                <div class="portal-account">
+                    <span class="notification" aria-label="3 varsler">♧</span>
+                    <span>Offentlig aktør</span>
+                </div>
+            </header>
+
+            <!-- Sideinnhold -->
+            <main role="main" class="portal-content">
+                @RenderBody()
+            </main>
+
         </div>
-    </nav>
-</header>
-<div class="container">
-    <main role="main" class="pb-3">
-        @RenderBody()
-    </main>
-</div>
 
-<footer class="border-top footer text-muted">
-    <div class="container">
-        &copy; 2026 - SemesterProsjekt - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
     </div>
-</footer>
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/js/site.js" asp-append-version="true"></script>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-        crossorigin=""></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
-@await RenderSectionAsync("Scripts", required: false)
+
+    <!-- JavaScript -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true"></script>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin="">
+    </script>
+
+    <!-- Leaflet Draw JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js">
+    </script>
+
+    <!-- JavaScript for individuelle sider -->
+    @await RenderSectionAsync("Scripts", required: false)
 
 </body>
 </html>

@@ -1,9 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
 
 namespace SemesterProsjekt.Controllers;
 
+[Authorize]
 public class ResourceController : Controller
 {
     private readonly IResourceRepository _resourceRepository;
@@ -14,35 +17,17 @@ public class ResourceController : Controller
     }
 
     // Viser en utskriftsvennlig ressursliste.
-    public async Task<IActionResult> Print(int? locationId = null)
+    public async Task<IActionResult> Print()
     {
         var resources = await _resourceRepository.GetAllAsync();
-
-        if (locationId.HasValue)
-        {
-            resources = resources
-                .Where(resource => resource.LocationId == locationId.Value)
-                .ToList();
-        }
-
-        ViewData["LocationIdFilter"] = locationId;
 
         return View(resources);
     }
 
     // Viser alle ressurser, eventuelt filtrert på lokasjon-ID.
-    public async Task<IActionResult> Overview(int? locationId = null)
+    public async Task<IActionResult> Overview()
     {
         var resources = await _resourceRepository.GetAllAsync();
-
-        if (locationId.HasValue)
-        {
-            resources = resources
-                .Where(resource => resource.LocationId == locationId.Value)
-                .ToList();
-        }
-
-        ViewData["LocationIdFilter"] = locationId;
 
         return View(resources);
     }
@@ -51,7 +36,7 @@ public class ResourceController : Controller
     [HttpGet]
     public IActionResult Create()
     {
-        return View(new ResourceViewModel());
+        return View(new ResourceViewModel { UserId = CurrentUserId });
     }
 
     // Lagrer en ny ressurs.
@@ -66,9 +51,8 @@ public class ResourceController : Controller
 
         var resource = new Resource
         {
-            ProviderId = model.ProviderId,
+            UserId = CurrentUserId,
             ResourceTypeId = model.ResourceTypeId,
-            LocationId = model.LocationId,
             Title = model.Title,
             Description = model.Description,
             GeometryType = model.GeometryType,
@@ -114,4 +98,8 @@ public class ResourceController : Controller
 
         return View(resource);
     }
+
+    private int CurrentUserId => int.Parse(
+        User.FindFirstValue(ClaimTypes.NameIdentifier)
+        ?? throw new InvalidOperationException("Innlogget bruker mangler identifikator."));
 }

@@ -3,11 +3,9 @@ namespace SemesterProsjekt.Models;
 // Informasjon fra ressursskjemaet.
 public class ResourceViewModel
 {
-    public int ProviderId { get; set; }
+    public int UserId { get; set; }
 
     public int ResourceTypeId { get; set; }
-
-    public int LocationId { get; set; }
 
     public string Title { get; set; } = "";
 

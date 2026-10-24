@@ -4,27 +4,19 @@
     ViewData["Title"] = "Registrer ressurs";
 }
 
-<div class="resource-container">
+<div class="need-container resource-container">
     <h1>Registrer ressurs</h1>
 
     <form asp-controller="Resource"
           asp-action="Create"
           method="post"
-          class="resource-form">
+          class="need-form resource-form">
 
-        <div>
-            <label asp-for="ProviderId">Tilbyder-ID</label>
-            <input asp-for="ProviderId" type="number" />
-        </div>
+        <input asp-for="UserId" type="hidden" />
 
         <div>
             <label asp-for="ResourceTypeId">Ressurstype-ID</label>
             <input asp-for="ResourceTypeId" type="number" />
-        </div>
-
-        <div>
-            <label asp-for="LocationId">Lokasjon-ID</label>
-            <input asp-for="LocationId" type="number" />
         </div>
 
         <div>
@@ -73,7 +65,7 @@
         <input asp-for="GeometryType" type="hidden" id="GeometryType" />
         <input asp-for="GeometryData" type="hidden" id="GeometryData" />
 
-        <button type="submit">
+        <button type="submit" class="need-button">
             Registrer ressurs
         </button>
     </form>
@@ -128,4 +120,8 @@
                 JSON.stringify(geoJson);
         });
     </script>
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/figma-need.css" asp-append-version="true" />
 }

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Moq;
+using System.Security.Claims;
 using SemesterProsjekt.Controllers;
 using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
@@ -15,12 +17,12 @@ public class TestResourcePostError
         var resourceRepository = new Mock<IResourceRepository>();
 
         var controller = new ResourceController(resourceRepository.Object);
+        controller.ControllerContext = AuthenticatedContext(1);
 
         var model = new ResourceViewModel
         {
-            ProviderId = 1,
+            UserId = 1,
             ResourceTypeId = 1,
-            LocationId = 1,
             Title = "Gravemaskin",
             Description = "Stor gravemaskin",
             Quantity = 1,
@@ -30,8 +32,8 @@ public class TestResourcePostError
 
         // Simulerer at skjemadataene er ugyldige.
         controller.ModelState.AddModelError(
-            "LocationId",
-            "Ugyldig lokasjon"
+            "UserId",
+            "Ugyldig bruker"
         );
 
         // Act
@@ -47,4 +49,14 @@ public class TestResourcePostError
             Times.Never
         );
     }
+
+    private static ControllerContext AuthenticatedContext(int userId) => new()
+    {
+        HttpContext = new DefaultHttpContext
+        {
+            User = new ClaimsPrincipal(new ClaimsIdentity(
+                new[] { new Claim(ClaimTypes.NameIdentifier, userId.ToString()) },
+                "Test"))
+        }
+    };
 }

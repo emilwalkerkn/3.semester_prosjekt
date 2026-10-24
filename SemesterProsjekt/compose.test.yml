@@ -1,3 +1,5 @@
+name: erik-test-v2
+
 services:
   semesterprosjekt:
     build:
@@ -7,8 +9,14 @@ services:
       - "8081:8080"
     environment:
       ConnectionStrings__DefaultConnection: "Server=mariadb;Port=3306;Database=semesterprosjekt_test;User=appuser;Password=apppassword;"
+      Authentication__CookieName: "SemesterProsjektTest.Auth"
+      Antiforgery__CookieName: "SemesterProsjektTest.Antiforgery"
     depends_on:
       - mariadb
+    volumes:
+      # Bevarer ASP.NET Core-nøklene mellom containeroppstarter. Uten dette
+      # blir gamle innloggings- og skjemacookies ugyldige når app-containeren bygges på nytt.
+      - data_protection_keys:/home/app/.aspnet/DataProtection-Keys
 
   mariadb:
     image: mariadb:latest
@@ -17,12 +25,11 @@ services:
       MARIADB_DATABASE: semesterprosjekt_test
       MARIADB_USER: appuser
       MARIADB_PASSWORD: apppassword
-    ports:
-      - "3307:3306"
     volumes:
       - mariadb_test_data:/var/lib/mysql
-      - ./Database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
-      - ./Database/test-data.sql:/docker-entrypoint-initdb.d/02-test-data.sql
+      - ./Database/init-v2.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./Database/test-data-v2.sql:/docker-entrypoint-initdb.d/02-test-data.sql
 
 volumes:
   mariadb_test_data:
+  data_protection_keys:

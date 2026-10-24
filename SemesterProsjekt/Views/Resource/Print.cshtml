@@ -1,12 +1,6 @@
 ﻿@model IEnumerable<SemesterProsjekt.Models.Resource>
 
-@{
-Layout = null;
-
-var locationId = ViewData["LocationIdFilter"] is int id
-? id
-: (int?)null;
-}
+@{ Layout = null; }
 
 <!DOCTYPE html>
 <html lang="nb">
@@ -63,18 +57,12 @@ var locationId = ViewData["LocationIdFilter"] is int id
     </button>
 
     <a asp-controller="Resource"
-       asp-action="Overview"
-       asp-route-locationId="@locationId">
+       asp-action="Overview">
         Tilbake til oversikten
     </a>
 </div>
 
 <h1>Ressursliste</h1>
-
-<p>
-    <strong>Lokasjon-ID:</strong>
-    @(locationId?.ToString() ?? "Alle lokasjoner")
-</p>
 
 @if (!Model.Any())
 {
@@ -87,7 +75,6 @@ else
     <tr>
         <th>Tittel</th>
         <th>Ressurstype-ID</th>
-        <th>Lokasjon-ID</th>
         <th>Mengde</th>
         <th>Kontaktpunkt</th>
         <th>Status</th>
@@ -102,7 +89,6 @@ else
     <tr>
         <td>@resource.Title</td>
         <td>@resource.ResourceTypeId</td>
-        <td>@resource.LocationId</td>
         <td>@resource.Quantity @resource.Unit</td>
         <td>@(resource.ContactPoint ?? "Ikke oppgitt")</td>
         <td>@resource.Status</td>

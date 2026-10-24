@@ -1,47 +1,12 @@
 @using System.Text.Json
 @model IEnumerable<SemesterProsjekt.Models.Resource>
 
-@{
-ViewData["Title"] = "Ressursoversikt";
-
-var locationIdFilter = ViewData["LocationIdFilter"];
-}
+@{ ViewData["Title"] = "Ressursoversikt"; }
 
 <h1>Ressursoversikt</h1>
 
-<form asp-controller="Resource"
-      asp-action="Overview"
-      method="get"
-      class="mb-3">
-
-    <label for="locationId" class="form-label">
-        Filtrer på lokasjon-ID
-    </label>
-
-    <div class="d-flex flex-wrap gap-2">
-        <input type="number"
-               id="locationId"
-               name="locationId"
-               value="@locationIdFilter"
-               class="form-control"
-               style="max-width: 300px;"
-               placeholder="For eksempel 1" />
-
-        <button type="submit" class="btn btn-primary">
-            Filtrer
-        </button>
-
-        <a asp-controller="Resource"
-           asp-action="Overview"
-           class="btn btn-outline-secondary">
-            Vis alle
-        </a>
-    </div>
-</form>
-
 <a asp-controller="Resource"
    asp-action="Print"
-   asp-route-locationId="@locationIdFilter"
    class="btn btn-outline-secondary mb-3">
     Skriv ut ressursliste
 </a>
@@ -69,11 +34,6 @@ else
         <p>
             <strong>Ressurstype-ID:</strong>
             @resource.ResourceTypeId
-        </p>
-
-        <p>
-            <strong>Lokasjon-ID:</strong>
-            @resource.LocationId
         </p>
 
         <p>

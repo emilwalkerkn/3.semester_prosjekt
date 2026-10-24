@@ -5,69 +5,34 @@
     ViewData["Title"] = "Behovsoversikt";
 }
 
-<h1>Behovsoversikt</h1>
+<h1>Behov</h1>
+<p class="page-intro">Søk i registrerte behov og finn tilgjengelige ressurser i nærheten.</p>
 
-<h2>Registrerte behov på kartet</h2>
-
-<div id="needMap" style="height: 500px; margin-bottom: 30px;"></div>
+<div class="filter-bar">
+    <input id="needSearch" type="search" placeholder="Søk i behov" aria-label="Søk i behov" />
+    <select id="needStatus" aria-label="Filtrer på status"><option value="">Alle statuser</option><option value="New">Ny</option><option value="In progress">Under behandling</option><option value="Resolved">Løst</option></select>
+</div>
 
 @if (!Model.Any())
 {
-    <p>Ingen behov er registrert ennå.</p>
+    <div class="portal-card empty-state">Ingen behov er registrert ennå.</div>
 }
 else
 {
     @foreach (var need in Model)
     {
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title">@need.Title</h5>
+        <article class="portal-card record-card" data-title="@need.Title" data-status="@need.Status">
+                <span class="record-status status">@need.Status</span>
+                <h2>@need.Title</h2>
+                <p>@need.Description</p>
+                <p class="mt-2">@need.Quantity @need.Unit · Frist: @(need.Deadline?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")</p>
 
-                <p class="card-text">
-                    @need.Description
-                </p>
-
-                <p>
-                    <strong>Behovstype-ID:</strong>
-                    @need.NeedTypeId
-                </p>
-
-                <p>
-                    <strong>Lokasjon-ID:</strong>
-                    @need.LocationId
-                </p>
-
-                <p>
-                    <strong>Mengde:</strong>
-                    @need.Quantity @need.Unit
-                </p>
-
-                <p>
-                    <strong>Status:</strong>
-                    @need.Status
-                </p>
-
-                <p>
-                    <strong>Prioritet:</strong>
-                    @need.Priority
-                </p>
-
-                <p>
-                    <strong>Frist:</strong>
-                    @(need.Deadline?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")
-                </p>
-
-                <a asp-controller="Need"
-                   asp-action="Details"
-                   asp-route-id="@need.NeedId"
-                   class="btn btn-outline-secondary">
+                <div class="record-actions"><a asp-controller="Need" asp-action="Details" asp-route-id="@need.NeedId" class="portal-button secondary">
                     Se detaljer
                 </a>
-
                 <form asp-controller="Need"
                       asp-action="UpdateStatus"
-                      method="post"
-                      class="mt-3">
+                      method="post">
 
                     @Html.AntiForgeryToken()
 
@@ -92,17 +57,29 @@ else
                         </option>
                     </select>
 
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit">
                         Oppdater status
                     </button>
                 </form>
-            </div>
-        </div>
+                </div>
+        </article>
     }
 }
 
 @section Scripts {
     <script>
+        const filterNeeds = () => {
+            const query = document.getElementById("needSearch").value.toLowerCase();
+            const status = document.getElementById("needStatus").value;
+            document.querySelectorAll(".record-card").forEach(card => {
+                card.hidden = !(card.dataset.title.toLowerCase().includes(query) && (!status || card.dataset.status === status));
+            });
+        };
+        document.getElementById("needSearch").addEventListener("input", filterNeeds);
+        document.getElementById("needStatus").addEventListener("change", filterNeeds);
+
+        const mapHost = document.createElement("div"); mapHost.id = "needMap"; mapHost.className = "map-panel";
+        document.querySelector(".filter-bar").after(mapHost);
         // Oppretter kartet med Kristiansand som startposisjon.
         var needMap = L.map("needMap")
             .setView([58.1467, 7.9956], 12);

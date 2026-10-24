@@ -20,4 +20,9 @@ RUN dotnet publish "./SemesterProsjekt.csproj" -c $BUILD_CONFIGURATION -o /app/p
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+# Docker kopierer dette kataloginnholdet til et nytt named volume. Da kan
+# app-brukeren lagre ASP.NET Core-sikkerhetsnøkler også etter en omstart.
+USER root
+RUN mkdir -p /home/app/.aspnet/DataProtection-Keys && chown -R $APP_UID:$APP_UID /home/app/.aspnet
+USER $APP_UID
 ENTRYPOINT ["dotnet", "SemesterProsjekt.dll"]

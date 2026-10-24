@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 using SemesterProsjekt.Controllers;
 using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
@@ -19,12 +21,12 @@ public class UnitTestResourcePost
             .ReturnsAsync(1);
 
         var controller = new ResourceController(resourceRepository.Object);
+        controller.ControllerContext = AuthenticatedContext(1);
 
         var model = new ResourceViewModel
         {
-            ProviderId = 1,
+            UserId = 1,
             ResourceTypeId = 1,
-            LocationId = 1,
             Title = "Brannbil",
             Description = "Brannbil med mannskap.",
             Quantity = 1,
@@ -46,4 +48,14 @@ public class UnitTestResourcePost
             Times.Once
         );
     }
+
+    private static ControllerContext AuthenticatedContext(int userId) => new()
+    {
+        HttpContext = new DefaultHttpContext
+        {
+            User = new ClaimsPrincipal(new ClaimsIdentity(
+                new[] { new Claim(ClaimTypes.NameIdentifier, userId.ToString()) },
+                "Test"))
+        }
+    };
 }

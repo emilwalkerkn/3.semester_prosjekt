@@ -12,10 +12,7 @@
           method="post"
           class="need-form">
 
-        <div>
-            <label asp-for="PublicActorId">Offentlig aktør-ID</label>
-            <input asp-for="PublicActorId" type="number" />
-        </div>
+        <input asp-for="UserId" type="hidden" />
 
         <div>
             <label asp-for="NeedTypeId"> </label>
@@ -24,11 +21,6 @@
                 <option value="">Velg type behov</option>
             </select>
             <span asp-validation-for="NeedTypeId"></span>
-        </div>
-
-        <div>
-            <label asp-for="LocationId">Lokasjon-ID</label>
-            <input asp-for="LocationId" type="number" />
         </div>
 
         <div>
@@ -136,4 +128,8 @@
                 JSON.stringify(geoJson);
         });
     </script>
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/figma-need.css" asp-append-version="true" />
 }

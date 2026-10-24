@@ -13,10 +13,7 @@ public class NeedViewModel
     public IEnumerable<SelectListItem> NeedTypes { get; set; }
         = Enumerable.Empty<SelectListItem>();
     
-    public int PublicActorId { get; set; }
-
-
-    public int LocationId { get; set; }
+    public int UserId { get; set; }
 
     public string Title { get; set; } = "";
 

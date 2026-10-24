@@ -4,11 +4,9 @@ public class Resource
 {
     public int ResourceId { get; set; }
 
-    public int ProviderId { get; set; }
+    public int UserId { get; set; }
 
     public int ResourceTypeId { get; set; }
-
-    public int LocationId { get; set; }
 
     public string Title { get; set; } = "";
 

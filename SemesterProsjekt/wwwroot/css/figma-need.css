@@ -1,0 +1,64 @@
+/* Farger fra Figma-designet */
+:root {
+    --portal-blue: #144e78;
+    --portal-button: #1769aa;
+    --portal-background: #f4f9fc;
+    --portal-border: #d5e6f1;
+    --portal-text: #164e78;
+}
+
+/* Bakgrunn */
+body {
+    background-color: var(--portal-background);
+}
+
+/* Hovedinnhold */
+.need-container {
+    max-width: 835px;
+    margin: 40px auto;
+    padding: 26px;
+    background-color: white;
+    border: 1px solid var(--portal-border);
+    border-radius: 12px;
+}
+
+/* Overskrift */
+.need-container h1 {
+    color: var(--portal-text);
+    font-size: 28px;
+    margin-bottom: 25px;
+}
+
+/* Skjema */
+.need-form {
+    display: grid;
+    gap: 20px;
+}
+
+/* Tekst over feltene */
+.need-form label {
+    display: block;
+    font-weight: 600;
+    color: var(--portal-text);
+    margin-bottom: 8px;
+}
+
+/* Input-felter */
+.need-form input,
+.need-form select,
+.need-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--portal-border);
+    border-radius: 9px;
+}
+
+/* Knapper */
+.need-form button {
+    background-color: var(--portal-button);
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}

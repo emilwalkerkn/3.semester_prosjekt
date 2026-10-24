@@ -1,4 +1,8 @@
 using SemesterProsjekt.Data;
+using SemesterProsjekt.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
+using SemesterProsjekt.Models;
 
 
 
@@ -15,6 +19,46 @@ builder.Services.AddSingleton<IDbConnectionFactory, MySqlConnectionFactory>();
 builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
 
 builder.Services.AddScoped<INeedRepository, NeedRepository>();
+
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+
+builder.Services.AddSingleton<PasswordService>();
+
+builder.Services.AddScoped<IPasswordHasher<PortalUser>, PortalPasswordHasher>();
+
+// Testversjonen kan kjøre parallelt med originalen på localhost:8080.
+// Navnene kan settes i compose.test.yml slik at de to appene ikke deler cookies.
+var authenticationCookieName = builder.Configuration["Authentication:CookieName"];
+var antiforgeryCookieName = builder.Configuration["Antiforgery:CookieName"];
+
+if (!string.IsNullOrWhiteSpace(antiforgeryCookieName))
+{
+    builder.Services.AddAntiforgery(options => options.Cookie.Name = antiforgeryCookieName);
+}
+
+builder.Services.AddIdentityCore<PortalUser>(options =>
+    {
+        options.Password.RequiredLength = 8;
+        options.Password.RequireDigit = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireLowercase = false;
+    })
+    .AddUserStore<PortalUserStore>();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/Login";
+
+        if (!string.IsNullOrWhiteSpace(authenticationCookieName))
+        {
+            options.Cookie.Name = authenticationCookieName;
+        }
+    });
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -33,6 +77,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

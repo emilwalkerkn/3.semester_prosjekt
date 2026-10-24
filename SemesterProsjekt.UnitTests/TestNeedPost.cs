@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Moq;
+using System.Security.Claims;
 using SemesterProsjekt.Controllers;
 using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
@@ -19,12 +21,12 @@ public class UnitTestNeedPost
             .ReturnsAsync(1);
 
         var controller = new NeedController(needRepository.Object);
+        controller.ControllerContext = AuthenticatedContext(1);
 
         var model = new NeedViewModel
         {
-            PublicActorId = 1,
+            UserId = 1,
             NeedTypeId = 1,
-            LocationId = 1,
             Title = "Tre over vei",
             Description = "Et tre har falt over veien i Kristiansand.",
             Quantity = 1,
@@ -47,4 +49,14 @@ public class UnitTestNeedPost
             Times.Once
         );
     }
+
+    private static ControllerContext AuthenticatedContext(int userId) => new()
+    {
+        HttpContext = new DefaultHttpContext
+        {
+            User = new ClaimsPrincipal(new ClaimsIdentity(
+                new[] { new Claim(ClaimTypes.NameIdentifier, userId.ToString()) },
+                "Test"))
+        }
+    };
 }

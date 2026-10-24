@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
 
 namespace SemesterProsjekt.Controllers;
 
+[Authorize]
 public class NeedController : Controller
 {
     private readonly INeedRepository _needRepository;
@@ -36,7 +39,7 @@ public class NeedController : Controller
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        var model = new NeedViewModel();
+        var model = new NeedViewModel { UserId = CurrentUserId };
         await LoadNeedTypesAsync(model);
         return View(model);
     }
@@ -54,9 +57,8 @@ public class NeedController : Controller
 
         var need = new Need
         {
-            PublicActorId = model.PublicActorId,
+            UserId = CurrentUserId,
             NeedTypeId = model.NeedTypeId!.Value,
-            LocationId = model.LocationId,
             Title = model.Title,
             Description = model.Description,
             GeometryType = model.GeometryType,
@@ -113,4 +115,8 @@ public class NeedController : Controller
 
         return RedirectToAction(nameof(Overview));
     }
+
+    private int CurrentUserId => int.Parse(
+        User.FindFirstValue(ClaimTypes.NameIdentifier)
+        ?? throw new InvalidOperationException("Innlogget bruker mangler identifikator."));
 }

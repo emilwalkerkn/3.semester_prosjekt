@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 using SemesterProsjekt.Controllers;
 using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
@@ -15,6 +17,7 @@ public class UnitTestResourceGet
         var resourceRepository = new Mock<IResourceRepository>();
 
         var controller = new ResourceController(resourceRepository.Object);
+        controller.ControllerContext = AuthenticatedContext(1);
 
         // Act
         var result = controller.Create();
@@ -23,4 +26,13 @@ public class UnitTestResourceGet
         var viewResult = Assert.IsType<ViewResult>(result);
         Assert.IsType<ResourceViewModel>(viewResult.Model);
     }
+
+    private static ControllerContext AuthenticatedContext(int userId) => new()
+    {
+        HttpContext = new DefaultHttpContext
+        {
+            User = new ClaimsPrincipal(new ClaimsIdentity(
+                new[] { new Claim(ClaimTypes.NameIdentifier, userId.ToString()) }, "Test"))
+        }
+    };
 }
