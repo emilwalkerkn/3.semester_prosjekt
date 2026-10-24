@@ -74,4 +74,18 @@ public class AccountRepository : IAccountRepository
             WHERE userRole.UserId = @UserId;
             """, new { UserId = userId });
     }
+
+    public async Task<bool> AssignRoleAsync(int userId, string roleName)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        const string sql = """
+            INSERT INTO UserRole (UserId, RoleId)
+            SELECT @UserId, RoleId
+            FROM Roles
+            WHERE Name = @RoleName;
+            """;
+
+        return await connection.ExecuteAsync(sql, new { UserId = userId, RoleName = roleName }) == 1;
+    }
 }

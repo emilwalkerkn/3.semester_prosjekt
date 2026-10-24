@@ -32,11 +32,14 @@ public class NeedController : Controller
     {
         var needs = await _needRepository.GetAllAsync();
 
+        ViewData["CurrentUserId"] = CurrentUserId;
+        ViewData["CanManageAll"] = CanManageAll;
         return View(needs);
     }
 
     // Viser registreringsskjemaet.
     [HttpGet]
+    [Authorize(Roles = "Behovsaktør,Admin")]
     public async Task<IActionResult> Create()
     {
         var model = new NeedViewModel { UserId = CurrentUserId };
@@ -47,6 +50,7 @@ public class NeedController : Controller
     // Lagrer et nytt behov.
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Behovsaktør,Admin")]
     public async Task<IActionResult> Create(NeedViewModel model)
     {
         if (!ModelState.IsValid)
@@ -103,15 +107,21 @@ public class NeedController : Controller
             return NotFound();
         }
 
+        ViewData["CurrentUserId"] = CurrentUserId;
+        ViewData["CanManageAll"] = CanManageAll;
         return View(need);
     }
 
     // Oppdaterer status på et behov.
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Behovsaktør,Admin")]
     public async Task<IActionResult> UpdateStatus(int id, string status)
     {
-        await _needRepository.UpdateStatusAsync(id, status);
+        if (!await _needRepository.UpdateStatusAsync(id, CurrentUserId, CanManageAll, status))
+        {
+            return NotFound();
+        }
 
         return RedirectToAction(nameof(Overview));
     }
@@ -119,4 +129,6 @@ public class NeedController : Controller
     private int CurrentUserId => int.Parse(
         User.FindFirstValue(ClaimTypes.NameIdentifier)
         ?? throw new InvalidOperationException("Innlogget bruker mangler identifikator."));
+
+    private bool CanManageAll => User.IsInRole("Admin");
 }

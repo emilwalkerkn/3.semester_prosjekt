@@ -20,6 +20,8 @@ builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
 
 builder.Services.AddScoped<INeedRepository, NeedRepository>();
 
+builder.Services.AddScoped<IMatchRepository, MatchRepository>();
+
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 
 builder.Services.AddSingleton<PasswordService>();
@@ -38,10 +40,11 @@ if (!string.IsNullOrWhiteSpace(antiforgeryCookieName))
 
 builder.Services.AddIdentityCore<PortalUser>(options =>
     {
+        options.User.RequireUniqueEmail = true;
         options.Password.RequiredLength = 8;
-        options.Password.RequireDigit = false;
+        options.Password.RequireDigit = true;
         options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequireUppercase = false;
+        options.Password.RequireUppercase = true;
         options.Password.RequireLowercase = false;
     })
     .AddUserStore<PortalUserStore>();
@@ -50,7 +53,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(options =>
     {
         options.LoginPath = "/Account/Login";
-        options.AccessDeniedPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
 
         if (!string.IsNullOrWhiteSpace(authenticationCookieName))
         {

@@ -13,4 +13,6 @@ public interface IAccountRepository
     Task UpdatePasswordHashAsync(int userId, string passwordHash);
 
     Task<IEnumerable<string>> GetRoleNamesAsync(int userId);
+
+    Task<bool> AssignRoleAsync(int userId, string roleName);
 }

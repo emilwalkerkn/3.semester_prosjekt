@@ -3,6 +3,8 @@
 
 @{
     ViewData["Title"] = "Behovsoversikt";
+    var currentUserId = ViewData["CurrentUserId"] is int currentUserIdValue ? currentUserIdValue : 0;
+    var canManageAll = ViewData["CanManageAll"] is true;
 }
 
 <h1>Behov</h1>
@@ -21,18 +23,28 @@ else
 {
     @foreach (var need in Model)
     {
+        var typeIcon = PortalTypeIcons.ForNeed(need.NeedTypeId);
+
         <article class="portal-card record-card" data-title="@need.Title" data-status="@need.Status">
                 <span class="record-status status">@need.Status</span>
-                <h2>@need.Title</h2>
+                <div class="record-title-with-icon">
+                    <span class="type-icon" role="img" aria-label="@typeIcon.Label">@typeIcon.Symbol</span>
+                    <div>
+                        <p class="record-type">@typeIcon.Label</p>
+                        <h2>@need.Title</h2>
+                    </div>
+                </div>
                 <p>@need.Description</p>
                 <p class="mt-2">@need.Quantity @need.Unit · Frist: @(need.Deadline?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")</p>
 
                 <div class="record-actions"><a asp-controller="Need" asp-action="Details" asp-route-id="@need.NeedId" class="portal-button secondary">
                     Se detaljer
                 </a>
-                <form asp-controller="Need"
-                      asp-action="UpdateStatus"
-                      method="post">
+                @if (canManageAll || (need.UserId == currentUserId && User.IsInRole("Behovsaktør")))
+                {
+                    <form asp-controller="Need"
+                          asp-action="UpdateStatus"
+                          method="post">
 
                     @Html.AntiForgeryToken()
 
@@ -60,7 +72,8 @@ else
                     <button type="submit">
                         Oppdater status
                     </button>
-                </form>
+                    </form>
+                }
                 </div>
         </article>
     }

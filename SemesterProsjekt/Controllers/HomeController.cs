@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using SemesterProsjekt.Data;
@@ -68,6 +69,7 @@ public class HomeController : Controller
 
     // GET: Viser skjemaet for registrering av et behov.
     [HttpGet]
+    [Authorize(Roles = "Behovsaktør,Admin")]
     public IActionResult Need()
     {
         return View(new NeedViewModel());
@@ -76,6 +78,7 @@ public class HomeController : Controller
     // POST: Registrerer et nytt behov.
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Behovsaktør,Admin")]
     public async Task<IActionResult> Need(NeedViewModel model)
     {
         if (!ModelState.IsValid)
@@ -85,7 +88,7 @@ public class HomeController : Controller
 
         var need = new Need
         {
-            UserId = model.UserId,
+            UserId = CurrentUserId,
             NeedTypeId = model.NeedTypeId!.Value,
             Title = model.Title,
             Description = model.Description,
@@ -110,6 +113,7 @@ public class HomeController : Controller
 
     // GET: Viser skjemaet for registrering av en ressurs.
     [HttpGet]
+    [Authorize(Roles = "Ressurseier,Admin")]
     public IActionResult Resource()
     {
         return View(new ResourceViewModel());
@@ -118,6 +122,7 @@ public class HomeController : Controller
     // POST: Registrerer en ny ressurs.
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Ressurseier,Admin")]
     public async Task<IActionResult> Resource(ResourceViewModel model)
     {
         if (!ModelState.IsValid)
@@ -127,7 +132,7 @@ public class HomeController : Controller
 
         var resource = new Resource
         {
-            UserId = model.UserId,
+            UserId = CurrentUserId,
             ResourceTypeId = model.ResourceTypeId,
             Title = model.Title,
             Description = model.Description,
@@ -181,12 +186,20 @@ public class HomeController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Behovsaktør,Admin")]
     public async Task<IActionResult> UpdateNeedStatus(
         int id,
         string status)
     {
-        await _needRepository.UpdateStatusAsync(id, status);
+        if (!await _needRepository.UpdateStatusAsync(id, CurrentUserId, User.IsInRole("Admin"), status))
+        {
+            return NotFound();
+        }
 
         return RedirectToAction(nameof(NeedOverview));
     }
+
+    private int CurrentUserId => int.Parse(
+        User.FindFirstValue(ClaimTypes.NameIdentifier)
+        ?? throw new InvalidOperationException("Innlogget bruker mangler identifikator."));
 }

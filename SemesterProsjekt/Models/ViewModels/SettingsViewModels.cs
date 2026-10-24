@@ -38,6 +38,8 @@ public class PasswordSettingsViewModel
 
     [Required(ErrorMessage = "Skriv inn et nytt passord.")]
     [MinLength(8, ErrorMessage = "Nytt passord må være minst 8 tegn.")]
+    [RegularExpression(@"^(?=.*[A-Za-z])(?=.*\d)(?=.*[A-Z]).{8,}$",
+        ErrorMessage = "Passordet må ha minst 8 tegn, minst én stor bokstav og inneholde både bokstaver og tall.")]
     [DataType(DataType.Password)]
     [Display(Name = "Nytt passord")]
     public string NewPassword { get; set; } = "";

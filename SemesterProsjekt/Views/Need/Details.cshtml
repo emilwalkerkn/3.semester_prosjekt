@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "Behovsdetaljer";
+    var currentUserId = ViewData["CurrentUserId"] is int currentUserIdValue ? currentUserIdValue : 0;
+    var canManageAll = ViewData["CanManageAll"] is true;
 }
 
 <h1>Behovsdetaljer</h1>
@@ -56,6 +58,16 @@
                 <strong>Geometri:</strong>
                 @Model.GeometryType
             </p>
+        }
+
+        @if (canManageAll || (Model.UserId == currentUserId && User.IsInRole("Behovsaktør")))
+        {
+            <a asp-controller="Match"
+               asp-action="Create"
+               asp-route-needId="@Model.NeedId"
+               class="portal-button mt-3">
+                Foreslå match
+            </a>
         }
     </div>
 </div>

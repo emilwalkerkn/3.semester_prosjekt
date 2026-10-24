@@ -32,7 +32,16 @@ public class NeedRepository : INeedRepository
                 Unit,
                 Status,
                 Priority
-            FROM Needs;
+            FROM Needs
+            -- Arbeidsrekkefølge i oversikten: behandling først, nye behov
+            -- deretter, mens løste behov flyttes helt nederst.
+            ORDER BY CASE Status
+                WHEN 'In progress' THEN 0
+                WHEN 'New' THEN 1
+                WHEN 'Resolved' THEN 3
+                ELSE 2
+            END,
+            NeedId DESC;
             """;
 
         return await connection.QueryAsync<Need>(sql);
@@ -124,23 +133,24 @@ public class NeedRepository : INeedRepository
         return await connection.ExecuteScalarAsync<int>(sql, need);
     }
 
-    public async Task UpdateStatusAsync(int id, string status)
+    public async Task<bool> UpdateStatusAsync(int id, int userId, bool canManageAll, string status)
     {
         using var connection = _connectionFactory.CreateConnection();
 
         const string sql = """
             UPDATE Needs
             SET Status = @Status
-            WHERE NeedId = @NeedId;
+            WHERE NeedId = @NeedId AND (@CanManageAll = 1 OR UserId = @UserId);
             """;
 
-        await connection.ExecuteAsync(
+        return await connection.ExecuteAsync(
             sql,
             new
             {
                 NeedId = id,
+                UserId = userId,
+                CanManageAll = canManageAll,
                 Status = status
-            }
-        );
+            }) == 1;
     }
 }

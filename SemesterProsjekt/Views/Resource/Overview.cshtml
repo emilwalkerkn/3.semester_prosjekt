@@ -1,7 +1,13 @@
 @using System.Text.Json
 @model IEnumerable<SemesterProsjekt.Models.Resource>
 
-@{ ViewData["Title"] = "Ressursoversikt"; }
+@{
+    ViewData["Title"] = "Ressursoversikt";
+    var currentUserId = int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out var parsedUserId)
+        ? parsedUserId
+        : 0;
+    var canManageAll = User.IsInRole("Admin");
+}
 
 <h1>Ressursoversikt</h1>
 
@@ -23,17 +29,25 @@ else
 {
 @foreach (var resource in Model)
 {
+    var typeIcon = PortalTypeIcons.ForResource(resource.ResourceTypeId);
+
 <div class="card mb-3">
     <div class="card-body">
-        <h5 class="card-title">@resource.Title</h5>
+        <div class="record-title-with-icon">
+            <span class="type-icon" role="img" aria-label="@typeIcon.Label">@typeIcon.Symbol</span>
+            <div>
+                <p class="record-type">@typeIcon.Label</p>
+                <h5 class="card-title">@resource.Title</h5>
+            </div>
+        </div>
 
         <p class="card-text">
             @resource.Description
         </p>
 
         <p>
-            <strong>Ressurstype-ID:</strong>
-            @resource.ResourceTypeId
+            <strong>Type:</strong>
+            @typeIcon.Label
         </p>
 
         <p>
@@ -58,6 +72,16 @@ else
            class="btn btn-outline-secondary">
             Se detaljer
         </a>
+
+        @if (canManageAll || (resource.UserId == currentUserId && User.IsInRole("Ressurseier")))
+        {
+            <a asp-controller="Resource" asp-action="Edit" asp-route-id="@resource.ResourceId" class="btn btn-primary">
+                Rediger
+            </a>
+            <form asp-controller="Resource" asp-action="Delete" asp-route-id="@resource.ResourceId" method="post" class="d-inline" onsubmit="return confirm('Er du sikker på at du vil slette ressursen?');">
+                <button type="submit" class="btn btn-outline-danger">Slett</button>
+            </form>
+        }
     </div>
 </div>
 }

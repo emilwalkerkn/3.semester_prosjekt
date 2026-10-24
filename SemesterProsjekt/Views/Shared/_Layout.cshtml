@@ -1,4 +1,11 @@
 ﻿
+@{
+    var accountRole = User.IsInRole("Admin")
+        ? "Administrator"
+        : User.IsInRole("Ressurseier")
+            ? "Ressurseier"
+            : "Behovsaktør";
+}
 <!DOCTYPE html>
 <html lang="no">
 <head>
@@ -6,6 +13,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>@ViewData["Title"] - SemesterProsjekt</title>
+
+    <script>
+        // Leser lagret utseende før siden tegnes, slik at nattmodus ikke blinker hvitt ved lasting.
+        if (localStorage.getItem("kriseportal-theme") === "dark") {
+            document.documentElement.classList.add("dark-mode");
+        }
+    </script>
 
     <!-- Bootstrap -->
     <link rel="stylesheet"
@@ -41,13 +55,18 @@
 
         <!-- SIDEMENY -->
         <aside class="portal-sidebar">
-            <div class="portal-brand"><span class="portal-brand-mark">K</span><span>Kriseportal</span></div>
+            <a asp-controller="Home"
+               asp-action="Index"
+               class="portal-brand"
+               aria-label="Kriseportal – gå til hjemmesiden">
+                <span class="portal-brand-mark" aria-hidden="true">K</span><span>Kriseportal</span>
+            </a>
             <p class="portal-sidebar-label">Arbeidsområde</p>
 
             <nav aria-label="Hovedmeny">
 
                 <a asp-controller="Home" asp-action="Index" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Home") ? "active" : "")">
-                    Dashboard
+                    Hjem
                 </a>
 
                 <a asp-controller="Need" asp-action="Overview" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Need" && ViewContext.RouteData.Values["action"]?.ToString() != "Create") ? "active" : "")">
@@ -58,16 +77,30 @@
                     Tilgjengelige ressurser
                 </a>
 
-                <a asp-controller="Need" asp-action="Create" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Need" && ViewContext.RouteData.Values["action"]?.ToString() == "Create") ? "active" : "")">
-                    Registrer behov
+                <a asp-controller="Match" asp-action="Overview" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Match") ? "active" : "")">
+                    Matcher
                 </a>
 
-                <a asp-controller="Resource" asp-action="Create" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Resource" && ViewContext.RouteData.Values["action"]?.ToString() == "Create") ? "active" : "")">
-                    Registrer ressurs
-                </a>
+                @if (User.IsInRole("Behovsaktør") || User.IsInRole("Admin"))
+                {
+                    <a asp-controller="Need" asp-action="Create" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Need" && ViewContext.RouteData.Values["action"]?.ToString() == "Create") ? "active" : "")">
+                        Registrer behov
+                    </a>
+                }
 
-                <a asp-controller="Settings" asp-action="Index" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Settings") ? "active" : "")">
-                    Innstillinger
+                @if (User.IsInRole("Ressurseier") || User.IsInRole("Admin"))
+                {
+                    <a asp-controller="Resource" asp-action="Create" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Resource" && ViewContext.RouteData.Values["action"]?.ToString() == "Create") ? "active" : "")">
+                        Registrer ressurs
+                    </a>
+                }
+
+                <a asp-controller="Settings"
+                   asp-action="Index"
+                   class="settings-nav-link @((ViewContext.RouteData.Values["controller"]?.ToString() == "Settings") ? "active" : "")"
+                   aria-label="Innstillinger"
+                   title="Innstillinger">
+                    <span aria-hidden="true">⚙</span>
                 </a>
 
             </nav>
@@ -82,7 +115,7 @@
                 <p class="portal-context">Ressurs- og behovsoppfølging</p>
                 <div class="portal-account">
                     <span class="notification" aria-label="3 varsler">♧</span>
-                    <span>Offentlig aktør</span>
+                    <span>@accountRole</span>
                 </div>
             </header>
 

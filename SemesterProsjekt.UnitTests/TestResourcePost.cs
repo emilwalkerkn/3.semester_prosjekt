@@ -15,9 +15,11 @@ public class UnitTestResourcePost
     {
         // Arrange
         var resourceRepository = new Mock<IResourceRepository>();
+        Resource? savedResource = null;
 
         resourceRepository
             .Setup(repository => repository.CreateAsync(It.IsAny<Resource>()))
+            .Callback<Resource>(resource => savedResource = resource)
             .ReturnsAsync(1);
 
         var controller = new ResourceController(resourceRepository.Object);
@@ -25,7 +27,8 @@ public class UnitTestResourcePost
 
         var model = new ResourceViewModel
         {
-            UserId = 1,
+            // UserId fra skjemaet skal ikke kunne brukes til å registrere på vegne av andre.
+            UserId = 99,
             ResourceTypeId = 1,
             Title = "Brannbil",
             Description = "Brannbil med mannskap.",
@@ -42,6 +45,8 @@ public class UnitTestResourcePost
 
         Assert.Equal("Result", redirectResult.ActionName);
         Assert.Equal(1, redirectResult.RouteValues?["id"]);
+        Assert.NotNull(savedResource);
+        Assert.Equal(1, savedResource.UserId);
 
         resourceRepository.Verify(
             repository => repository.CreateAsync(It.IsAny<Resource>()),

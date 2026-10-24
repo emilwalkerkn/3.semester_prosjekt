@@ -2,6 +2,8 @@
 
 @{
     ViewData["Title"] = "Ressursdetaljer";
+    var isAdmin = ViewData["CanManageAll"] is true;
+    var canManageResource = isAdmin || (ViewData["CurrentUserId"] is int currentUserId && currentUserId == Model.UserId);
 }
 
 <h1>Ressursdetaljer</h1>
@@ -54,6 +56,16 @@
         }
     </div>
 </div>
+
+@if (canManageResource)
+{
+    <div class="record-actions mt-3">
+        <a asp-action="Edit" asp-route-id="@Model.ResourceId" class="btn btn-primary">Rediger ressurs</a>
+        <form asp-action="Delete" asp-route-id="@Model.ResourceId" method="post" onsubmit="return confirm('Er du sikker på at du vil slette ressursen?');">
+            <button type="submit" class="btn btn-outline-danger">Slett ressurs</button>
+        </form>
+    </div>
+}
 
 <a asp-controller="Resource"
    asp-action="Overview"

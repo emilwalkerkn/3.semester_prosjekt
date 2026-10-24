@@ -62,3 +62,24 @@ body {
     border-radius: 10px;
     cursor: pointer;
 }
+
+/* Skjemaarket lastes etter hovedstilen. Behold valgt nattmodus her også. */
+html.dark-mode {
+    --portal-background: #080d14;
+    --portal-border: #2c4055;
+    --portal-text: #f1f7ff;
+    --portal-button: #278ed8;
+}
+
+html.dark-mode .need-container {
+    background-color: #131e2b;
+    border-color: #2c4055;
+}
+
+html.dark-mode .need-form input,
+html.dark-mode .need-form select,
+html.dark-mode .need-form textarea {
+    background-color: #0d1621;
+    border-color: #3a5269;
+    color: #f1f7ff;
+}

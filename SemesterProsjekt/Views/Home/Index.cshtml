@@ -1,39 +1,87 @@
 ﻿@model SemesterProsjekt.Models.DashboardViewModel
 
 @{
-    ViewData["Title"] = "Oversikt for offentlig aktør";
+    ViewData["Title"] = "Hjem";
 }
 
-<section>
-    <h1>Oversikt for offentlig aktør</h1>
-    <p class="page-intro">Registrer behov, se tilgjengelige ressurser og følg opp hastesaker.</p>
-
-    <a asp-controller="Need"
-       asp-action="Create"
-       class="portal-button">
-        <span aria-hidden="true">+</span> Registrer behov
-    </a>
-
-    <a asp-controller="Resource"
-       asp-action="Create"
-       class="portal-button secondary">
-        Registrer ressurs
-    </a>
+<section class="home-hero">
+    <div class="home-hero-copy">
+        <p class="home-eyebrow">Kriseportal</p>
+        <h1>Samlet oversikt når det virkelig gjelder.</h1>
+        <p>Registrer behov, tilby ressurser og følg opp matcher på ett sted. Kriseportal gjør det enklere å koordinere en trygg og rask innsats.</p>
+        <div class="home-hero-actions">
+            <a asp-controller="Need" asp-action="Overview" class="portal-button">Se behov</a>
+            <a asp-controller="Resource" asp-action="Overview" class="portal-button secondary">Se ressurser</a>
+        </div>
+    </div>
+    <img src="~/images/kriseportal-hero.png" alt="Et team som planlegger beredskapsinnsats rundt et kart" />
 </section>
 
-<div class="stat-grid">
-    <div class="portal-card stat-card"><p>Mine åpne behov</p><strong>@Model.TotalNeeds</strong></div>
-    <div class="portal-card stat-card"><p>Tilgjengelige ressurser</p><strong>@Model.TotalResources</strong></div>
-    <div class="portal-card stat-card"><p>Saker til oppfølging</p><strong>@(Model.TotalNeeds + Model.TotalResources)</strong></div>
-</div>
+<section class="home-info-grid" aria-label="Slik fungerer Kriseportal">
+    <article class="home-info-card">
+        <span aria-hidden="true">1</span>
+        <h2>Registrer</h2>
+        <p>Legg inn et behov eller en ressurs med kontaktinformasjon, mengde og plassering.</p>
+    </article>
+    <article class="home-info-card">
+        <span aria-hidden="true">2</span>
+        <h2>Finn en match</h2>
+        <p>Koble riktig ressurs til et behov, og la ressurseieren godta forslaget.</p>
+    </article>
+    <article class="home-info-card">
+        <span aria-hidden="true">3</span>
+        <h2>Følg opp</h2>
+        <p>Bruk oversiktene til å se hva som er nytt, pågående og løst.</p>
+    </article>
+</section>
 
-<section class="portal-card section-card">
-    <h2>Siste registreringer</h2>
+<section class="home-overview" aria-labelledby="oversikt-heading">
+    <div>
+        <p class="home-eyebrow">Akkurat nå</p>
+        <h2 id="oversikt-heading">Oversikt</h2>
+        <p>Se status på det som er registrert i portalen.</p>
+    </div>
+    <div class="stat-grid home-stat-grid">
+        <div class="portal-card stat-card"><p>Registrerte behov</p><strong>@Model.TotalNeeds</strong></div>
+        <div class="portal-card stat-card"><p>Tilgjengelige ressurser</p><strong>@Model.TotalResources</strong></div>
+        <div class="portal-card stat-card"><p>Saker i oversikt</p><strong>@(Model.TotalNeeds + Model.TotalResources)</strong></div>
+    </div>
+</section>
+
+<section class="portal-card section-card home-latest">
+    <div class="section-heading-row">
+        <div>
+            <p class="home-eyebrow">Siste aktivitet</p>
+            <h2>Siste registreringer</h2>
+        </div>
+        <a asp-controller="Match" asp-action="Overview" class="text-link">Gå til matcher</a>
+    </div>
     <ul class="summary-list">
         @foreach (var need in Model.RecentNeeds)
-        { <li><a asp-controller="Need" asp-action="Details" asp-route-id="@need.NeedId">@need.Title</a><span class="status new">@need.Status</span><a asp-controller="Need" asp-action="Details" asp-route-id="@need.NeedId">Se detaljer</a></li> }
+        {
+            var typeIcon = PortalTypeIcons.ForNeed(need.NeedTypeId);
+            <li>
+                <a asp-controller="Need" asp-action="Details" asp-route-id="@need.NeedId" class="summary-link-with-icon">
+                    <span class="summary-type-icon" role="img" aria-label="@typeIcon.Label">@typeIcon.Symbol</span>@need.Title
+                </a>
+                <span class="status new">@need.Status</span>
+                <a asp-controller="Need" asp-action="Details" asp-route-id="@need.NeedId">Se detaljer</a>
+            </li>
+        }
         @foreach (var resource in Model.RecentResources)
-        { <li><a asp-controller="Resource" asp-action="Details" asp-route-id="@resource.ResourceId">@resource.Title</a><span class="status available">@resource.Status</span><a asp-controller="Resource" asp-action="Details" asp-route-id="@resource.ResourceId">Se detaljer</a></li> }
+        {
+            var typeIcon = PortalTypeIcons.ForResource(resource.ResourceTypeId);
+            <li>
+                <a asp-controller="Resource" asp-action="Details" asp-route-id="@resource.ResourceId" class="summary-link-with-icon">
+                    <span class="summary-type-icon" role="img" aria-label="@typeIcon.Label">@typeIcon.Symbol</span>@resource.Title
+                </a>
+                <span class="status available">@resource.Status</span>
+                <a asp-controller="Resource" asp-action="Details" asp-route-id="@resource.ResourceId">Se detaljer</a>
+            </li>
+        }
     </ul>
-    @if (!Model.RecentNeeds.Any() && !Model.RecentResources.Any()) { <p class="empty-state">Ingen registreringer ennå.</p> }
+    @if (!Model.RecentNeeds.Any() && !Model.RecentResources.Any())
+    {
+        <p class="empty-state">Ingen registreringer ennå.</p>
+    }
 </section>

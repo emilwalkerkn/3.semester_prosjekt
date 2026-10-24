@@ -27,6 +27,12 @@ public class SettingsController : Controller
         return View(await CreatePageModelAsync());
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Privacy()
+    {
+        return View(await CreatePageModelAsync());
+    }
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateProfile(
