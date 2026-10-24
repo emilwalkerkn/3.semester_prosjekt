@@ -1,0 +1,55 @@
+@model SemesterProsjekt.Models.ViewModels.MatchOverviewViewModel
+
+@{
+    ViewData["Title"] = "Matcher";
+}
+
+<h1>Aktive matcher</h1>
+<p class="page-intro">Her følger du koblingene mellom behov og ressurser du er involvert i. Matcher for løste behov fjernes automatisk fra denne listen.</p>
+
+@if (!Model.Matches.Any())
+{
+    <div class="portal-card empty-state">
+        Ingen aktive matcher. En behovsaktør kan opprette et forslag fra et behov.
+    </div>
+}
+else
+{
+    @foreach (var match in Model.Matches)
+    {
+        var needIcon = PortalTypeIcons.ForNeed(match.NeedTypeId);
+        var resourceIcon = PortalTypeIcons.ForResource(match.ResourceTypeId);
+
+        <article class="portal-card record-card">
+            <span class="record-status status">@match.Status</span>
+            <div class="match-title-row">
+                <span class="type-icon" role="img" aria-label="@needIcon.Label">@needIcon.Symbol</span>
+                <h2>@match.NeedTitle</h2>
+                <span class="match-arrow" aria-hidden="true">→</span>
+                <span class="type-icon" role="img" aria-label="@resourceIcon.Label">@resourceIcon.Symbol</span>
+            </div>
+            <p><strong>Foreslått ressurs:</strong> @match.ResourceTitle</p>
+            <p>@match.AssignedQuantity @match.Unit · Opprettet @match.CreatedAt.ToString("dd.MM.yyyy HH:mm")</p>
+
+            @if (match.Status == "Proposed" &&
+                 (Model.CanManageAll || match.ResourceOwnerId == Model.CurrentUserId) &&
+                 (User.IsInRole("Ressurseier") || User.IsInRole("Admin")))
+            {
+                <div class="record-actions">
+                    <form asp-action="UpdateStatus" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@match.MatchId" />
+                        <input type="hidden" name="status" value="Accepted" />
+                        <button class="portal-button" type="submit">Godta</button>
+                    </form>
+                    <form asp-action="UpdateStatus" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@match.MatchId" />
+                        <input type="hidden" name="status" value="Rejected" />
+                        <button class="portal-button secondary" type="submit">Avslå</button>
+                    </form>
+                </div>
+            }
+        </article>
+    }
+}

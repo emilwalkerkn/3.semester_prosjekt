@@ -1,0 +1,46 @@
+@model SemesterProsjekt.Models.ViewModels.MatchCreateViewModel
+
+@{
+    ViewData["Title"] = "Foreslå match";
+}
+
+<h1>Foreslå match</h1>
+<p class="page-intro">Koble en tilgjengelig ressurs til behovet. Ressurseieren må deretter godta eller avslå forslaget.</p>
+
+<section class="portal-card mb-4">
+    <h2>@Model.Need.Title</h2>
+    <p>@Model.Need.Description</p>
+    <p><strong>Behov:</strong> @Model.Need.Quantity @Model.Need.Unit</p>
+</section>
+
+<form asp-action="Create" asp-route-needId="@Model.Need.NeedId" method="post" class="portal-form">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="ResourceId"></label>
+        <select asp-for="ResourceId">
+            <option value="">Velg en tilgjengelig ressurs</option>
+            @foreach (var resource in Model.AvailableResources)
+            {
+                <option value="@resource.ResourceId">@resource.Title — @resource.Quantity @resource.Unit</option>
+            }
+        </select>
+        <span asp-validation-for="ResourceId" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="AssignedQuantity"></label>
+        <input asp-for="AssignedQuantity" min="0.01" step="0.01" />
+        <span asp-validation-for="AssignedQuantity" class="text-danger"></span>
+    </div>
+
+    <div class="record-actions">
+        <button class="portal-button" type="submit">Send matchforslag</button>
+        <a asp-controller="Need" asp-action="Details" asp-route-id="@Model.Need.NeedId" class="portal-button secondary">Avbryt</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

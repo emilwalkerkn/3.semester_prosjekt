@@ -1,0 +1,111 @@
+@model SemesterProsjekt.Models.ResourceViewModel
+
+@{
+    ViewData["Title"] = "Rediger ressurs";
+    var resourceId = ViewContext.RouteData.Values["id"];
+}
+
+<div class="need-container resource-container">
+    <h1>Rediger ressurs</h1>
+    <p>Oppdater opplysningene. Du kan også endre punktet eller linjen på kartet.</p>
+
+    <form asp-action="Edit" method="post" class="need-form resource-form">
+        <input asp-for="UserId" type="hidden" />
+
+        <div>
+            <label asp-for="ResourceTypeId">Ressurstype-ID</label>
+            <input asp-for="ResourceTypeId" type="number" />
+        </div>
+        <div>
+            <label asp-for="Title">Tittel</label>
+            <input asp-for="Title" />
+        </div>
+        <div>
+            <label asp-for="Description">Beskrivelse</label>
+            <textarea asp-for="Description"></textarea>
+        </div>
+        <div>
+            <label asp-for="Quantity">Mengde</label>
+            <input asp-for="Quantity" type="number" step="0.01" />
+        </div>
+        <div>
+            <label asp-for="Unit">Enhet</label>
+            <input asp-for="Unit" />
+        </div>
+        <div>
+            <label asp-for="ContactPoint">Kontaktpunkt</label>
+            <input asp-for="ContactPoint" />
+        </div>
+        <div>
+            <label asp-for="AvailableFrom">Tilgjengelig fra</label>
+            <input asp-for="AvailableFrom" type="datetime-local" />
+        </div>
+        <div>
+            <label asp-for="AvailableTo">Tilgjengelig til</label>
+            <input asp-for="AvailableTo" type="datetime-local" />
+        </div>
+        <div>
+            <label asp-for="Status">Status</label>
+            <select asp-for="Status">
+                <option value="Available">Tilgjengelig</option>
+                <option value="Unavailable">Ikke tilgjengelig</option>
+            </select>
+        </div>
+
+        <input asp-for="GeometryType" type="hidden" id="GeometryType" />
+        <input asp-for="GeometryData" type="hidden" id="GeometryData" />
+        <button type="submit" class="need-button">Lagre endringer</button>
+        <a asp-action="Details" class="btn btn-secondary" asp-route-id="@resourceId">Avbryt</a>
+    </form>
+
+    <h2>Oppdater område på kartet</h2>
+    <div id="map"></div>
+</div>
+
+@section Scripts {
+    <script>
+        var map = L.map("map").setView([58.1467, 7.9956], 13);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: "&copy; OpenStreetMap contributors"
+        }).addTo(map);
+
+        var drawnItems = new L.FeatureGroup();
+        map.addLayer(drawnItems);
+        var drawControl = new L.Control.Draw({
+            draw: { polygon: false, polyline: true, circle: false, rectangle: false, marker: true },
+            edit: { featureGroup: drawnItems, remove: true }
+        });
+        map.addControl(drawControl);
+
+        var existingGeometry = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.GeometryData));
+        if (existingGeometry) {
+            try {
+                var layer = L.geoJSON(JSON.parse(existingGeometry));
+                layer.eachLayer(function (item) { drawnItems.addLayer(item); });
+                map.fitBounds(layer.getBounds(), { maxZoom: 14 });
+            } catch { }
+        }
+
+        function storeGeometry(layer, layerType) {
+            document.getElementById("GeometryType").value = layerType;
+            document.getElementById("GeometryData").value = JSON.stringify(layer.toGeoJSON());
+        }
+
+        map.on("draw:created", function (event) {
+            drawnItems.clearLayers();
+            drawnItems.addLayer(event.layer);
+            storeGeometry(event.layer, event.layerType);
+        });
+        map.on("draw:edited", function () {
+            drawnItems.eachLayer(function (layer) { storeGeometry(layer, "updated"); });
+        });
+        map.on("draw:deleted", function () {
+            document.getElementById("GeometryType").value = "";
+            document.getElementById("GeometryData").value = "";
+        });
+    </script>
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/figma-need.css" asp-append-version="true" />
+}

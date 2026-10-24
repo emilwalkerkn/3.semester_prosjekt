@@ -1,0 +1,51 @@
+@model SemesterProsjekt.Models.SettingsPageViewModel
+
+@{
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
+<aside class="settings-sidebar" aria-label="Innstillingsmeny">
+    <div class="settings-sidebar-heading">
+        <span class="settings-sidebar-icon" aria-hidden="true">⚙</span>
+        <div>
+            <p>Innstillinger</p>
+            <strong>@Model.Profile.FirstName @Model.Profile.LastName</strong>
+            <span>@Model.Profile.Role</span>
+        </div>
+    </div>
+
+    <nav class="settings-navigation">
+        <p class="settings-navigation-label">Konto</p>
+        <a asp-action="Index" asp-fragment="profil">👤 Profil og kontakt</a>
+        <a asp-action="Index" asp-fragment="sikkerhet">🔒 Sikkerhet</a>
+
+        <p class="settings-navigation-label">System</p>
+        <a asp-controller="Home" asp-action="Index">⌂ Til hjemmesiden</a>
+        <div class="theme-setting">
+            <div>
+                <span>🌙</span>
+                <strong>Nattmodus</strong>
+                <small>Bruk mørkt utseende</small>
+            </div>
+            <button id="darkModeToggle"
+                    class="theme-toggle"
+                    type="button"
+                    role="switch"
+                    aria-checked="false"
+                    aria-label="Slå på nattmodus">
+                <span class="theme-toggle-knob"></span>
+            </button>
+        </div>
+
+        <p class="settings-navigation-label">Varslinger</p>
+        <a asp-controller="Match" asp-action="Overview">🔔 Matchoppfølging</a>
+
+        <p class="settings-navigation-label">Personvern</p>
+        <a asp-action="Privacy" class="@(currentAction == "Privacy" ? "active" : "")">ⓘ Personvern</a>
+    </nav>
+
+    <form asp-controller="Account" asp-action="Logout" method="post" class="settings-sign-out-form">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="settings-sign-out">⇥ Logg ut</button>
+    </form>
+</aside>

@@ -1,0 +1,30 @@
+@model SemesterProsjekt.Models.SettingsPageViewModel
+
+@{
+    ViewData["Title"] = "Personvern";
+}
+
+<div class="settings-layout settings-page-layout">
+    <partial name="_SettingsSidebar" model="Model" />
+
+    <div class="settings-content privacy-content">
+        <p class="home-eyebrow">Personvern</p>
+        <h1>Slik behandles informasjonen din</h1>
+        <p class="page-intro">Kriseportal bruker bare opplysninger som er nødvendige for å registrere, koordinere og følge opp ressurser og behov.</p>
+
+        <section class="portal-card settings-card privacy-card">
+            <h2>Kontoopplysninger</h2>
+            <p>Navn, brukernavn, e-postadresse og telefonnummer brukes for å identifisere kontaktpersoner i portalen.</p>
+        </section>
+
+        <section class="portal-card settings-card privacy-card">
+            <h2>Passord og innlogging</h2>
+            <p>Passord lagres aldri som vanlig tekst. De lagres som en sikker hash, og innloggingen bruker en beskyttet informasjonskapsel.</p>
+        </section>
+
+        <section class="portal-card settings-card privacy-card">
+            <h2>Ressurser, behov og kart</h2>
+            <p>Informasjon du registrerer om behov, ressurser og plassering brukes for at andre autoriserte brukere skal kunne koordinere innsatsen.</p>
+        </section>
+    </div>
+</div>

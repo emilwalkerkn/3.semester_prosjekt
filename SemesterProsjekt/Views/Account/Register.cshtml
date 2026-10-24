@@ -1,0 +1,75 @@
+@model SemesterProsjekt.Models.RegisterViewModel
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Opprett bruker – Kriseportal</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="login-page">
+    <main class="login-shell">
+        <section class="login-intro">
+            <div class="portal-brand"><span class="portal-brand-mark">K</span><span>Kriseportal</span></div>
+            <h1>Bidra med behov eller ressurser når det trengs.</h1>
+            <p>Opprett en konto for å registrere og følge opp det du kan bidra med.</p>
+        </section>
+        <section class="login-card login-card-wide" aria-labelledby="register-heading">
+            <h2 id="register-heading">Opprett bruker</h2>
+            <p>Velg brukertype. Du kan endre kontaktopplysninger senere under Innstillinger.</p>
+            <form asp-action="Register" method="post" class="login-form registration-form">
+                <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label asp-for="FirstName"></label>
+                        <input asp-for="FirstName" autocomplete="given-name" />
+                        <span asp-validation-for="FirstName"></span>
+                    </div>
+                    <div class="form-field">
+                        <label asp-for="LastName"></label>
+                        <input asp-for="LastName" autocomplete="family-name" />
+                        <span asp-validation-for="LastName"></span>
+                    </div>
+                    <div class="form-field">
+                        <label asp-for="Username"></label>
+                        <input asp-for="Username" autocomplete="username" />
+                        <span asp-validation-for="Username"></span>
+                    </div>
+                    <div class="form-field">
+                        <label asp-for="Email"></label>
+                        <input asp-for="Email" autocomplete="email" />
+                        <span asp-validation-for="Email"></span>
+                    </div>
+                    <div class="form-field full">
+                        <label asp-for="Phone"></label>
+                        <input asp-for="Phone" autocomplete="tel" />
+                        <span asp-validation-for="Phone"></span>
+                    </div>
+                    <fieldset class="form-field full registration-role">
+                        <legend>Jeg skal</legend>
+                        <label><input asp-for="Role" type="radio" value="Behovsaktør" /> Registrere og følge opp behov</label>
+                        <label><input asp-for="Role" type="radio" value="Ressurseier" /> Tilby ressurser</label>
+                        <span asp-validation-for="Role"></span>
+                    </fieldset>
+                    <div class="form-field">
+                        <label asp-for="Password"></label>
+                        <input asp-for="Password" autocomplete="new-password" />
+                        <small class="form-text">Minst 8 tegn, med minst én stor bokstav og både bokstaver og tall.</small>
+                        <span asp-validation-for="Password"></span>
+                    </div>
+                    <div class="form-field">
+                        <label asp-for="ConfirmPassword"></label>
+                        <input asp-for="ConfirmPassword" autocomplete="new-password" />
+                        <span asp-validation-for="ConfirmPassword"></span>
+                    </div>
+                </div>
+                <button type="submit">Opprett bruker</button>
+            </form>
+            <p class="login-switch">Har du allerede konto? <a asp-action="Login">Logg inn</a></p>
+        </section>
+    </main>
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>
