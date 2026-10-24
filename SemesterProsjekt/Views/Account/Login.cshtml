@@ -1,0 +1,42 @@
+@model SemesterProsjekt.Models.LoginViewModel
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Logg inn – Kriseportal</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="login-page">
+    <main class="login-shell">
+        <section class="login-intro">
+            <div class="portal-brand"><span class="portal-brand-mark">K</span><span>Kriseportal</span></div>
+            <h1>Koordiner behov og ressurser med oversikt.</h1>
+            <p>Logg inn for å registrere behov, tilby ressurser og følge opp saker.</p>
+        </section>
+        <section class="login-card" aria-labelledby="login-heading">
+            <h2 id="login-heading">Velkommen tilbake</h2>
+            <p>Logg inn med brukernavn og passord.</p>
+            <form asp-action="Login" method="post" class="login-form">
+                <input asp-for="ReturnUrl" type="hidden" />
+                <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+                <div class="form-field">
+                    <label asp-for="Username"></label>
+                    <input asp-for="Username" autocomplete="username" placeholder="Skriv inn brukernavn" autofocus />
+                    <span asp-validation-for="Username"></span>
+                </div>
+                <div class="form-field">
+                    <label asp-for="Password"></label>
+                    <input asp-for="Password" autocomplete="current-password" placeholder="Skriv inn passord" />
+                    <span asp-validation-for="Password"></span>
+                </div>
+                <button type="submit">Logg inn</button>
+            </form>
+            <p class="login-help">Testkonto: <code>testaktor</code> / <code>testpassord</code></p>
+        </section>
+    </main>
+    <partial name="_ValidationScriptsPartial" />
+</body>
+</html>

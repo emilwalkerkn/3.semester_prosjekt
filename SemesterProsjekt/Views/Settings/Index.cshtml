@@ -1,0 +1,66 @@
+@model SemesterProsjekt.Models.SettingsPageViewModel
+
+@{
+    ViewData["Title"] = "Kontoinnstillinger";
+}
+
+<h1>Kontoinnstillinger</h1>
+<p class="page-intro">Administrer profilinformasjon, kontosikkerhet og tilgang.</p>
+
+@if (TempData["SettingsSuccess"] is string success)
+{
+    <div class="settings-message success" role="status">@success</div>
+}
+
+<div class="settings-grid">
+    <section class="portal-card settings-card">
+        <h2>Profil</h2>
+        <form asp-action="UpdateProfile" method="post" class="settings-form">
+            <div class="form-field">
+                <label asp-for="Profile.FirstName"></label>
+                <input asp-for="Profile.FirstName" />
+                <span asp-validation-for="Profile.FirstName"></span>
+            </div>
+            <div class="form-field">
+                <label asp-for="Profile.LastName"></label>
+                <input asp-for="Profile.LastName" />
+                <span asp-validation-for="Profile.LastName"></span>
+            </div>
+            <div class="form-field">
+                <label asp-for="Profile.Email"></label>
+                <input asp-for="Profile.Email" type="email" />
+                <span asp-validation-for="Profile.Email"></span>
+            </div>
+            <div class="form-field">
+                <label>Kontorolle</label>
+                <input value="@Model.Profile.Role" readonly aria-readonly="true" />
+            </div>
+            <button type="submit">Lagre endringer</button>
+        </form>
+    </section>
+
+    <section class="portal-card settings-card">
+        <h2>Sikkerhet</h2>
+        <p>Endre passord og logg ut på en sikker måte.</p>
+        <form asp-action="UpdatePassword" method="post" class="settings-form">
+            <div class="form-field">
+                <label asp-for="Password.CurrentPassword"></label>
+                <input asp-for="Password.CurrentPassword" autocomplete="current-password" />
+                <span asp-validation-for="Password.CurrentPassword"></span>
+            </div>
+            <div class="form-field">
+                <label asp-for="Password.NewPassword"></label>
+                <input asp-for="Password.NewPassword" autocomplete="new-password" />
+                <span asp-validation-for="Password.NewPassword"></span>
+            </div>
+            <button type="submit">Oppdater passord</button>
+        </form>
+        <form asp-controller="Account" asp-action="Logout" method="post" class="sign-out-form">
+            <button type="submit" class="portal-button secondary">Logg ut</button>
+        </form>
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
