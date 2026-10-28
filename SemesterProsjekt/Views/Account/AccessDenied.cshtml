@@ -1,0 +1,9 @@
+@{
+    ViewData["Title"] = "Ingen tilgang";
+}
+
+<section class="section-card access-denied" aria-labelledby="access-denied-heading">
+    <h1 id="access-denied-heading">Du har ikke tilgang til denne handlingen</h1>
+    <p>Du kan se oversikten, men bare den som eier en ressurs kan endre eller slette den.</p>
+    <a asp-controller="Resource" asp-action="Overview" class="portal-button">Til ressursoversikten</a>
+</section>

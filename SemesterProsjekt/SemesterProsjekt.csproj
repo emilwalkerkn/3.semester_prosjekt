@@ -17,4 +17,10 @@
       <PackageReference Include="MySqlConnector" Version="2.6.2" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Remove="wwwroot\css\account-overview.css" />
+      <Content Remove="wwwroot\css\login.css" />
+      <Content Remove="wwwroot\js\account-overview.js" />
+    </ItemGroup>
+
 </Project>

@@ -1,0 +1,44 @@
+/* Gjenbruker portalens farger og rammeverk; disse reglene gjelder behovsoversikten. */
+.needs-main { max-width: 1180px; padding: 31px 40px 76px; font-size: 14px; line-height: 22px; }
+.needs-main h1 { margin: 0; font-size: 28px; font-weight: 600; line-height: 41px; }
+.needs-intro { margin: 9px 0 30px; color: var(--portal-secondary); }
+.needs-panel { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; margin-bottom: 16px; padding: 24px; border: 1px solid var(--portal-border); border-radius: 12px; background: var(--portal-surface); }
+.needs-panel h2, .needs-panel p { margin: 0; }
+.needs-panel h2 { font-size: 22px; font-weight: 600; line-height: 22px; }
+.needs-muted { color: var(--portal-secondary); }
+.need-status { color: #8f6300; font-size: 16px; font-weight: 600; }
+.status-3 { color: #237a5a; }
+.need-stepper { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.need-stepper li { display: flex; align-items: center; gap: 8px; color: var(--portal-secondary); }
+.need-stepper li + li::before { content: ''; width: 40px; height: 2px; margin-right: 8px; background: var(--portal-border); }
+.step-marker { display: grid; place-items: center; width: 28px; height: 28px; border: 1.5px solid var(--portal-border); border-radius: 50%; font-size: 12px; }
+.need-stepper .is-current { padding: 6px 14px 6px 8px; border-radius: 20px; background: #e8f2fa; color: var(--portal-primary); font-weight: 600; }
+.need-stepper .is-current .step-marker { border-color: var(--portal-primary); background: var(--portal-primary); color: white; }
+.needs-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; }
+.needs-button { display: inline-flex; align-items: center; justify-content: center; width: 190px; min-height: 44px; padding: 10px 16px; border: 1px solid var(--portal-border); border-radius: 8px; background: white; color: var(--portal-text); font: inherit; font-weight: 600; }
+.needs-button.is-primary { width: 210px; border-color: var(--portal-primary); background: var(--portal-primary); color: white; }
+.needs-button:disabled { opacity: .55; cursor: not-allowed; }
+.needs-button:not(:disabled):hover { box-shadow: 0 0 0 2px var(--portal-border); }
+.matching-panel h2 { font-size: 18px; }
+.needs-resource-link, .registered-needs a { text-decoration: underline; text-underline-offset: 3px; }
+.extra-details { display: block; }
+.extra-details summary { cursor: pointer; font-weight: 600; }
+.extra-details[open] summary { margin-bottom: 16px; }
+.extra-details p { margin-bottom: 16px; }
+.extra-details dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 24px; }
+.extra-details dd { margin: 0; }
+.extra-details select { min-height: 44px; border: 1px solid var(--portal-border); border-radius: 8px; background: white; color: var(--portal-text); padding: 8px; font: inherit; }
+.registered-needs { list-style: none; padding: 0; }
+.registered-needs li { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--portal-border); }
+#needMap { width: 100%; height: 500px; border-radius: 8px; }
+summary:focus-visible, select:focus-visible { outline: 3px solid #df9800; outline-offset: 4px; }
+@media (max-width: 760px) {
+    .needs-main { padding: 24px 16px 40px; }
+    .needs-main h1 { font-size: 25px; line-height: 1.3; }
+    .needs-panel { padding: 20px 16px; }
+    .need-stepper li + li::before { width: 12px; margin-right: 0; }
+    .need-stepper { gap: 8px; }
+    .needs-actions { width: 100%; }
+    .needs-button, .needs-button.is-primary { width: 100%; }
+    .portal-topbar { flex-wrap: wrap; }
+}

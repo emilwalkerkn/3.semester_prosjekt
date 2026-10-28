@@ -1,0 +1,80 @@
+@model SemesterProsjekt.Models.DashboardViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Oversikt for offentlig aktør – Kriseportal</title>
+    <link rel="stylesheet" href="~/css/account-overview.css" asp-append-version="true" />
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Hopp til innhold</a>
+    <div class="portal-shell">
+        <aside class="portal-sidebar">
+            <a class="portal-brand" asp-controller="Account" asp-action="Dashbord-public-actor">
+                <span class="brand-mark" aria-hidden="true">K</span><span>Kriseportal</span>
+            </a>
+            <p class="workspace-label">ARBEIDSOMRÅDE</p>
+            <nav class="portal-navigation" aria-label="Arbeidsområde">
+                <a class="is-active" asp-controller="Account" asp-action="Dashbord-public-actor" aria-current="page">Dashbord</a>
+                <a asp-controller="Need" asp-action="Overview">Behov</a>
+                <a asp-controller="Resource" asp-action="Overview">Tilgjengelige ressurser</a>
+                <a asp-controller="Need" asp-action="Create">Registrer behov</a>
+                <button type="button" data-feature="Oversiktskart">Oversiktskart</button>
+                <a href="#regional-resources">Regional ressursliste</a>
+                <button type="button" data-feature="Innstillinger">Innstillinger</button>
+            </nav>
+        </aside>
+        <div class="portal-workspace">
+            <header class="portal-topbar">
+                <p>Behovsregistrering og oppfølging</p>
+                <div class="account-tools">
+                    <button class="notification-button" type="button" data-feature="Varsler" aria-label="Varsler, 3 eksempelvarsler" aria-haspopup="dialog">
+                        <img src="~/images/portal/notification-bell.svg" width="20" height="20" alt="" />
+                        <span class="notification-badge" aria-hidden="true">3</span>
+                    </button>
+                    <span class="account-role">Offentlig aktør</span>
+                </div>
+            </header>
+            <main class="dashboard" id="main-content">
+                <h1>Oversikt for offentlig aktør</h1>
+                <a class="primary-action" asp-controller="Need" asp-action="Create"><span aria-hidden="true">+</span>Registrer behov</a>
+                <p class="dashboard-description">Registrer behov, se tilgjengelige ressurser og følg opp hastesaker.</p>
+                <dl class="dashboard-metrics" aria-label="Oppdatert oversikt over registrerte behov og ressurser">
+                    <div class="metric"><dt>Åpne behov</dt><dd>@Model.OpenNeeds</dd></div>
+                    <div class="metric"><dt>Tilgjengelige ressurser</dt><dd>@Model.AvailableResources</dd></div>
+                    <div class="metric"><dt>Hastebehov</dt><dd>@Model.UrgentNeeds</dd></div>
+                </dl>
+                <section class="resource-panel" id="regional-resources" aria-labelledby="resources-heading">
+                    <h2 id="resources-heading">Sist registrerte tilgjengelige ressurser</h2>
+                    @if (!Model.RecentResources.Any())
+                    {
+                        <p>Ingen tilgjengelige ressurser er registrert for øyeblikket.</p>
+                    }
+                    <ul class="resource-list" aria-label="Tilgjengelige ressurser">
+                        @foreach (var resource in Model.RecentResources)
+                        {
+                            <li>
+                                <span class="resource-name">@resource.Type</span>
+                                <span class="resource-status">Tilgjengelig</span>
+                                <span class="resource-location">@resource.Location</span>
+                                <a class="resource-link" asp-controller="Resource" asp-action="Details" asp-route-id="@resource.Id" aria-label="Se detaljer om @resource.Type i @resource.Location">→</a>
+                            </li>
+                        }
+                    </ul>
+                    <a class="view-resources" asp-controller="Resource" asp-action="Overview">Se tilgjengelige ressurser</a>
+                </section>
+            </main>
+        </div>
+    </div>
+    <dialog class="feature-dialog" id="feature-dialog" aria-labelledby="feature-heading" aria-describedby="feature-description">
+        <h2 id="feature-heading"></h2>
+        <p id="feature-description"></p>
+        <form method="dialog"><button class="primary-action" autofocus>Lukk</button></form>
+    </dialog>
+    <script src="~/js/account-overview.js" asp-append-version="true"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+/* Egne regler for registreringssiden, med portalens eksisterende farger. */
+.need-registration .portal-navigation { margin-top: 60px; }
+.need-registration .portal-brand > span:last-child { padding-top: 3px; }
+.need-registration .portal-topbar { padding-right: 24px; }
+.need-registration .portal-topbar p { color: #1769ab; }
+.need-main { padding: 31px 40px 76px; }
+.need-main h1 { margin: 0; font-size: 28px; font-weight: 600; line-height: 41px; }
+.need-intro { margin: 9px 0 36px; color: var(--portal-secondary); line-height: 21px; }
+.need-card { max-width: 835px; padding: 23px 25px 29px; border: 1px solid var(--portal-border); border-radius: 12px; background: var(--portal-surface); }
+.need-card h2 { margin: 0; font-size: 18px; font-weight: 600; line-height: 26px; }
+.section-description { margin: 1px 0 27px; font-size: 12px; line-height: 20px; color: var(--portal-secondary); }
+.need-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 26px; row-gap: 28px; margin-right: 9px; }
+.need-field { display: flex; flex-direction: column; gap: 2px; }
+.need-field label { font-size: 12px; font-weight: 600; line-height: 20px; }
+.need-field label span { color: #c33; }
+.need-card input, .need-card select { width: 100%; min-width: 0; height: 44px; padding: 0 13px; border: 1px solid var(--portal-border); border-radius: 9px; background: white; color: var(--portal-text); font: inherit; font-size: 12px; }
+.need-card input::placeholder { color: #99abbd; opacity: 1; }
+.need-card input:focus-visible, .need-card select:focus-visible, summary:focus-visible { outline: 3px solid var(--portal-primary); outline-offset: 2px; }
+.full-width { grid-column: 1 / -1; }
+.description-field { margin-top: 0; }
+.need-card .contact-heading { margin: 24px 0 19px; }
+.contact-fields { row-gap: 26px; }
+.need-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 40px; }
+.cancel-action, .register-action { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; border: 0; border-radius: 10px; color: white; font-size: 13px; font-weight: 600; }
+.cancel-action { min-width: 110px; background: #c33; }
+.register-action { min-width: 145px; background: var(--portal-primary); }
+.register-action:hover { background: #12578e; }
+.cancel-action:hover { background: #aa2929; }
+.validation-errors { color: #b42323; }
+.validation-summary-valid { display: none; }
+.map-details { margin-top: 20px; font-size: 12px; color: var(--portal-secondary); }
+.map-details summary { cursor: pointer; }
+.map-details > div:not(#map) { margin: 12px 0; }
+.map-details label { display: block; margin-bottom: 4px; }
+#map { height: 360px; width: 100%; border-radius: 9px; }
+@media (max-width: 760px) {
+    .need-registration .portal-navigation { margin-top: 20px; }
+    .need-main { padding: 24px 16px 40px; }
+    .need-main h1 { font-size: 25px; }
+    .need-card { padding: 22px 18px; }
+    .need-fields { grid-template-columns: 1fr; margin-right: 0; gap: 20px; }
+    .need-actions { flex-wrap: wrap; }
+}
+
+/* Kartvinduet åpnes over skjemaet; koordinatfeltene er skjulte. */
+.location-map-button { align-self: flex-start; padding: 5px 0; border: 0; background: transparent; color: var(--portal-primary); text-decoration: underline; }
+.need-map-dialog { width: min(780px, calc(100% - 32px)); max-height: 90svh; overflow-y: auto; padding: 24px; border: 1px solid var(--portal-border); border-radius: 12px; background: white; color: var(--portal-text); }
+.need-map-dialog::backdrop { background: rgb(22 78 120 / 45%); }
+.map-dialog-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.need-map-dialog p { line-height: 1.5; }
+.need-map-dialog button { min-height: 44px; padding: 8px 16px; border: 1px solid var(--portal-border); border-radius: 8px; background: var(--portal-page); color: var(--portal-text); }
+.need-map-dialog #close-need-map, .need-map-dialog #search-address { background: var(--portal-primary); color: white; }
+.address-search { display: flex; gap: 8px; margin-top: 6px; }
+.address-search input { flex: 1; }
+.address-results { display: grid; gap: 6px; list-style: none; padding: 0; }
+.address-results button { width: 100%; text-align: left; }
+.map-feedback { min-height: 20px; margin: 8px 0; font-size: 13px; }
+.map-source { font-size: 12px; color: var(--portal-secondary); }
+.need-map-dialog #map { height: min(380px, 50svh); min-height: 220px; }

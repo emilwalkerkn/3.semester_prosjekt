@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using SemesterProsjekt.Models;
 using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
 
@@ -8,7 +7,6 @@ namespace SemesterProsjekt.Controllers;
 
 public class HomeController : Controller
 {
-    
     private readonly IResourceRepository _resourceRepository;
     private readonly INeedRepository _needRepository;
 
@@ -19,16 +17,20 @@ public class HomeController : Controller
         _resourceRepository = resourceRepository;
         _needRepository = needRepository;
     }
-    
+
     public async Task<IActionResult> Index()
     {
-        var needs = await _needRepository.GetAllAsync();
-        var resources = await _resourceRepository.GetAllAsync();
+        var needs = (await _needRepository.GetAllAsync()).ToList();
+        var resources = (await _resourceRepository.GetAllAsync()).ToList();
 
         var model = new DashboardViewModel
         {
-            TotalNeeds = needs.Count(),
-            TotalResources = resources.Count(),
+            TotalNeeds = needs.Count,
+            TotalResources = resources.Count,
+            OpenNeeds = needs.Count(n => n.Status != "Resolved"),
+            AvailableResources = resources.Count(r => r.Status == "Available"),
+            UrgentNeeds = needs.Count(n => n.Status != "Resolved"
+                && (n.Priority == "High" || n.Priority == "Critical")),
 
             RecentNeeds = needs
                 .OrderByDescending(n => n.Id)
@@ -41,135 +43,144 @@ public class HomeController : Controller
 
         return View(model);
     }
-    
-    
+
     public async Task<IActionResult> NeedDetails(int id)
     {
         var need = await _needRepository.GetByIdAsync(id);
 
-        if (need == null)
+        if (need is null)
         {
             return NotFound();
         }
 
-        return View(need);
+        return View("~/Views/Need/Details.cshtml", need);
     }
-    
-    
+
     public async Task<IActionResult> ResourceDetails(int id)
     {
         var resource = await _resourceRepository.GetByIdAsync(id);
 
-        if (resource == null)
+        if (resource is null)
         {
             return NotFound();
         }
 
-        return View(resource);
+        return View("~/Views/Resource/Details.cshtml", resource);
     }
-    
-    
+
     // GET: Viser skjemaet for registrering av et behov.
+    [HttpGet]
     public IActionResult Need()
     {
-        var model = new NeedViewModel();
-        return View(model);
+        return View("~/Views/Need/Create.cshtml", new NeedViewModel());
     }
-    
-    // POST: Mottar informasjonen fra behovsskjemaet
-    // og sender dataene videre til resultatsiden.
+
+    // POST: Registrerer et nytt behov.
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Need(NeedViewModel model)
     {
+        if (!ModelState.IsValid)
+        {
+            return View("~/Views/Need/Create.cshtml", model);
+        }
+
         var need = new Need
         {
             Type = model.Type,
-            Description = model.Description,
             Location = model.Location,
             Latitude = model.Latitude,
             Longitude = model.Longitude,
+            Description = model.Description,
             GeometryType = model.GeometryType,
             GeometryData = model.GeometryData,
-            Status = model.Status
+            ContactPoint = model.ContactPoint,
+            NeededFrom = model.NeededFrom,
+            Deadline = model.Deadline,
+            Status = model.Status,
+            Priority = model.Priority
         };
 
         await _needRepository.CreateAsync(need);
 
-        return RedirectToAction("NeedResult", model);
+        return RedirectToAction("Result", "Need", model);
     }
 
-
-    public IActionResult NeedResult(NeedViewModel model)
-    {
-        return View(model);
-    }
-    
-    // GET: Viser skjemaet for registrering av en ressurs. 
+    // GET: Viser skjemaet for registrering av en ressurs.
+    [HttpGet]
     public IActionResult Resource()
     {
-        var model = new ResourceViewModel();
-        return View(model);
+        return View("~/Views/Resource/Create.cshtml", new ResourceViewModel());
     }
 
-    // POST: Mottar informasjonen fra ressursskjemaet
-    // og sender dataene videre til resultatsiden.
+    // POST: Registrerer en ny ressurs.
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Resource(ResourceViewModel model)
     {
+        if (!ModelState.IsValid)
+        {
+            return View("~/Views/Resource/Create.cshtml", model);
+        }
+
         var resource = new Resource
         {
             Type = model.Type,
-            Description = model.Description,
             Location = model.Location,
             Latitude = model.Latitude,
             Longitude = model.Longitude,
+            Description = model.Description,
             GeometryType = model.GeometryType,
-            GeometryData = model.GeometryData
+            GeometryData = model.GeometryData,
+            ContactPoint = model.ContactPoint,
+            AvailableFrom = model.AvailableFrom,
+            AvailableTo = model.AvailableTo,
+            Status = model.Status
         };
 
         await _resourceRepository.CreateAsync(resource);
 
-        return RedirectToAction("ResourceResult", model);
+        return RedirectToAction("Result", "Resource", model);
     }
-    
-    public IActionResult ResourceResult(ResourceViewModel model)
-    {
-        return View(model);
-    }
-    
+
     public async Task<IActionResult> ResourceOverview()
     {
         var resources = await _resourceRepository.GetAllAsync();
-
-        return View(resources);
+        return View("~/Views/Resource/Overview.cshtml", resources);
     }
-    
+
     public async Task<IActionResult> NeedOverview()
     {
         var needs = await _needRepository.GetAllAsync();
-
-        return View(needs);
+        return View("~/Views/Need/Overview.cshtml", needs);
     }
-    
-    
-    
+
     public IActionResult Privacy()
     {
         return View();
     }
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    [ResponseCache(
+        Duration = 0,
+        Location = ResponseCacheLocation.None,
+        NoStore = true)]
     public IActionResult Error()
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        return View(new ErrorViewModel
+        {
+            RequestId = Activity.Current?.Id
+                        ?? HttpContext.TraceIdentifier
+        });
     }
-    
-    
+
     [HttpPost]
-    public async Task<IActionResult> UpdateNeedStatus(int id, string status)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateNeedStatus(
+        int id,
+        string status)
     {
         await _needRepository.UpdateStatusAsync(id, status);
 
-        return RedirectToAction("NeedOverview");
+        return RedirectToAction(nameof(NeedOverview));
     }
 }

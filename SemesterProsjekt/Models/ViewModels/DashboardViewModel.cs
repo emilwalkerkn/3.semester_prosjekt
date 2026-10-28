@@ -4,6 +4,10 @@ public class DashboardViewModel
 {
     public int TotalNeeds { get; set; }
     public int TotalResources { get; set; }
+
+    public int OpenNeeds { get; set; }
+    public int AvailableResources { get; set; }
+    public int UrgentNeeds { get; set; }
     
     public IEnumerable<Need> RecentNeeds { get; set; } = new List<Need>();
     
