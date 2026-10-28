@@ -5,10 +5,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:8080"
-  
-  
-  
-  
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=mariadb;Port=3306;Database=semesterprosjekt;User=appuser;Password=apppassword;"
+    depends_on:
+      - mariadb
+
   mariadb:
     image: mariadb:latest
     environment:
@@ -16,12 +17,9 @@ services:
       MARIADB_DATABASE: semesterprosjekt
       MARIADB_USER: appuser
       MARIADB_PASSWORD: apppassword
-    ports:
-      - "3306:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
-      - ./Database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./Database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
 
 volumes:
   mariadb_data:
-
