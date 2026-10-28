@@ -2,46 +2,13 @@
 @model IEnumerable<SemesterProsjekt.Models.Resource>
 
 @{
-ViewData["Title"] = "Ressursoversikt";
-
-var locationIdFilter = ViewData["LocationIdFilter"];
+    ViewData["Title"] = "Ressursoversikt";
 }
 
 <h1>Ressursoversikt</h1>
 
-<form asp-controller="Resource"
-      asp-action="Overview"
-      method="get"
-      class="mb-3">
-
-    <label for="locationId" class="form-label">
-        Filtrer på lokasjon-ID
-    </label>
-
-    <div class="d-flex flex-wrap gap-2">
-        <input type="number"
-               id="locationId"
-               name="locationId"
-               value="@locationIdFilter"
-               class="form-control"
-               style="max-width: 300px;"
-               placeholder="For eksempel 1" />
-
-        <button type="submit" class="btn btn-primary">
-            Filtrer
-        </button>
-
-        <a asp-controller="Resource"
-           asp-action="Overview"
-           class="btn btn-outline-secondary">
-            Vis alle
-        </a>
-    </div>
-</form>
-
 <a asp-controller="Resource"
    asp-action="Print"
-   asp-route-locationId="@locationIdFilter"
    class="btn btn-outline-secondary mb-3">
     Skriv ut ressursliste
 </a>
@@ -52,95 +19,90 @@ var locationIdFilter = ViewData["LocationIdFilter"];
 
 @if (!Model.Any())
 {
-<p>Ingen ressurser ble funnet.</p>
+    <p>Ingen ressurser ble funnet.</p>
 }
 else
 {
-@foreach (var resource in Model)
-{
-<div class="card mb-3">
-    <div class="card-body">
-        <h5 class="card-title">@resource.Title</h5>
+    @foreach (var resource in Model)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">@resource.Title</h5>
 
-        <p class="card-text">
-            @resource.Description
-        </p>
+                <p class="card-text">
+                    @resource.Description
+                </p>
 
-        <p>
-            <strong>Ressurstype-ID:</strong>
-            @resource.ResourceTypeId
-        </p>
+                <p>
+                    <strong>Ressurstype-ID:</strong>
+                    @resource.ResourceTypeId
+                </p>
 
-        <p>
-            <strong>Lokasjon-ID:</strong>
-            @resource.LocationId
-        </p>
+                <p>
+                    <strong>Mengde:</strong>
+                    @resource.Quantity @resource.Unit
+                </p>
 
-        <p>
-            <strong>Mengde:</strong>
-            @resource.Quantity @resource.Unit
-        </p>
+                <p>
+                    <strong>Status:</strong>
+                    @resource.Status
+                </p>
 
-        <p>
-            <strong>Status:</strong>
-            @resource.Status
-        </p>
+                <p>
+                    <strong>Tilgjengelig til:</strong>
+                    @(resource.AvailableTo?.ToString("dd.MM.yyyy HH:mm")
+                      ?? "Ikke oppgitt")
+                </p>
 
-        <p>
-            <strong>Tilgjengelig til:</strong>
-            @(resource.AvailableTo?.ToString("dd.MM.yyyy HH:mm")
-            ?? "Ikke oppgitt")
-        </p>
-
-        <a asp-controller="Resource"
-           asp-action="Details"
-           asp-route-id="@resource.ResourceId"
-           class="btn btn-outline-secondary">
-            Se detaljer
-        </a>
-    </div>
-</div>
-}
+                <a asp-controller="Resource"
+                   asp-action="Details"
+                   asp-route-id="@resource.ResourceId"
+                   class="btn btn-outline-secondary">
+                    Se detaljer
+                </a>
+            </div>
+        </div>
+    }
 }
 
 @section Scripts {
-<script>
-    // Oppretter kartet med Kristiansand som startposisjon.
-    var resourceMap = L.map("resourceMap")
-        .setView([58.1467, 7.9956], 12);
+    <script>
+        // Oppretter kartet med Kristiansand som startposisjon.
+        var resourceMap = L.map("resourceMap")
+            .setView([58.1467, 7.9956], 12);
 
-    L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+                attribution: "&copy; OpenStreetMap contributors"
+            }
+        ).addTo(resourceMap);
+
+        @foreach (var resource in Model)
         {
-            attribution: "&copy; OpenStreetMap contributors"
+            if (!string.IsNullOrWhiteSpace(resource.GeometryData))
+            {
+                <text>
+                try {
+                    var geometryData =
+                        @Html.Raw(JsonSerializer.Serialize(resource.GeometryData));
+
+                    var geoJson = JSON.parse(geometryData);
+
+                    var popupText =
+                        @Html.Raw(JsonSerializer.Serialize(resource.Title));
+
+                    L.geoJSON(geoJson)
+                        .addTo(resourceMap)
+                        .bindPopup(popupText);
+                }
+                catch {
+                    console.error(
+                        "Kunne ikke vise geometri for ressurs @resource.ResourceId"
+                    );
+                }
+                </text>
+            }
         }
-    ).addTo(resourceMap);
-
-    @foreach (var resource in Model)
-    {
-    if (!string.IsNullOrWhiteSpace(resource.GeometryData))
-    {
-    <text>
-    try {
-        var geometryData =
-            @Html.Raw(JsonSerializer.Serialize(resource.GeometryData));
-
-        var geoJson = JSON.parse(geometryData);
-
-        var popupText =
-            @Html.Raw(JsonSerializer.Serialize(resource.Title));
-
-        L.geoJSON(geoJson)
-            .addTo(resourceMap)
-            .bindPopup(popupText);
-    }
-    catch {
-        console.error(
-            "Kunne ikke vise geometri for ressurs @resource.ResourceId"
-        );
-    }
-    </text>
-    }
-    }
-</script>
+    </script>
 }
