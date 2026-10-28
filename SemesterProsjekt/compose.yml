@@ -17,6 +17,8 @@ services:
       MARIADB_DATABASE: semesterprosjekt
       MARIADB_USER: appuser
       MARIADB_PASSWORD: apppassword
+    ports:
+      - "3308:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
       - ./Database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
