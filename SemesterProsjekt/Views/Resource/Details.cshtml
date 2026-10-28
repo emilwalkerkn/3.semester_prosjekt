@@ -4,6 +4,7 @@
     ViewData["Title"] = "Ressursdetaljer";
     var isAdmin = ViewData["CanManageAll"] is true;
     var canManageResource = isAdmin || (ViewData["CurrentUserId"] is int currentUserId && currentUserId == Model.UserId);
+    var resourceType = PortalTypeIcons.ForResource(Model.ResourceTypeId);
 }
 
 <h1>Ressursdetaljer</h1>
@@ -18,8 +19,8 @@
         </p>
 
         <p class="card-text">
-            <strong>Ressurstype-ID:</strong>
-            @Model.ResourceTypeId
+            <strong>Type:</strong>
+            @resourceType.Label
         </p>
 
         <p class="card-text">

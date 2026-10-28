@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Ressurs registrert";
+    var resourceType = PortalTypeIcons.ForResource(Model.ResourceTypeId);
 }
 
 <div class="text-center">
@@ -19,8 +20,8 @@
         </p>
 
         <p>
-            <strong>Ressurstype-ID:</strong>
-            @Model.ResourceTypeId
+            <strong>Type:</strong>
+            @resourceType.Label
         </p>
 
         <p>
