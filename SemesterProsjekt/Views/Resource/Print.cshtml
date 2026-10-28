@@ -2,10 +2,6 @@
 
 @{
 Layout = null;
-
-var locationId = ViewData["LocationIdFilter"] is int id
-? id
-: (int?)null;
 }
 
 <!DOCTYPE html>
@@ -63,18 +59,12 @@ var locationId = ViewData["LocationIdFilter"] is int id
     </button>
 
     <a asp-controller="Resource"
-       asp-action="Overview"
-       asp-route-locationId="@locationId">
+       asp-action="Overview">
         Tilbake til oversikten
     </a>
 </div>
 
 <h1>Ressursliste</h1>
-
-<p>
-    <strong>Lokasjon-ID:</strong>
-    @(locationId?.ToString() ?? "Alle lokasjoner")
-</p>
 
 @if (!Model.Any())
 {
@@ -82,42 +72,40 @@ var locationId = ViewData["LocationIdFilter"] is int id
 }
 else
 {
-<table>
-    <thead>
-    <tr>
-        <th>Tittel</th>
-        <th>Ressurstype-ID</th>
-        <th>Lokasjon-ID</th>
-        <th>Mengde</th>
-        <th>Kontaktpunkt</th>
-        <th>Status</th>
-        <th>Tilgjengelig fra</th>
-        <th>Tilgjengelig til</th>
-    </tr>
-    </thead>
+    <table>
+        <thead>
+        <tr>
+            <th>Tittel</th>
+            <th>Ressurstype-ID</th>
+            <th>Mengde</th>
+            <th>Kontaktpunkt</th>
+            <th>Status</th>
+            <th>Tilgjengelig fra</th>
+            <th>Tilgjengelig til</th>
+        </tr>
+        </thead>
 
-    <tbody>
-    @foreach (var resource in Model)
-    {
-    <tr>
-        <td>@resource.Title</td>
-        <td>@resource.ResourceTypeId</td>
-        <td>@resource.LocationId</td>
-        <td>@resource.Quantity @resource.Unit</td>
-        <td>@(resource.ContactPoint ?? "Ikke oppgitt")</td>
-        <td>@resource.Status</td>
-        <td>
-            @(resource.AvailableFrom?.ToString("dd.MM.yyyy HH:mm")
-            ?? "Ikke oppgitt")
-        </td>
-        <td>
-            @(resource.AvailableTo?.ToString("dd.MM.yyyy HH:mm")
-            ?? "Ikke oppgitt")
-        </td>
-    </tr>
-    }
-    </tbody>
-</table>
+        <tbody>
+        @foreach (var resource in Model)
+        {
+            <tr>
+                <td>@resource.Title</td>
+                <td>@resource.ResourceTypeId</td>
+                <td>@resource.Quantity @resource.Unit</td>
+                <td>@(resource.ContactPoint ?? "Ikke oppgitt")</td>
+                <td>@resource.Status</td>
+                <td>
+                    @(resource.AvailableFrom?.ToString("dd.MM.yyyy HH:mm")
+                    ?? "Ikke oppgitt")
+                </td>
+                <td>
+                    @(resource.AvailableTo?.ToString("dd.MM.yyyy HH:mm")
+                    ?? "Ikke oppgitt")
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
 }
 </body>
 </html>
