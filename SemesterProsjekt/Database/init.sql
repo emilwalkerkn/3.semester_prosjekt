@@ -1,118 +1,93 @@
 
 
-
-
-CREATE TABLE IF NOT EXISTS AppUsers (
-    UserId INT AUTO_INCREMENT PRIMARY KEY,
-    Username VARCHAR(80) NOT NULL UNIQUE,
+CREATE TABLE IF NOT EXISTS Users (
+                                     UserId INT AUTO_INCREMENT PRIMARY KEY,
+                                     Username VARCHAR(80) NOT NULL UNIQUE,
     Email VARCHAR(254) NOT NULL UNIQUE,
     FirstName VARCHAR(100) NOT NULL,
     LastName VARCHAR(100) NOT NULL,
-    Phone VARCHAR(30)
+    Phone VARCHAR(30),
+    PasswordHash VARCHAR(255) NOT NULL
     );
+
+CREATE TABLE IF NOT EXISTS Roles (
+                                     RoleId INT AUTO_INCREMENT PRIMARY KEY,
+                                     Name VARCHAR(50) NOT NULL UNIQUE,
+    Description VARCHAR(255)
+    );
+
+CREATE TABLE IF NOT EXISTS UserRole (
+                                        UserId INT NOT NULL,
+                                        RoleId INT NOT NULL,
+                                        PRIMARY KEY (UserId, RoleId),
+
+    CONSTRAINT FK_UserRole_User
+    FOREIGN KEY (UserId) REFERENCES Users(UserId)
+    ON DELETE CASCADE,
+
+    CONSTRAINT FK_UserRole_Role
+    FOREIGN KEY (RoleId) REFERENCES Roles(RoleId)
+    ON DELETE CASCADE
+    );
+
+
 
 CREATE TABLE IF NOT EXISTS NeedType (
     NeedTypeId INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(80) NOT NULL UNIQUE
+    Name VARCHAR(80) NOT NULL UNIQUE
     );
 
 CREATE TABLE IF NOT EXISTS ResourceType (
     ResourceTypeId INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(80) NOT NULL UNIQUE
-    );
-
-CREATE TABLE IF NOT EXISTS Location (
-    LocationId INT AUTO_INCREMENT PRIMARY KEY,
-    Description TEXT NOT NULL,
-    Latitude VARCHAR(50),
-    Longitude VARCHAR(50)
-);
-CREATE TABLE IF NOT EXISTS PublicActors (
-    UserId INT PRIMARY KEY,
-    OrganizationName VARCHAR(160) NOT NULL,
-    OrganizationType VARCHAR(50) NOT NULL,
-
-    CONSTRAINT FK_PublicActors_AppUsers
-    FOREIGN KEY (UserId)
-    REFERENCES AppUsers(UserId)
-    ON DELETE CASCADE
-    );
-
-CREATE TABLE IF NOT EXISTS ResourceProviders (
-    UserId INT PRIMARY KEY,
-    ProviderType VARCHAR(50) NOT NULL,
-    OrganizationName VARCHAR(160),
-
-    CONSTRAINT FK_ResourceProviders_AppUsers
-    FOREIGN KEY (UserId)
-    REFERENCES AppUsers(UserId)
-    ON DELETE CASCADE
-
+    Name VARCHAR(80) NOT NULL UNIQUE
     );
 
 CREATE TABLE IF NOT EXISTS Needs (
-    NeedId INT AUTO_INCREMENT PRIMARY KEY,
-    PublicActorId INT NOT NULL,
-    NeedTypeId INT NOT NULL,
-    LocationId INT NOT NULL,
+                                     NeedId INT AUTO_INCREMENT PRIMARY KEY,
+                                     UserId INT NOT NULL,
+                                     NeedTypeId INT NOT NULL,
 
-    Title VARCHAR(160) NOT NULL,
+                                     Title VARCHAR(160) NOT NULL,
     Description TEXT NOT NULL,
     GeometryType VARCHAR(50),
     GeometryData TEXT,
     ContactPoint VARCHAR(255),
-    
-    NeededFrom DATETIME NULL,
-    Deadline DATETIME NULL,
-    Quantity DECIMAL (10,2) NOT NULL,
+    NeededFrom DATETIME,
+    Deadline DATETIME,
+    Quantity DECIMAL(10,2) NOT NULL,
     Unit VARCHAR(50) NOT NULL,
     Status VARCHAR(50) NOT NULL DEFAULT 'New',
     Priority VARCHAR(20) NOT NULL DEFAULT 'Normal',
-    
-    CONSTRAINT FK_Needs_PublicActors
-        FOREIGN KEY (PublicActorId)
-        REFERENCES PublicActors(UserId),
-    
+
+    CONSTRAINT FK_Needs_User
+    FOREIGN KEY (UserId) REFERENCES Users(UserId),
+
     CONSTRAINT FK_Needs_NeedType
-        FOREIGN KEY (NeedTypeId)
-        REFERENCES NeedType(NeedTypeId),
-    
-    CONSTRAINT FK_Needs_Location
-        FOREIGN KEY (LocationId)
-        REFERENCES Location(LocationId)
+    FOREIGN KEY (NeedTypeId) REFERENCES NeedType(NeedTypeId)
     );
 
 CREATE TABLE IF NOT EXISTS Resources (
-    ResourceId INT AUTO_INCREMENT PRIMARY KEY,
-    ProviderId INT NOT NULL,
-    ResourceTypeId INT NOT NULL,
-    LocationId INT NOT NULL,
+                                         ResourceId INT AUTO_INCREMENT PRIMARY KEY,
+                                         UserId INT NOT NULL,
+                                         ResourceTypeId INT NOT NULL,
 
-    Title VARCHAR(160) NOT NULL,
+                                         Title VARCHAR(160) NOT NULL,
     Description TEXT NOT NULL,
     GeometryType VARCHAR(50),
     GeometryData TEXT,
     ContactPoint VARCHAR(255),
-    
-    AvailableFrom DATETIME NULL,
-    AvailableTo DATETIME NULL,
+    AvailableFrom DATETIME,
+    AvailableTo DATETIME,
     Quantity DECIMAL(10,2) NOT NULL,
     Unit VARCHAR(50) NOT NULL,
     Status VARCHAR(50) NOT NULL DEFAULT 'Available',
-    
-    CONSTRAINT FK_Resources_ResourceProviders
-        FOREIGN KEY (ProviderId)
-        REFERENCES ResourceProviders(UserId),
-    
-    CONSTRAINT FK_Resources_ResourceType
-        FOREIGN KEY (ResourceTypeId)
-        REFERENCES ResourceType(ResourceTypeId),
-    
-    CONSTRAINT FK_Resources_Location
-        FOREIGN KEY (LocationId)
-        REFERENCES Location(LocationId)
-    );
 
+    CONSTRAINT FK_Resources_User
+    FOREIGN KEY (UserId) REFERENCES Users(UserId),
+
+    CONSTRAINT FK_Resources_ResourceType
+    FOREIGN KEY (ResourceTypeId) REFERENCES ResourceType(ResourceTypeId)
+    );
 
 
 CREATE TABLE IF NOT EXISTS `Match` (
@@ -138,94 +113,24 @@ CREATE TABLE IF NOT EXISTS `Match` (
 
 --Testdata--
 -- Startverdier for behovstyper
-INSERT IGNORE INTO NeedType (name)
-VALUES
-    ('Mat og drikke'),
-    ('Transport'),
-    ('Medisinsk utstyr'),
-    ('Mannskap'),
-    ('Overnatting');
+INSERT IGNORE INTO Roles (RoleId, Name, Description) VALUES
+    (1, 'Behovsaktør', 'Registrerer og følger opp behov'),
+    (2, 'Ressurseier', 'Registrerer og oppdaterer ressurser'),
+    (3, 'Admin', 'Administrerer behov, ressurser og matcher');
+
+INSERT IGNORE INTO NeedType (NeedTypeId, Name) VALUES
+    (1, 'Mat og drikke'),
+    (2, 'Transport'),
+    (3, 'Medisinsk utstyr'),
+    (4, 'Mannskap'),
+    (5, 'Overnatting');
+
+INSERT IGNORE INTO ResourceType (ResourceTypeId, Name) VALUES
+    (1, 'Kjøretøy'),
+    (2, 'Medisinsk utstyr'),
+    (3, 'Matforsyning'),
+    (4, 'Mannskap');
 
 
--- Testbrukere
-INSERT IGNORE INTO AppUsers (
-    UserId,
-    Username,
-    Email,
-    FirstName,
-    LastName,
-    Phone
-)
-VALUES
-    (
-        1,
-        'testaktor',
-        'testaktor@example.com',
-        'Test',
-        'Aktør',
-        '00000000'
-    ),
-    (
-        2,
-        'testtilbyder',
-        'testtilbyder@example.com',
-        'Test',
-        'Tilbyder',
-        '11111111'
-    );
 
--- Offentlig testaktør
-INSERT IGNORE INTO PublicActors (
-    UserId,
-    OrganizationName,
-    OrganizationType
-)
-VALUES
-    (
-        1,
-        'Testkommune',
-        'Kommune'
-    );
-
-
--- Testtilbyder
-INSERT IGNORE INTO ResourceProviders (
-    UserId,
-    ProviderType,
-    OrganizationName
-)
-VALUES
-    (
-        2,
-        'Frivillig organisasjon',
-        'Testorganisasjon'
-    );
-
-
--- Startverdi for ressurstype
-INSERT IGNORE INTO ResourceType (
-    ResourceTypeId,
-    name
-)
-VALUES
-    (
-        1,
-        'Kjøretøy'
-    );
-
-
--- Testlokasjon
-INSERT IGNORE INTO Location (
-    LocationId,
-    Description,
-    Latitude,
-    Longitude
-)
-VALUES
-    (
-        1,
-        'Kristiansand sentrum',
-        '58.1467',
-        '7.9956'
-    );
 

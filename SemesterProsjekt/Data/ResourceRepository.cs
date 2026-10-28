@@ -19,9 +19,8 @@ public class ResourceRepository : IResourceRepository
         const string sql = """
             SELECT
                 ResourceId,
-                ProviderId,
+                UserId,
                 ResourceTypeId,
-                LocationId,
                 Title,
                 Description,
                 GeometryType,
@@ -45,9 +44,8 @@ public class ResourceRepository : IResourceRepository
         const string sql = """
             SELECT
                 ResourceId,
-                ProviderId,
-                ResourceTypeId,
-                LocationId,
+                UserId,
+                ResourceTypeId,               
                 Title,
                 Description,
                 GeometryType,
@@ -74,9 +72,8 @@ public class ResourceRepository : IResourceRepository
 
         const string sql = """
             INSERT INTO Resources (
-                ProviderId,
-                ResourceTypeId,
-                LocationId,
+                UserId,
+                ResourceTypeId,                   
                 Title,
                 Description,
                 GeometryType,
@@ -89,9 +86,8 @@ public class ResourceRepository : IResourceRepository
                 Status
             )
             VALUES (
-                @ProviderId,
-                @ResourceTypeId,
-                @LocationId,
+                @UserId,
+                @ResourceTypeId,    
                 @Title,
                 @Description,
                 @GeometryType,

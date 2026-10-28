@@ -13,12 +13,7 @@
           class="need-form">
 
         <div>
-            <label asp-for="PublicActorId">Offentlig aktør-ID</label>
-            <input asp-for="PublicActorId" type="number" />
-        </div>
-
-        <div>
-            <label asp-for="NeedTypeId"> </label>
+            <label asp-for="NeedTypeId"></label>
             <select asp-for="NeedTypeId"
                     asp-items="Model.NeedTypes">
                 <option value="">Velg type behov</option>
@@ -27,28 +22,28 @@
         </div>
 
         <div>
-            <label asp-for="LocationId">Lokasjon-ID</label>
-            <input asp-for="LocationId" type="number" />
-        </div>
-
-        <div>
             <label asp-for="Title">Tittel</label>
             <input asp-for="Title" />
+            <span asp-validation-for="Title"></span>
         </div>
 
         <div>
             <label asp-for="Description">Beskrivelse</label>
             <textarea asp-for="Description"></textarea>
+            <span asp-validation-for="Description"></span>
         </div>
 
         <div>
             <label asp-for="Quantity">Mengde</label>
             <input asp-for="Quantity" type="number" step="0.01" />
+            <span asp-validation-for="Quantity"></span>
         </div>
 
         <div>
             <label asp-for="Unit">Enhet</label>
-            <input asp-for="Unit" placeholder="For eksempel stk, kg eller liter" />
+            <input asp-for="Unit"
+                   placeholder="For eksempel stk, kg eller liter" />
+            <span asp-validation-for="Unit"></span>
         </div>
 
         <div>
@@ -59,21 +54,25 @@
                 <option value="High">Høy</option>
                 <option value="Critical">Kritisk</option>
             </select>
+            <span asp-validation-for="Priority"></span>
         </div>
 
         <div>
             <label asp-for="ContactPoint">Kontaktpunkt</label>
             <input asp-for="ContactPoint" />
+            <span asp-validation-for="ContactPoint"></span>
         </div>
 
         <div>
             <label asp-for="NeededFrom">Behov fra</label>
             <input asp-for="NeededFrom" type="datetime-local" />
+            <span asp-validation-for="NeededFrom"></span>
         </div>
 
         <div>
             <label asp-for="Deadline">Frist</label>
             <input asp-for="Deadline" type="datetime-local" />
+            <span asp-validation-for="Deadline"></span>
         </div>
 
         <input asp-for="Status" type="hidden" />
