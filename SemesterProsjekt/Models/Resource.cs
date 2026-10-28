@@ -5,6 +5,7 @@ namespace SemesterProsjekt.Models;
 public class Resource
 {
     public int ResourceId { get; set; }
+    
 
     public int UserId { get; set; }
 

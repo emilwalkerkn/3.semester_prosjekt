@@ -4,6 +4,10 @@ namespace SemesterProsjekt.Models;
 public class Need
 {
     public int NeedId { get; set; }
+    
+    public int UserId { get; set; }
+    public int NeedTypeId { get; set; }
+
 
     public int UserId { get; set; }
 

@@ -19,9 +19,8 @@ public class NeedRepository : INeedRepository
         const string sql = """
             SELECT
                 NeedId,
-                PublicActorId,
+                UserId,
                 NeedTypeId,
-                LocationId,
                 Title,
                 Description,
                 GeometryType,
@@ -46,9 +45,8 @@ public class NeedRepository : INeedRepository
         const string sql = """
             SELECT
                 NeedId,
-                PublicActorId,
-                NeedTypeId,
-                LocationId,
+                UserId,
+                NeedTypeId,               
                 Title,
                 Description,
                 GeometryType,
@@ -73,11 +71,9 @@ public class NeedRepository : INeedRepository
     public async Task<IEnumerable<NeedType>> GetNeedTypesAsync()
     {
         const string sql = """
-                           SELECT
-                           NeedTypeId,
-                           name AS Name
+                           SELECT NeedTypeId, Name
                            FROM NeedType
-                           ORDER BY name;
+                           ORDER BY Name;
                            """;
         using var connection = _connectionFactory.CreateConnection();
         return await connection.QueryAsync<NeedType>(sql);
@@ -90,9 +86,8 @@ public class NeedRepository : INeedRepository
 
         const string sql = """
             INSERT INTO Needs (
-                PublicActorId,
                 NeedTypeId,
-                LocationId,
+                UserId,               
                 Title,
                 Description,
                 GeometryType,
@@ -106,9 +101,8 @@ public class NeedRepository : INeedRepository
                 Priority
             )
             VALUES (
-                @PublicActorId,
                 @NeedTypeId,
-                @LocationId,
+                @UserId,    
                 @Title,
                 @Description,
                 @GeometryType,

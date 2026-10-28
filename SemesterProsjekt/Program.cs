@@ -3,10 +3,9 @@ using SemesterProsjekt.Data;
 using SemesterProsjekt.Models.Identity;
 
 
-var builder = WebApplication.CreateBuilder(args);
-
 // Registrerer MVC-tjenestene som brukes av applikasjonen,
 // inkludert Controllers og Views.
+var builder = WebApplication.CreateBuilder(args);
 
 /*
 builder.Services
@@ -23,10 +22,9 @@ builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddSingleton<IDbConnectionFactory, MySqlConnectionFactory>();
-
 builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
-
 builder.Services.AddScoped<INeedRepository, NeedRepository>();
+
 
 var app = builder.Build();
 
