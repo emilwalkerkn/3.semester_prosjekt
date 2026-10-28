@@ -1,11 +1,24 @@
+using Microsoft.AspNetCore.Identity;
 using SemesterProsjekt.Data;
-
+using SemesterProsjekt.Models.Identity;
 
 
 // Registrerer MVC-tjenestene som brukes av applikasjonen,
 // inkludert Controllers og Views.
 var builder = WebApplication.CreateBuilder(args);
 
+/*
+builder.Services
+    .AddIdentity<ApplicationUser, ApplicationRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+*/
+builder.Services
+    .AddIdentity<ApplicationUser, ApplicationRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>();
+
+builder.Services.AddControllersWithViews();
+builder.Services.AddRazorPages();
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddSingleton<IDbConnectionFactory, MySqlConnectionFactory>();
@@ -31,8 +44,6 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
-app.UseAuthorization();
-
 app.MapStaticAssets();
 
 // Setter opp standard routing slik at URL-er kobles
@@ -42,7 +53,11 @@ app.MapControllerRoute(
         pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+app.UseAuthentication();
+app.UseAuthorization();
 
+app.MapControllers();
+app.MapRazorPages();
 // Starter ASP.NET Core-applikasjonen og gjør den klar
 // til å motta HTTP-forespørsler.
 app.Run();
