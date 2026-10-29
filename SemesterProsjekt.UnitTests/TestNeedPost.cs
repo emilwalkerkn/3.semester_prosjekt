@@ -22,9 +22,7 @@ public class UnitTestNeedPost
 
         var model = new NeedViewModel
         {
-            PublicActorId = 1,
             NeedTypeId = 1,
-            LocationId = 1,
             Title = "Tre over vei",
             Description = "Et tre har falt over veien i Kristiansand.",
             Quantity = 1,

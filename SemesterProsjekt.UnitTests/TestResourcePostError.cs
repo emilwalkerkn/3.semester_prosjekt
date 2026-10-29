@@ -18,9 +18,7 @@ public class TestResourcePostError
 
         var model = new ResourceViewModel
         {
-            ProviderId = 1,
             ResourceTypeId = 1,
-            LocationId = 1,
             Title = "Gravemaskin",
             Description = "Stor gravemaskin",
             Quantity = 1,

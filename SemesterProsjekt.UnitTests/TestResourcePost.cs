@@ -22,9 +22,7 @@ public class UnitTestResourcePost
 
         var model = new ResourceViewModel
         {
-            ProviderId = 1,
             ResourceTypeId = 1,
-            LocationId = 1,
             Title = "Brannbil",
             Description = "Brannbil med mannskap.",
             Quantity = 1,
