@@ -1,61 +1,92 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using SemesterProsjekt.Data;
-using SemesterProsjekt.Models.Identity;
+using SemesterProsjekt.Models;
+using Microsoft.AspNetCore.DataProtection;
 
-
-// Registrerer MVC-tjenestene som brukes av applikasjonen,
-// inkludert Controllers og Views.
 var builder = WebApplication.CreateBuilder(args);
 
-/*
+var connectionString =
+    builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException(
+        "Connection string 'DefaultConnection' ble ikke funnet.");
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseMySql(
+        connectionString,
+        new MariaDbServerVersion(new Version(10, 11, 0))));
+
 builder.Services
-    .AddIdentity<ApplicationUser, ApplicationRole>()
+    .AddIdentity<ApplicationUser, IdentityRole>(options =>
+    {
+        options.Password.RequiredLength = 8;
+        options.Password.RequireUppercase = true;
+        options.Password.RequireLowercase = true;
+        options.Password.RequireDigit = true;
+        options.Password.RequireNonAlphanumeric = false;
+
+        options.User.RequireUniqueEmail = true;
+        options.SignIn.RequireConfirmedAccount = false;
+        
+        options.Lockout.AllowedForNewUsers = true;
+        options.Lockout.MaxFailedAccessAttempts = 5;
+        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+        
+        
+    })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
-*/
-
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
-builder.Services.AddControllersWithViews();
 
+/*
+ * Dapper brukes fortsatt midlertidig for behov og ressurser.
+ * Vi erstatter disse når domenemodellene kobles til EF Core.
+ */
 builder.Services.AddSingleton<IDbConnectionFactory, MySqlConnectionFactory>();
 builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
 builder.Services.AddScoped<INeedRepository, NeedRepository>();
 
 
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Services
+        .AddDataProtection()
+        .PersistKeysToFileSystem(new DirectoryInfo("/keys"))
+        .SetApplicationName("SemesterProsjekt");
+}
+
+
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var database = scope.ServiceProvider
+        .GetRequiredService<ApplicationDbContext>();
 
-// Konfigurerer HTTP-forespørselsflyten.
-// Ved kjøring utenfor utviklingsmiljø brukes en egen feilhåndteringsside
-// og HSTS for sikrere HTTPS-tilkoblinger.
+    database.Database.Migrate();
+}
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    
-    // Standardverdien for HSTS er 30 dager.
-    // Denne kan endres ved behov for produksjonsmiljø.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapStaticAssets();
 
-// Setter opp standard routing slik at URL-er kobles
-// til riktig Controller og Action.
 app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-app.UseAuthentication();
-app.UseAuthorization();
-
-app.MapControllers();
 app.MapRazorPages();
-// Starter ASP.NET Core-applikasjonen og gjør den klar
-// til å motta HTTP-forespørsler.
+
 app.Run();

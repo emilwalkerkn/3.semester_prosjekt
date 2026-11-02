@@ -19,5 +19,10 @@ RUN dotnet publish "./SemesterProsjekt.csproj" -c $BUILD_CONFIGURATION -o /app/p
 
 FROM base AS final
 WORKDIR /app
+
+USER root
+RUN mkdir -p /keys && chown -R $APP_UID:$APP_UID /keys
+USER $APP_UID
+
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "SemesterProsjekt.dll"]
