@@ -21,6 +21,9 @@ public class HomeController : Controller
         _resourceRepository = resourceRepository;
         _needRepository = needRepository;
     }
+    
+    
+    [AllowAnonymous]
 
     public async Task<IActionResult> Index()
     {
@@ -163,6 +166,7 @@ public class HomeController : Controller
         return View(needs);
     }
 
+    [AllowAnonymous]
     public IActionResult Privacy()
     {
         return View();
