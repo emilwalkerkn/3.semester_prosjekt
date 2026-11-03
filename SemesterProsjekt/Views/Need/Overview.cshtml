@@ -77,11 +77,17 @@
             @foreach (var need in Model)
             {
                 var canManage = User.IsInRole("Admin") || currentUserId == need.UserId;
+                var typeIcon = PortalTypeIcons.ForNeed(need.NeedTypeId);
 
                 <article class="portal-card overview-record">
                     <div class="overview-record-main">
-                        <p class="record-type">@(need.NeedTypeName ?? "Behov")</p>
-                        <h2>@need.Title</h2>
+                        <div class="record-title-with-icon">
+                            <span class="type-icon" role="img" aria-label="@typeIcon.Label">@typeIcon.Symbol</span>
+                            <div>
+                                <p class="record-type">@(need.NeedTypeName ?? "Behov")</p>
+                                <h2>@need.Title</h2>
+                            </div>
+                        </div>
                         <p class="overview-description">@need.Description</p>
                     </div>
 
