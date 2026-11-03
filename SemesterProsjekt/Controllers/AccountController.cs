@@ -36,6 +36,12 @@ public class AccountController : Controller
             return View(model);
         }
 
+        if (!AppRoles.SelfServiceRoles.Contains(model.Role))
+        {
+            ModelState.AddModelError(nameof(model.Role), "Ugyldig aktørtype.");
+            return View(model);
+        }
+
         var user = new ApplicationUser
         {
             UserName = model.Email,
@@ -48,6 +54,18 @@ public class AccountController : Controller
 
         if (result.Succeeded)
         {
+            var roleResult = await _userManager.AddToRoleAsync(user, model.Role);
+            if (!roleResult.Succeeded)
+            {
+                await _userManager.DeleteAsync(user);
+                foreach (var error in roleResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+
+                return View(model);
+            }
+
             await _signInManager.SignInAsync(user, isPersistent: false);
             return RedirectToLocal(model.ReturnUrl);
         }
@@ -112,6 +130,10 @@ public class AccountController : Controller
         await _signInManager.SignOutAsync();
         return RedirectToAction(nameof(HomeController.Index), "Home")!;
     }
+
+    [AllowAnonymous]
+    [HttpGet]
+    public IActionResult AccessDenied() => View();
 
     private IActionResult RedirectToLocal(string? returnUrl)
     {

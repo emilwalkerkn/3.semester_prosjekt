@@ -1,0 +1,12 @@
+@model SemesterProsjekt.Models.ViewModels.CreateMatchViewModel
+@{
+    ViewData["Title"] = "Opprett match";
+}
+<h1>Opprett match</h1>
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-3"><label asp-for="NeedId" class="form-label">Behov</label><select asp-for="NeedId" asp-items="Model.Needs" class="form-select"><option value="">Velg behov</option></select><span asp-validation-for="NeedId" class="text-danger"></span></div>
+    <div class="mb-3"><label asp-for="ResourceId" class="form-label">Ressurs</label><select asp-for="ResourceId" asp-items="Model.Resources" class="form-select"><option value="">Velg ressurs</option></select><span asp-validation-for="ResourceId" class="text-danger"></span></div>
+    <div class="mb-3"><label asp-for="Notes" class="form-label">Notat</label><textarea asp-for="Notes" class="form-control"></textarea></div>
+    <button type="submit" class="btn btn-primary">Opprett match</button>
+</form>

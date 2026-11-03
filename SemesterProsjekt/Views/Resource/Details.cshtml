@@ -60,3 +60,8 @@
    class="btn btn-secondary mt-3">
     Tilbake til ressursoversikten
 </a>
+@if (User.IsInRole("Admin") || User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.UserId)
+{
+    <a asp-action="Edit" asp-route-id="@Model.ResourceId" class="btn btn-primary mt-3">Rediger</a>
+    <a asp-action="Delete" asp-route-id="@Model.ResourceId" class="btn btn-danger mt-3">Slett</a>
+}

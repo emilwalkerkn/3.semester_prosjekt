@@ -5,7 +5,7 @@
 namespace SemesterProsjekt.Migrations
 {
     /// <inheritdoc />
-    public partial class AddIdentityUserForeignKeys : Migration
+    public partial class AddIdentityOwnershipForeignKeys : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -25,7 +25,6 @@ namespace SemesterProsjekt.Migrations
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Restrict);
-
         }
 
         /// <inheritdoc />
@@ -38,7 +37,6 @@ namespace SemesterProsjekt.Migrations
             migrationBuilder.DropForeignKey(
                 name: "FK_Resources_AspNetUsers_UserId",
                 table: "Resources");
-
         }
     }
 }

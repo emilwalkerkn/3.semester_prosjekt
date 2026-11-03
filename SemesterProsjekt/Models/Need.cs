@@ -5,7 +5,9 @@ public class Need
 {
     public int NeedId { get; set; }
 
-    public int UserId { get; set; }
+    [Required]
+    [StringLength(255)]
+    public string UserId { get; set; } = string.Empty;
 
     public int NeedTypeId { get; set; }
 

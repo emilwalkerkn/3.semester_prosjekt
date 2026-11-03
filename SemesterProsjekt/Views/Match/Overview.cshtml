@@ -1,0 +1,18 @@
+@model IEnumerable<SemesterProsjekt.Models.ViewModels.MatchListItemViewModel>
+@{
+    ViewData["Title"] = "Aktive matcher";
+}
+<h1>Aktive matcher</h1>
+<p><a asp-action="Create" class="btn btn-primary">Opprett match</a> <a asp-action="History" class="btn btn-outline-secondary">Vis fullførte</a></p>
+@if (!Model.Any()) { <p>Ingen aktive matcher.</p> }
+@foreach (var item in Model)
+{
+    <div class="card mb-3"><div class="card-body">
+        <h2 class="h5">@item.NeedTitle ↔ @item.ResourceTitle</h2>
+        <p>Status: <strong>@item.Status</strong></p><p>@item.Notes</p>
+        @if (item.Status == SemesterProsjekt.Models.MatchStatuses.Proposed)
+        { <form asp-action="UpdateStatus" method="post"><input type="hidden" name="id" value="@item.MatchId" /><input type="hidden" name="status" value="@SemesterProsjekt.Models.MatchStatuses.Approved" /><button class="btn btn-primary">Godkjenn</button></form> }
+        else if (item.Status == SemesterProsjekt.Models.MatchStatuses.Approved)
+        { <form asp-action="UpdateStatus" method="post"><input type="hidden" name="id" value="@item.MatchId" /><input type="hidden" name="status" value="@SemesterProsjekt.Models.MatchStatuses.Completed" /><button class="btn btn-success">Fullfør</button></form> }
+    </div></div>
+}

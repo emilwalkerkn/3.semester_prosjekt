@@ -12,7 +12,7 @@ public class Match
 
     [Required]
     [StringLength(50)]
-    public string Status { get; set; } = "";
+    public string Status { get; set; } = MatchStatuses.Proposed;
 
     public DateTime MatchedAt { get; set; }
 

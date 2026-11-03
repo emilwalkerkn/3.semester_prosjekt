@@ -1,0 +1,10 @@
+@model SemesterProsjekt.Models.Resource
+@{
+    ViewData["Title"] = "Slett ressurs";
+}
+<h1>Slett ressurs</h1>
+<p>Er du sikker på at du vil slette <strong>@Model.Title</strong>?</p>
+<form asp-action="Delete" asp-route-id="@Model.ResourceId" method="post">
+    <button type="submit" class="btn btn-danger">Slett</button>
+    <a asp-action="Details" asp-route-id="@Model.ResourceId" class="btn btn-secondary">Avbryt</a>
+</form>

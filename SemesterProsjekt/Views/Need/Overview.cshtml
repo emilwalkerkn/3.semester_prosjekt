@@ -7,6 +7,16 @@
 
 <h1>Behovsoversikt</h1>
 
+<form asp-action="Overview" method="get" class="mb-3">
+    <label for="sortBy">Sorter etter</label>
+    <select id="sortBy" name="sortBy" onchange="this.form.submit()">
+        <option value="newest" selected="@(ViewData["SortBy"]?.ToString() == "newest")">Nyeste</option>
+        <option value="deadline" selected="@(ViewData["SortBy"]?.ToString() == "deadline")">Frist</option>
+        <option value="priority" selected="@(ViewData["SortBy"]?.ToString() == "priority")">Prioritet</option>
+        <option value="status" selected="@(ViewData["SortBy"]?.ToString() == "status")">Status</option>
+    </select>
+</form>
+
 <h2>Registrerte behov på kartet</h2>
 
 <div id="needMap" style="height: 500px; margin-bottom: 30px;"></div>
@@ -59,7 +69,12 @@ else
                     Se detaljer
                 </a>
 
-                <form asp-controller="Need"
+                @if (User.IsInRole("Admin") || User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == need.UserId)
+                {
+                    <a asp-action="Edit" asp-route-id="@need.NeedId" class="btn btn-outline-primary">Rediger</a>
+                    <a asp-action="Delete" asp-route-id="@need.NeedId" class="btn btn-outline-danger">Slett</a>
+
+                    <form asp-controller="Need"
                       asp-action="UpdateStatus"
                       method="post"
                       class="mt-3">
@@ -90,7 +105,8 @@ else
                     <button type="submit" class="btn btn-primary">
                         Oppdater status
                     </button>
-                </form>
+                    </form>
+                }
             </div>
         </div>
     }

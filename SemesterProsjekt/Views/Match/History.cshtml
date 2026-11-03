@@ -1,0 +1,11 @@
+@model IEnumerable<SemesterProsjekt.Models.ViewModels.MatchListItemViewModel>
+@{
+    ViewData["Title"] = "Fullførte matcher";
+}
+<h1>Fullførte matcher</h1>
+<a asp-action="Overview" class="btn btn-secondary mb-3">Til aktive matcher</a>
+@if (!Model.Any()) { <p>Ingen fullførte matcher.</p> }
+@foreach (var item in Model)
+{
+    <div class="card mb-3"><div class="card-body"><h2 class="h5">@item.NeedTitle ↔ @item.ResourceTitle</h2><p>Fullført: @(item.ResolvedAt?.ToString("dd.MM.yyyy HH:mm"))</p><p>@item.Notes</p></div></div>
+}

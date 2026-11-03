@@ -1,0 +1,25 @@
+@model SemesterProsjekt.Models.ResourceViewModel
+@{
+    ViewData["Title"] = "Rediger ressurs";
+}
+
+<h1>Rediger ressurs</h1>
+<form asp-action="Edit" asp-route-id="@Model.ResourceId" method="post">
+    <input asp-for="ResourceId" type="hidden" />
+    <input asp-for="GeometryType" type="hidden" />
+    <input asp-for="GeometryData" type="hidden" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3"><label asp-for="ResourceTypeId" class="form-label">Ressurstype</label><select asp-for="ResourceTypeId" asp-items="Model.ResourceTypes" class="form-select"></select><span asp-validation-for="ResourceTypeId" class="text-danger"></span></div>
+    <div class="mb-3"><label asp-for="Title" class="form-label">Tittel</label><input asp-for="Title" class="form-control" /><span asp-validation-for="Title" class="text-danger"></span></div>
+    <div class="mb-3"><label asp-for="Description" class="form-label">Beskrivelse</label><textarea asp-for="Description" class="form-control"></textarea><span asp-validation-for="Description" class="text-danger"></span></div>
+    <div class="mb-3"><label asp-for="Quantity" class="form-label">Mengde</label><input asp-for="Quantity" class="form-control" /></div>
+    <div class="mb-3"><label asp-for="Unit" class="form-label">Enhet</label><input asp-for="Unit" class="form-control" /></div>
+    <div class="mb-3"><label asp-for="ContactPoint" class="form-label">Kontaktpunkt</label><input asp-for="ContactPoint" class="form-control" /></div>
+    <div class="mb-3"><label asp-for="AvailableFrom" class="form-label">Tilgjengelig fra</label><input asp-for="AvailableFrom" type="datetime-local" class="form-control" /></div>
+    <div class="mb-3"><label asp-for="AvailableTo" class="form-label">Tilgjengelig til</label><input asp-for="AvailableTo" type="datetime-local" class="form-control" /><span asp-validation-for="AvailableTo" class="text-danger"></span></div>
+    <div class="mb-3"><label asp-for="Status" class="form-label">Status</label><select asp-for="Status" class="form-select"><option value="Available">Tilgjengelig</option><option value="Unavailable">Ikke tilgjengelig</option></select></div>
+
+    <button type="submit" class="btn btn-primary">Lagre</button>
+    <a asp-action="Details" asp-route-id="@Model.ResourceId" class="btn btn-secondary">Avbryt</a>
+</form>

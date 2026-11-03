@@ -13,18 +13,23 @@
           class="resource-form">
 
         <div>
-            <label asp-for="ResourceTypeId">Ressurstype-ID</label>
-            <input asp-for="ResourceTypeId" type="number" />
+            <label asp-for="ResourceTypeId">Ressurstype</label>
+            <select asp-for="ResourceTypeId" asp-items="Model.ResourceTypes">
+                <option value="">Velg ressurstype</option>
+            </select>
+            <span asp-validation-for="ResourceTypeId" class="text-danger"></span>
         </div>
 
         <div>
             <label asp-for="Title">Tittel</label>
             <input asp-for="Title" />
+            <span asp-validation-for="Title" class="text-danger"></span>
         </div>
 
         <div>
             <label asp-for="Description">Beskrivelse</label>
             <textarea asp-for="Description"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
         </div>
 
         <div>

@@ -9,4 +9,10 @@ public interface IResourceRepository
     Task<Resource?> GetByIdAsync(int id);
 
     Task<int> CreateAsync(Resource resource);
+
+    Task UpdateAsync(Resource resource);
+
+    Task DeleteAsync(int id);
+
+    Task<IEnumerable<ResourceType>> GetResourceTypesAsync();
 }

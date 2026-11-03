@@ -1,12 +1,17 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace SemesterProsjekt.Models;
 
 // Informasjon fra ressursskjemaet.
 public class ResourceViewModel
 {
+    public int ResourceId { get; set; }
+
     [Range(1, int.MaxValue, ErrorMessage = "Velg en ressurstype.")]
     public int ResourceTypeId { get; set; }
+
+    public IEnumerable<SelectListItem> ResourceTypes { get; set; } = [];
 
     [Required(ErrorMessage = "Tittel må fylles ut.")]
     [StringLength(160)]
