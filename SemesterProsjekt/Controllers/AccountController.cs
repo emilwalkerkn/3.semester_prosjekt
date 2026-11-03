@@ -23,7 +23,12 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult Register(string? returnUrl = null)
     {
-        return View(new RegisterViewModel { ReturnUrl = returnUrl });
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return RedirectToAction(nameof(HomeController.Index), "Home")!;
+        }
+
+        return View(new RegisterViewModel { ReturnUrl = SafeReturnUrl(returnUrl) });
     }
 
     [AllowAnonymous]
@@ -31,6 +36,9 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterViewModel model)
     {
+        // ReturnUrl comes from a hidden form field, so validate it again on POST.
+        model.ReturnUrl = SafeReturnUrl(model.ReturnUrl);
+
         if (!ModelState.IsValid)
         {
             return View(model);
@@ -82,7 +90,12 @@ public class AccountController : Controller
     [HttpGet]
     public IActionResult Login(string? returnUrl = null)
     {
-        return View(new LoginViewModel { ReturnUrl = returnUrl });
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return RedirectToAction(nameof(HomeController.Index), "Home")!;
+        }
+
+        return View(new LoginViewModel { ReturnUrl = SafeReturnUrl(returnUrl) });
     }
 
     [AllowAnonymous]
@@ -90,6 +103,9 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(LoginViewModel model)
     {
+        // ReturnUrl comes from a hidden form field, so validate it again on POST.
+        model.ReturnUrl = SafeReturnUrl(model.ReturnUrl);
+
         if (!ModelState.IsValid)
         {
             return View(model);
@@ -137,8 +153,21 @@ public class AccountController : Controller
 
     private IActionResult RedirectToLocal(string? returnUrl)
     {
-        return Url.IsLocalUrl(returnUrl)
-            ? LocalRedirect(returnUrl)
+        return SafeReturnUrl(returnUrl) is { } localUrl
+            ? LocalRedirect(localUrl)
             : RedirectToAction(nameof(HomeController.Index), "Home")!;
+    }
+
+    private string? SafeReturnUrl(string? returnUrl)
+    {
+        if (!Url.IsLocalUrl(returnUrl) ||
+            string.IsNullOrWhiteSpace(returnUrl) ||
+            returnUrl.StartsWith("/Account/", StringComparison.OrdinalIgnoreCase) ||
+            returnUrl.StartsWith("/Home/Error", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        return returnUrl;
     }
 }

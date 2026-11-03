@@ -9,10 +9,10 @@ using SemesterProsjekt.Data;
 
 #nullable disable
 
-namespace SemesterProsjekt.Migrations
+namespace SemesterProsjekt.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20261103111659_CreateIdentitySchema")]
+    [Migration("20261102143756_CreateIdentitySchema")]
     partial class CreateIdentitySchema
     {
         /// <inheritdoc />

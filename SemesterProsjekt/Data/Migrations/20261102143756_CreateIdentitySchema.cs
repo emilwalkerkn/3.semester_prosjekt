@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace SemesterProsjekt.Migrations
+namespace SemesterProsjekt.Data.Migrations
 {
     /// <inheritdoc />
     public partial class CreateIdentitySchema : Migration
