@@ -121,13 +121,7 @@
                 <div class="portal-account">
                     <span class="notification" aria-label="3 varsler">♧</span>
                     <span>@accountRole</span>
-                    @if (User.Identity?.IsAuthenticated == true)
-                    {
-                        <form asp-controller="Account" asp-action="Logout" method="post">
-                            <button type="submit" class="btn btn-sm btn-outline-secondary">Logg ut</button>
-                        </form>
-                    }
-                    else
+                    @if (User.Identity?.IsAuthenticated != true)
                     {
                         <a asp-controller="Account" asp-action="Login" class="btn btn-sm btn-primary">Logg inn</a>
                     }

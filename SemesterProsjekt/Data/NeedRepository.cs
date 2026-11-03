@@ -18,29 +18,31 @@ public class NeedRepository : INeedRepository
 
         var orderBy = sortBy switch
         {
-            "deadline" => "Deadline IS NULL, Deadline ASC",
-            "priority" => "FIELD(Priority, 'Critical', 'High', 'Normal', 'Low')",
-            "status" => "Status ASC, NeedId DESC",
-            _ => "NeedId DESC"
+            "deadline" => "n.Deadline IS NULL, n.Deadline ASC",
+            "priority" => "FIELD(n.Priority, 'Critical', 'High', 'Normal', 'Low')",
+            "status" => "n.Status ASC, n.NeedId DESC",
+            _ => "n.NeedId DESC"
         };
 
         var sql = $"""
             SELECT
-                NeedId,
-                UserId,
-                NeedTypeId,
-                Title,
-                Description,
-                GeometryType,
-                GeometryData,
-                ContactPoint,
-                NeededFrom,
-                Deadline,
-                Quantity,
-                Unit,
-                Status,
-                Priority
-            FROM Needs
+                n.NeedId,
+                n.UserId,
+                n.NeedTypeId,
+                nt.Name AS NeedTypeName,
+                n.Title,
+                n.Description,
+                n.GeometryType,
+                n.GeometryData,
+                n.ContactPoint,
+                n.NeededFrom,
+                n.Deadline,
+                n.Quantity,
+                n.Unit,
+                n.Status,
+                n.Priority
+            FROM Needs n
+            LEFT JOIN NeedType nt ON nt.NeedTypeId = n.NeedTypeId
             ORDER BY {orderBy};
             """;
 
@@ -53,22 +55,24 @@ public class NeedRepository : INeedRepository
 
         const string sql = """
             SELECT
-                NeedId,
-                UserId,
-                NeedTypeId,               
-                Title,
-                Description,
-                GeometryType,
-                GeometryData,
-                ContactPoint,
-                NeededFrom,
-                Deadline,
-                Quantity,
-                Unit,
-                Status,
-                Priority
-            FROM Needs
-            WHERE NeedId = @NeedId;
+                n.NeedId,
+                n.UserId,
+                n.NeedTypeId,
+                nt.Name AS NeedTypeName,
+                n.Title,
+                n.Description,
+                n.GeometryType,
+                n.GeometryData,
+                n.ContactPoint,
+                n.NeededFrom,
+                n.Deadline,
+                n.Quantity,
+                n.Unit,
+                n.Status,
+                n.Priority
+            FROM Needs n
+            LEFT JOIN NeedType nt ON nt.NeedTypeId = n.NeedTypeId
+            WHERE n.NeedId = @NeedId;
             """;
 
         return await connection.QuerySingleOrDefaultAsync<Need>(

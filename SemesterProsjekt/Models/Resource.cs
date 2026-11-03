@@ -13,6 +13,9 @@ public class Resource
 
     public int ResourceTypeId { get; set; }
 
+    // Fylles av repositoryet når ressursen hentes sammen med sin type.
+    public string? ResourceTypeName { get; set; }
+
     [Required(ErrorMessage = "Tittel må fylles ut.")]
     [StringLength(160)]
     public string Title { get; set; } = "";

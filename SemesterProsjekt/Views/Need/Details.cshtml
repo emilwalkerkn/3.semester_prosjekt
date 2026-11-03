@@ -2,71 +2,46 @@
 
 @{
     ViewData["Title"] = "Behovsdetaljer";
+    var canManage = User.IsInRole("Admin") || User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.UserId;
+    var statusText = Model.Status switch
+    {
+        "New" => "Ny",
+        "In progress" => "Under behandling",
+        "Resolved" => "Løst",
+        _ => Model.Status
+    };
+    var statusClass = Model.Status == "Resolved" ? "resolved" : Model.Status is "New" or "In progress" ? "warning" : "";
 }
 
-<h1>Behovsdetaljer</h1>
+<section class="details-page">
+    <a asp-action="Overview" class="back-link">← Tilbake til behov</a>
 
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title">@Model.Title</h5>
+    <article class="portal-card details-card">
+        <header class="details-heading">
+            <div>
+                <p class="record-type">@(Model.NeedTypeName ?? "Behov")</p>
+                <h1>@Model.Title</h1>
+            </div>
+            <span class="status @statusClass">@statusText</span>
+        </header>
 
-        <p class="card-text">
-            <strong>Beskrivelse:</strong><br />
-            @Model.Description
-        </p>
+        <p class="details-description">@Model.Description</p>
 
-        <p class="card-text">
-            <strong>Behovstype-ID:</strong>
-            @Model.NeedTypeId
-        </p>
-        
-        <p class="card-text">
-            <strong>Mengde:</strong>
-            @Model.Quantity @Model.Unit
-        </p>
+        <dl class="details-grid">
+            <div><dt>Type</dt><dd>@(Model.NeedTypeName ?? "Ikke oppgitt")</dd></div>
+            <div><dt>Prioritet</dt><dd>@Model.Priority</dd></div>
+            <div><dt>Mengde</dt><dd>@Model.Quantity @Model.Unit</dd></div>
+            <div><dt>Kontaktpunkt</dt><dd>@(Model.ContactPoint ?? "Ikke oppgitt")</dd></div>
+            <div><dt>Behov fra</dt><dd>@(Model.NeededFrom?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")</dd></div>
+            <div><dt>Frist</dt><dd>@(Model.Deadline?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")</dd></div>
+        </dl>
 
-        <p class="card-text">
-            <strong>Status:</strong>
-            @Model.Status
-        </p>
-
-        <p class="card-text">
-            <strong>Prioritet:</strong>
-            @Model.Priority
-        </p>
-
-        <p class="card-text">
-            <strong>Kontaktpunkt:</strong>
-            @(Model.ContactPoint ?? "Ikke oppgitt")
-        </p>
-
-        <p class="card-text">
-            <strong>Behov fra:</strong>
-            @(Model.NeededFrom?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")
-        </p>
-
-        <p class="card-text">
-            <strong>Frist:</strong>
-            @(Model.Deadline?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")
-        </p>
-
-        @if (!string.IsNullOrWhiteSpace(Model.GeometryType))
+        @if (canManage)
         {
-            <p class="card-text">
-                <strong>Geometri:</strong>
-                @Model.GeometryType
-            </p>
+            <div class="record-actions details-actions">
+                <a asp-action="Edit" asp-route-id="@Model.NeedId" class="portal-button">Rediger behov</a>
+                <a asp-action="Delete" asp-route-id="@Model.NeedId" class="portal-button danger">Slett behov</a>
+            </div>
         }
-    </div>
-</div>
-
-<a asp-controller="Need"
-   asp-action="Overview"
-   class="btn btn-secondary mt-3">
-    Tilbake til behovsoversikten
-</a>
-@if (User.IsInRole("Admin") || User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.UserId)
-{
-    <a asp-action="Edit" asp-route-id="@Model.NeedId" class="btn btn-primary mt-3">Rediger</a>
-    <a asp-action="Delete" asp-route-id="@Model.NeedId" class="btn btn-danger mt-3">Slett</a>
-}
+    </article>
+</section>
