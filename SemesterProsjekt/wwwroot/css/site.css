@@ -418,3 +418,69 @@ html.dark-mode .need-form input::placeholder,
 html.dark-mode .need-form textarea::placeholder {
   color:#8fa8bf;
 }
+
+.portal-auth {
+  display: grid;
+  place-items: center;
+  min-height: calc(100vh - 12rem);
+  padding: 3rem 1.25rem;
+}
+
+.portal-auth__card {
+  width: min(100%, 31rem);
+  padding: 2rem;
+  background: #ffffff;
+  border: 1px solid #d6e4f0;
+  border-radius: 1rem;
+  box-shadow: 0 0.75rem 2rem rgba(20, 72, 112, 0.12);
+}
+
+.portal-auth__eyebrow {
+  margin-bottom: 0.35rem;
+  color: #1f6da8;
+  font-weight: 700;
+}
+
+.portal-auth__card h1 {
+  margin-bottom: 0.5rem;
+  color: #164f7c;
+}
+
+.portal-auth__card > p {
+  color: #58708a;
+}
+
+.portal-auth .form-group {
+  margin-top: 1rem;
+}
+
+.portal-auth .form-control {
+  width: 100%;
+  margin-top: 0.35rem;
+}
+
+.portal-auth .form-check {
+  margin: 1rem 0;
+}
+
+.portal-auth .btn {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.portal-auth__footer {
+  margin: 1.5rem 0 0;
+  text-align: center;
+}
+
+@media (max-width: 576px) {
+  .portal-auth {
+    align-items: start;
+    padding: 1.5rem 1rem;
+  }
+
+  .portal-auth__card {
+    padding: 1.5rem;
+  }
+}
+

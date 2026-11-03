@@ -1,0 +1,62 @@
+@model SemesterProsjekt.Models.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Opprett konto";
+}
+
+<section class="portal-auth">
+    <div class="portal-auth__card">
+        <p class="portal-auth__eyebrow">Kriseportal</p>
+        <h1>Opprett konto</h1>
+        <p>Registrer deg for å legge inn og følge opp behov og ressurser.</p>
+
+        <form asp-action="Register" method="post">
+            <input asp-for="ReturnUrl" type="hidden" />
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="FirstName">Fornavn</label>
+                <input asp-for="FirstName" class="form-control" autocomplete="given-name" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="LastName">Etternavn</label>
+                <input asp-for="LastName" class="form-control" autocomplete="family-name" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Email">E-post</label>
+                <input asp-for="Email" class="form-control" autocomplete="email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Password">Passord</label>
+                <input asp-for="Password" class="form-control" autocomplete="new-password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ConfirmPassword">Bekreft passord</label>
+                <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Opprett konto
+            </button>
+        </form>
+
+        <p class="portal-auth__footer">
+            Har du allerede en konto?
+            <a asp-action="Login" asp-route-returnUrl="@Model.ReturnUrl">Logg inn</a>
+        </p>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

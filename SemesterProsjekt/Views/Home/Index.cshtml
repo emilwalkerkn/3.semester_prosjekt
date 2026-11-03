@@ -1,115 +1,134 @@
 ﻿@model SemesterProsjekt.Models.DashboardViewModel
 
 @{
-    ViewData["Title"] = "Forside";
+    ViewData["Title"] = "Hjem";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Velkommen</h1>
+<section class="home-hero">
+    <div class="home-hero-copy">
+        <p class="home-eyebrow">Kriseportal</p>
+        <h1>Samlet oversikt når det virkelig gjelder.</h1>
+        <p>
+            Registrer behov, tilby ressurser og følg opp situasjonen
+            fra ett samlet sted.
+        </p>
 
-    <p>Registrer et behov eller en ressurs.</p>
+        <div class="home-hero-actions">
+            <a asp-controller="Need"
+               asp-action="Overview"
+               class="portal-button">
+                Se behov
+            </a>
 
-    <a asp-controller="Need"
-       asp-action="Create"
-       class="btn btn-primary">
-        Registrer behov
-    </a>
-
-    <a asp-controller="Resource"
-       asp-action="Create"
-       class="btn btn-primary">
-        Registrer ressurs
-    </a>
-</div>
-
-<div class="row mt-4 mb-4">
-    <div class="col-md-6 mb-3">
-        <div class="card shadow-sm h-100">
-            <div class="card-body">
-                <h5 class="card-title">Registrerte behov</h5>
-                <h2>@Model.TotalNeeds</h2>
-                <p class="card-text">
-                    Behov som er registrert i portalen.
-                </p>
-
-                <a asp-controller="Need"
-                   asp-action="Overview"
-                   class="btn btn-primary">
-                    Vis behov
-                </a>
-            </div>
+            <a asp-controller="Resource"
+               asp-action="Overview"
+               class="portal-button secondary">
+                Se ressurser
+            </a>
         </div>
     </div>
 
-    <div class="col-md-6 mb-3">
-        <div class="card shadow-sm h-100">
-            <div class="card-body">
-                <h5 class="card-title">Registrerte ressurser</h5>
-                <h2>@Model.TotalResources</h2>
-                <p class="card-text">
-                    Ressurser som er registrert i portalen.
-                </p>
+    <img src="~/images/kriseportal-hero.png"
+         alt="Et team som planlegger beredskapsinnsats rundt et kart" />
+</section>
 
-                <a asp-controller="Resource"
-                   asp-action="Overview"
-                   class="btn btn-primary">
-                    Vis ressurser
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+<section class="home-info-grid" aria-label="Slik fungerer Kriseportal">
+    <article class="home-info-card">
+        <span aria-hidden="true">1</span>
+        <h2>Registrer</h2>
+        <p>Legg inn et behov eller en ressurs med mengde, kontaktinformasjon og plassering.</p>
+    </article>
 
-<h3 class="mt-4 mb-3">Siste registreringer</h3>
+    <article class="home-info-card">
+        <span aria-hidden="true">2</span>
+        <h2>Følg opp</h2>
+        <p>Se alle registreringer og oppdater status mens situasjonen utvikler seg.</p>
+    </article>
 
-<div class="row">
-    <div class="col-md-6 mb-3">
-        <div class="card shadow-sm h-100">
-            <div class="card-body">
-                <h5 class="card-title">Siste behov</h5>
+    <article class="home-info-card">
+        <span aria-hidden="true">3</span>
+        <h2>Koordiner</h2>
+        <p>Bruk oversiktene for å finne ressurser som kan dekke behovene.</p>
+    </article>
+</section>
 
-                @foreach (var need in Model.RecentNeeds)
-                {
-                    <div class="border-bottom py-2">
-                        <strong>@need.Title</strong>
-                        <br />
-                        <small>@need.Description</small>
-                        <br />
-
-                        <a asp-controller="Need"
-                           asp-action="Details"
-                           asp-route-id="@need.NeedId"
-                           class="btn btn-outline-primary btn-sm mt-2">
-                            Se detaljer
-                        </a>
-                    </div>
-                }
-            </div>
-        </div>
+<section class="home-overview" aria-labelledby="oversikt-heading">
+    <div>
+        <p class="home-eyebrow">Akkurat nå</p>
+        <h2 id="oversikt-heading">Oversikt</h2>
+        <p>Se status på det som er registrert i Kriseportal.</p>
     </div>
 
-    <div class="col-md-6 mb-3">
-        <div class="card shadow-sm h-100">
-            <div class="card-body">
-                <h5 class="card-title">Siste ressurser</h5>
+    <div class="stat-grid home-stat-grid">
+        <article class="portal-card stat-card">
+            <p>Registrerte behov</p>
+            <strong>@Model.TotalNeeds</strong>
+        </article>
 
-                @foreach (var resource in Model.RecentResources)
-                {
-                    <div class="border-bottom py-2">
-                        <strong>@resource.Title</strong>
-                        <br />
-                        <small>@resource.Description</small>
-                        <br />
+        <article class="portal-card stat-card">
+            <p>Tilgjengelige ressurser</p>
+            <strong>@Model.TotalResources</strong>
+        </article>
 
-                        <a asp-controller="Resource"
-                           asp-action="Details"
-                           asp-route-id="@resource.ResourceId"
-                           class="btn btn-outline-primary btn-sm mt-2">
-                            Se detaljer
-                        </a>
-                    </div>
-                }
-            </div>
+        <article class="portal-card stat-card">
+            <p>Saker i oversikt</p>
+            <strong>@(Model.TotalNeeds + Model.TotalResources)</strong>
+        </article>
+    </div>
+</section>
+
+<section class="portal-card section-card home-latest">
+    <div class="section-heading-row">
+        <div>
+            <p class="home-eyebrow">Siste aktivitet</p>
+            <h2>Siste registreringer</h2>
         </div>
     </div>
-</div>
+
+    @if (!Model.RecentNeeds.Any() && !Model.RecentResources.Any())
+    {
+        <p class="empty-state">Ingen registreringer ennå.</p>
+    }
+    else
+    {
+        <ul class="summary-list">
+            @foreach (var need in Model.RecentNeeds)
+            {
+                <li>
+                    <a asp-controller="Need"
+                       asp-action="Details"
+                       asp-route-id="@need.NeedId">
+                        Behov: @need.Title
+                    </a>
+
+                    <span class="status new">@need.Status</span>
+
+                    <a asp-controller="Need"
+                       asp-action="Details"
+                       asp-route-id="@need.NeedId">
+                        Se detaljer
+                    </a>
+                </li>
+            }
+
+            @foreach (var resource in Model.RecentResources)
+            {
+                <li>
+                    <a asp-controller="Resource"
+                       asp-action="Details"
+                       asp-route-id="@resource.ResourceId">
+                        Ressurs: @resource.Title
+                    </a>
+
+                    <span class="status available">@resource.Status</span>
+
+                    <a asp-controller="Resource"
+                       asp-action="Details"
+                       asp-route-id="@resource.ResourceId">
+                        Se detaljer
+                    </a>
+                </li>
+            }
+        </ul>
+    }
+</section>

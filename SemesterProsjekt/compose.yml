@@ -7,8 +7,11 @@ services:
       - "8080:8080"
     environment:
       ConnectionStrings__DefaultConnection: "Server=mariadb;Port=3306;Database=semesterprosjekt;User=appuser;Password=apppassword;"
+    volumes:
+      - dataprotection_keys:/keys
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
 
   mariadb:
     image: mariadb:latest
@@ -22,6 +25,13 @@ services:
     volumes:
       - mariadb_data:/var/lib/mysql
       - ./Database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
 
 volumes:
   mariadb_data:
+  dataprotection_keys:
