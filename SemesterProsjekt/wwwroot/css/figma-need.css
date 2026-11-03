@@ -1,0 +1,85 @@
+/* Farger fra Figma-designet */
+:root {
+    --portal-blue: #144e78;
+    --portal-button: #1769aa;
+    --portal-background: #f4f9fc;
+    --portal-border: #d5e6f1;
+    --portal-text: #164e78;
+}
+
+/* Bakgrunn */
+body {
+    background-color: var(--portal-background);
+}
+
+/* Hovedinnhold */
+.need-container {
+    max-width: 835px;
+    margin: 40px auto;
+    padding: 26px;
+    background-color: white;
+    border: 1px solid var(--portal-border);
+    border-radius: 12px;
+}
+
+/* Overskrift */
+.need-container h1 {
+    color: var(--portal-text);
+    font-size: 28px;
+    margin-bottom: 25px;
+}
+
+/* Skjema */
+.need-form {
+    display: grid;
+    gap: 20px;
+}
+
+/* Tekst over feltene */
+.need-form label {
+    display: block;
+    font-weight: 600;
+    color: var(--portal-text);
+    margin-bottom: 8px;
+}
+
+/* Input-felter */
+.need-form input,
+.need-form select,
+.need-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--portal-border);
+    border-radius: 9px;
+}
+
+/* Knapper */
+.need-form button {
+    background-color: var(--portal-button);
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* Skjemaarket lastes etter hovedstilen. Behold valgt nattmodus her også. */
+html.dark-mode {
+    --portal-background: #080d14;
+    --portal-border: #2c4055;
+    --portal-text: #f1f7ff;
+    --portal-button: #278ed8;
+}
+
+html.dark-mode .need-container {
+    background-color: #131e2b;
+    border-color: #2c4055;
+}
+
+html.dark-mode .need-form input,
+html.dark-mode .need-form select,
+html.dark-mode .need-form textarea {
+    background-color: #0d1621;
+    border-color: #3a5269;
+    color: #f1f7ff;
+}
