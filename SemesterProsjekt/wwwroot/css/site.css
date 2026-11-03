@@ -87,6 +87,7 @@ html.dark-mode .settings-sign-out:hover { background:#3a1b20; color:#ffd0d0; }
 html.dark-mode .leaflet-tile-pane { filter:brightness(.62) saturate(.7) contrast(1.15); }
 
 .login-page { min-height:100vh; background:var(--portal-bg); }
+.public-page { min-height:100vh; padding:40px; background:var(--portal-bg); }
 .login-shell { display:grid; grid-template-columns:minmax(280px, .85fr) minmax(380px, 1.15fr); min-height:100vh; }
 .login-intro { display:flex; flex-direction:column; justify-content:center; padding:56px; background:var(--portal-blue); color:#fff; }
 .login-intro .portal-brand { margin:0 0 80px; }.login-intro .portal-brand-mark{background:rgb(255 255 255 / 18%)}

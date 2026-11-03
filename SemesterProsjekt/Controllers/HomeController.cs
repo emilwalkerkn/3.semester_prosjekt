@@ -23,8 +23,6 @@ public class HomeController : Controller
     }
     
     
-    [AllowAnonymous]
-
     public async Task<IActionResult> Index()
     {
         var needs = (await _needRepository.GetAllAsync()).ToList();
@@ -170,7 +168,6 @@ public class HomeController : Controller
         return View(needs);
     }
 
-    [AllowAnonymous]
     public IActionResult Privacy()
     {
         return View();
@@ -180,6 +177,7 @@ public class HomeController : Controller
         Duration = 0,
         Location = ResponseCacheLocation.None,
         NoStore = true)]
+    [AllowAnonymous]
     public IActionResult Error()
     {
         return View(new ErrorViewModel
