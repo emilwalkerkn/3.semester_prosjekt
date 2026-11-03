@@ -14,6 +14,7 @@ public static class MatchStatuses
     public const string Proposed = "Foreslått";
     public const string Approved = "Godkjent";
     public const string Completed = "Fullført";
+    public const string Declined = "Avslått";
 
-    public static readonly string[] All = [Proposed, Approved, Completed];
+    public static readonly string[] All = [Proposed, Approved, Completed, Declined];
 }

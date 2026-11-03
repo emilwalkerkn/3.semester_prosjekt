@@ -14,12 +14,12 @@ public class MatchRepository : IMatchRepository
     }
 
     public Task<IEnumerable<MatchListItemViewModel>> GetActiveAsync() =>
-        GetByCompletionAsync(completed: false);
+        GetByHistoryAsync(isClosed: false);
 
-    public Task<IEnumerable<MatchListItemViewModel>> GetCompletedAsync() =>
-        GetByCompletionAsync(completed: true);
+    public Task<IEnumerable<MatchListItemViewModel>> GetHistoryAsync() =>
+        GetByHistoryAsync(isClosed: true);
 
-    private async Task<IEnumerable<MatchListItemViewModel>> GetByCompletionAsync(bool completed)
+    private async Task<IEnumerable<MatchListItemViewModel>> GetByHistoryAsync(bool isClosed)
     {
         using var connection = _connectionFactory.CreateConnection();
         const string sql = """
@@ -29,15 +29,16 @@ public class MatchRepository : IMatchRepository
             FROM `Match` m
             INNER JOIN Needs n ON n.NeedId = m.NeedId
             INNER JOIN Resources r ON r.ResourceId = m.ResourceId
-            WHERE (@Completed = 1 AND m.Status = @CompletedStatus)
-               OR (@Completed = 0 AND m.Status <> @CompletedStatus)
+            WHERE (@IsClosed = 1 AND m.Status IN (@CompletedStatus, @DeclinedStatus))
+               OR (@IsClosed = 0 AND m.Status NOT IN (@CompletedStatus, @DeclinedStatus))
             ORDER BY m.MatchedAt DESC;
             """;
 
         return await connection.QueryAsync<MatchListItemViewModel>(sql, new
         {
-            Completed = completed,
-            CompletedStatus = MatchStatuses.Completed
+            IsClosed = isClosed,
+            CompletedStatus = MatchStatuses.Completed,
+            DeclinedStatus = MatchStatuses.Declined
         });
     }
 
@@ -53,8 +54,17 @@ public class MatchRepository : IMatchRepository
     {
         using var connection = _connectionFactory.CreateConnection();
         return await connection.ExecuteScalarAsync<bool>(
-            "SELECT COUNT(*) > 0 FROM `Match` WHERE NeedId = @NeedId AND ResourceId = @ResourceId;",
-            new { NeedId = needId, ResourceId = resourceId });
+            """
+            SELECT COUNT(*) > 0
+            FROM `Match`
+            WHERE NeedId = @NeedId
+              AND ResourceId = @ResourceId;
+            """,
+            new
+            {
+                NeedId = needId,
+                ResourceId = resourceId
+            });
     }
 
     public async Task<int> CreateAsync(Match match)
