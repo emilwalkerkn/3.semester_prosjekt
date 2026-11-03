@@ -1,0 +1,53 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace SemesterProsjekt.Models.ViewModels;
+
+/// <summary>
+/// Samler informasjonen som vises på innstillingssiden.
+/// </summary>
+public class SettingsPageViewModel
+{
+    public ProfileSettingsViewModel Profile { get; set; } = new();
+
+    public PasswordSettingsViewModel Password { get; set; } = new();
+}
+
+public class ProfileSettingsViewModel
+{
+    [Required(ErrorMessage = "Fornavn må fylles ut.")]
+    [Display(Name = "Fornavn")]
+    public string FirstName { get; set; } = "";
+
+    [Required(ErrorMessage = "Etternavn må fylles ut.")]
+    [Display(Name = "Etternavn")]
+    public string LastName { get; set; } = "";
+
+    [Required(ErrorMessage = "E-postadresse må fylles ut.")]
+    [EmailAddress(ErrorMessage = "Skriv inn en gyldig e-postadresse.")]
+    [Display(Name = "E-postadresse")]
+    public string Email { get; set; } = "";
+
+    public string Role { get; set; } = "Bruker";
+}
+
+public class PasswordSettingsViewModel
+{
+    [Required(ErrorMessage = "Skriv inn nåværende passord.")]
+    [DataType(DataType.Password)]
+    [Display(Name = "Nåværende passord")]
+    public string CurrentPassword { get; set; } = "";
+
+    [Required(ErrorMessage = "Skriv inn et nytt passord.")]
+    [MinLength(8, ErrorMessage = "Nytt passord må være minst 8 tegn.")]
+    [RegularExpression(@"^(?=.*[A-Za-z])(?=.*\d)(?=.*[A-Z]).{8,}$",
+        ErrorMessage = "Passordet må ha minst 8 tegn, minst én stor bokstav og inneholde både bokstaver og tall.")]
+    [DataType(DataType.Password)]
+    [Display(Name = "Nytt passord")]
+    public string NewPassword { get; set; } = "";
+
+    [Required(ErrorMessage = "Bekreft det nye passordet.")]
+    [DataType(DataType.Password)]
+    [Compare(nameof(NewPassword), ErrorMessage = "De nye passordene er ikke like.")]
+    [Display(Name = "Bekreft nytt passord")]
+    public string ConfirmPassword { get; set; } = "";
+}
