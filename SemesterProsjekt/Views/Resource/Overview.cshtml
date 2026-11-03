@@ -55,11 +55,17 @@
             @foreach (var resource in Model)
             {
                 var canManage = User.IsInRole("Admin") || currentUserId == resource.UserId;
+                var typeIcon = PortalTypeIcons.ForResource(resource.ResourceTypeId);
 
                 <article class="portal-card overview-record">
                     <div class="overview-record-main">
-                        <p class="record-type">@(resource.ResourceTypeName ?? "Ressurs")</p>
-                        <h2>@resource.Title</h2>
+                        <div class="record-title-with-icon">
+                            <span class="type-icon" role="img" aria-label="@typeIcon.Label">@typeIcon.Symbol</span>
+                            <div>
+                                <p class="record-type">@(resource.ResourceTypeName ?? "Ressurs")</p>
+                                <h2>@resource.Title</h2>
+                            </div>
+                        </div>
                         <p class="overview-description">@resource.Description</p>
                     </div>
 
