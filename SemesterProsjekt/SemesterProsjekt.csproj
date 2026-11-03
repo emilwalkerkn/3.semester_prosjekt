@@ -10,6 +10,12 @@
     <ItemGroup>
       <_ContentIncludedByDefault Remove="SemesterProsjekt.UnitTests\obj\project.assets.json" />
       <_ContentIncludedByDefault Remove="SemesterProsjekt.UnitTests\obj\SemesterProsjekt.UnitTests.csproj.nuget.dgspec.json" />
+      <!--
+        The legacy Migrations folder was generated with the removed Oracle
+        MySQL provider. Identity now uses the Pomelo migrations in
+        Data/Migrations, so the obsolete files must not be compiled.
+      -->
+      <Compile Remove="Migrations\**\*.cs" />
     </ItemGroup>
 
     <ItemGroup>

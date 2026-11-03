@@ -1,0 +1,83 @@
+@model SemesterProsjekt.Models.ViewModels.SettingsPageViewModel
+
+@{
+    ViewData["Title"] = "Kontoinnstillinger";
+}
+
+<div class="settings-layout settings-page-layout">
+    <partial name="_SettingsSidebar" model="Model" />
+
+    <div class="settings-content">
+        <h1>Kontoinnstillinger</h1>
+        <p class="page-intro">Administrer profilinformasjon, kontosikkerhet og portalvalg.</p>
+
+        @if (TempData["SettingsSuccess"] is string success)
+        {
+            <div class="settings-message success" role="status">@success</div>
+        }
+
+        <div class="settings-grid">
+            <section class="portal-card settings-card" id="profil">
+                <h2>Profil og kontakt</h2>
+                <p>Oppdater navnet og e-postadressen som brukes i portalen.</p>
+                <form asp-action="UpdateProfile" method="post" class="settings-form">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-field">
+                        <label asp-for="Profile.FirstName"></label>
+                        <input asp-for="Profile.FirstName" />
+                        <span asp-validation-for="Profile.FirstName"></span>
+                    </div>
+                    <div class="form-field">
+                        <label asp-for="Profile.LastName"></label>
+                        <input asp-for="Profile.LastName" />
+                        <span asp-validation-for="Profile.LastName"></span>
+                    </div>
+                    <div class="form-field">
+                        <label asp-for="Profile.Email"></label>
+                        <input asp-for="Profile.Email" type="email" autocomplete="email" />
+                        <span asp-validation-for="Profile.Email"></span>
+                    </div>
+                    <div class="form-field">
+                        <label>Kontorolle</label>
+                        <input value="@Model.Profile.Role" readonly aria-readonly="true" />
+                    </div>
+                    <button type="submit">Lagre endringer</button>
+                </form>
+            </section>
+
+            <section class="portal-card settings-card" id="sikkerhet">
+                <h2>Sikkerhet</h2>
+                <p>Endre passordet ditt. Du må oppgi det nåværende passordet først.</p>
+                <form asp-action="UpdatePassword" method="post" class="settings-form">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-field">
+                        <label asp-for="Password.CurrentPassword"></label>
+                        <input asp-for="Password.CurrentPassword" autocomplete="current-password" />
+                        <span asp-validation-for="Password.CurrentPassword"></span>
+                    </div>
+                    <div class="form-field">
+                        <label asp-for="Password.NewPassword"></label>
+                        <input asp-for="Password.NewPassword" autocomplete="new-password" />
+                        <small class="form-text">Minst 8 tegn, med minst én stor bokstav og både bokstaver og tall.</small>
+                        <span asp-validation-for="Password.NewPassword"></span>
+                    </div>
+                    <div class="form-field">
+                        <label asp-for="Password.ConfirmPassword"></label>
+                        <input asp-for="Password.ConfirmPassword" autocomplete="new-password" />
+                        <span asp-validation-for="Password.ConfirmPassword"></span>
+                    </div>
+                    <button type="submit">Oppdater passord</button>
+                </form>
+            </section>
+
+            <section class="portal-card settings-card" id="varslinger">
+                <h2>Varslinger</h2>
+                <p>Du får beskjed i portalen når en match trenger oppfølging. E-postvarsler kan aktiveres når match-funksjonen er ferdig koblet til databasen.</p>
+            </section>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
