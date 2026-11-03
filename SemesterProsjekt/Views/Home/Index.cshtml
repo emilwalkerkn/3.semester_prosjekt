@@ -8,10 +8,7 @@
     <div class="home-hero-copy">
         <p class="home-eyebrow">Kriseportal</p>
         <h1>Samlet oversikt når det virkelig gjelder.</h1>
-        <p>
-            Registrer behov, tilby ressurser og følg opp situasjonen
-            fra ett samlet sted.
-        </p>
+        <p>Registrer behov, tilby ressurser og følg opp matcher på ett sted. Kriseportal gjør det enklere å koordinere en trygg og rask innsats.</p>
 
         <div class="home-hero-actions">
             <a asp-controller="Need"
@@ -41,14 +38,14 @@
 
     <article class="home-info-card">
         <span aria-hidden="true">2</span>
-        <h2>Følg opp</h2>
-        <p>Se alle registreringer og oppdater status mens situasjonen utvikler seg.</p>
+        <h2>Finn en match</h2>
+        <p>Koble riktig ressurs til et behov, og la ressurseieren godta forslaget.</p>
     </article>
 
     <article class="home-info-card">
         <span aria-hidden="true">3</span>
-        <h2>Koordiner</h2>
-        <p>Bruk oversiktene for å finne ressurser som kan dekke behovene.</p>
+        <h2>Følg opp</h2>
+        <p>Bruk oversiktene til å se hva som er nytt, pågående og løst.</p>
     </article>
 </section>
 
@@ -98,7 +95,13 @@
                     <a asp-controller="Need"
                        asp-action="Details"
                        asp-route-id="@need.NeedId">
-                        Behov: @need.Title
+                        @{
+                            var typeIcon = PortalTypeIcons.ForNeed(need.NeedTypeId);
+                        }
+                        <span class="summary-link-with-icon">
+                            <span class="summary-type-icon" role="img" aria-label="@typeIcon.Label">@typeIcon.Symbol</span>
+                            @need.Title
+                        </span>
                     </a>
 
                     <span class="status new">@need.Status</span>
@@ -117,7 +120,13 @@
                     <a asp-controller="Resource"
                        asp-action="Details"
                        asp-route-id="@resource.ResourceId">
-                        Ressurs: @resource.Title
+                        @{
+                            var typeIcon = PortalTypeIcons.ForResource(resource.ResourceTypeId);
+                        }
+                        <span class="summary-link-with-icon">
+                            <span class="summary-type-icon" role="img" aria-label="@typeIcon.Label">@typeIcon.Symbol</span>
+                            @resource.Title
+                        </span>
                     </a>
 
                     <span class="status available">@resource.Status</span>
