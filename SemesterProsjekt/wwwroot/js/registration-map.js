@@ -20,24 +20,37 @@
             attribution: "&copy; OpenStreetMap contributors"
         }).addTo(map);
 
-        const selectedPoint = new L.FeatureGroup();
-        map.addLayer(selectedPoint);
+        // The same registration flow supports either one point or one line.
+        // The FeatureGroup is also what Leaflet Draw uses for edit/delete actions.
+        const selectedGeometry = new L.FeatureGroup();
+        map.addLayer(selectedGeometry);
         map.addControl(new L.Control.Draw({
-            draw: { polyline: false, polygon: false, circle: false, rectangle: false, circlemarker: false, marker: true },
-            edit: { featureGroup: selectedPoint, edit: true, remove: true }
+            draw: {
+                marker: true,
+                polyline: true,
+                polygon: false,
+                circle: false,
+                rectangle: false,
+                circlemarker: false
+            },
+            edit: { featureGroup: selectedGeometry, edit: true, remove: true }
         }));
 
-        const savePoint = (layer) => {
-            selectedPoint.clearLayers();
-            selectedPoint.addLayer(layer);
-            geometryType.value = "marker";
+        const saveGeometry = (layer) => {
+            selectedGeometry.clearLayers();
+            selectedGeometry.addLayer(layer);
+
+            const isLine = layer instanceof L.Polyline && !(layer instanceof L.Polygon);
+            geometryType.value = isLine ? "polyline" : "marker";
             geometryData.value = JSON.stringify(layer.toGeoJSON());
-            status.textContent = "Plassering valgt. Du kan flytte eller slette punktet i kartet.";
+            status.textContent = isLine
+                ? "Linje valgt. Du kan redigere eller slette linjen i kartet."
+                : "Punkt valgt. Du kan flytte eller slette punktet i kartet.";
             status.classList.add("is-selected");
         };
 
-        map.on("draw:created", (event) => savePoint(event.layer));
-        map.on("draw:edited", (event) => event.layers.eachLayer((layer) => savePoint(layer)));
+        map.on("draw:created", (event) => saveGeometry(event.layer));
+        map.on("draw:edited", (event) => event.layers.eachLayer((layer) => saveGeometry(layer)));
         map.on("draw:deleted", () => {
             geometryType.value = "";
             geometryData.value = "";

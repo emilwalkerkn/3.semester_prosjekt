@@ -7,6 +7,8 @@ services:
       - "8080:8080"
     environment:
       ConnectionStrings__DefaultConnection: "Server=mariadb;Port=3306;Database=semesterprosjekt;User=appuser;Password=apppassword;"
+      LocalDemo__Enabled: "true"
+      LocalDemo__Password: "DemoPass123"
     volumes:
       - dataprotection_keys:/keys
     depends_on:

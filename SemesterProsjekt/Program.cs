@@ -70,6 +70,8 @@ using (var scope = app.Services.CreateScope())
 }
 
 await IdentitySeeder.SeedRolesAsync(app.Services);
+await DomainSchemaMigrator.MigrateAsync(app.Services);
+await LocalDemoSeeder.SeedAsync(app.Services, app.Configuration);
 
 if (!app.Environment.IsDevelopment())
 {
