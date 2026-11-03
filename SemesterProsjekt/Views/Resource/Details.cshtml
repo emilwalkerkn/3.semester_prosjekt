@@ -2,66 +2,38 @@
 
 @{
     ViewData["Title"] = "Ressursdetaljer";
+    var canManage = User.IsInRole("Admin") || User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.UserId;
 }
 
-<h1>Ressursdetaljer</h1>
+<section class="details-page">
+    <a asp-action="Overview" class="back-link">← Tilbake til ressurser</a>
 
-<div class="card">
-    <div class="card-body">
-        <h5 class="card-title">@Model.Title</h5>
+    <article class="portal-card details-card">
+        <header class="details-heading">
+            <div>
+                <p class="record-type">@(Model.ResourceTypeName ?? "Ressurs")</p>
+                <h1>@Model.Title</h1>
+            </div>
+            <span class="status available">@Model.Status</span>
+        </header>
 
-        <p class="card-text">
-            <strong>Beskrivelse:</strong><br />
-            @Model.Description
-        </p>
+        <p class="details-description">@Model.Description</p>
 
-        <p class="card-text">
-            <strong>Ressurstype-ID:</strong>
-            @Model.ResourceTypeId
-        </p>
+        <dl class="details-grid">
+            <div><dt>Type</dt><dd>@(Model.ResourceTypeName ?? "Ikke oppgitt")</dd></div>
+            <div><dt>Mengde</dt><dd>@Model.Quantity @Model.Unit</dd></div>
+            <div><dt>Kontaktpunkt</dt><dd>@(Model.ContactPoint ?? "Ikke oppgitt")</dd></div>
+            <div><dt>Tilgjengelig fra</dt><dd>@(Model.AvailableFrom?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")</dd></div>
+            <div><dt>Tilgjengelig til</dt><dd>@(Model.AvailableTo?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")</dd></div>
+            <div><dt>Status</dt><dd>@Model.Status</dd></div>
+        </dl>
 
-        <p class="card-text">
-            <strong>Mengde:</strong>
-            @Model.Quantity @Model.Unit
-        </p>
-
-        <p class="card-text">
-            <strong>Kontaktpunkt:</strong>
-            @(Model.ContactPoint ?? "Ikke oppgitt")
-        </p>
-
-        <p class="card-text">
-            <strong>Tilgjengelig fra:</strong>
-            @(Model.AvailableFrom?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")
-        </p>
-
-        <p class="card-text">
-            <strong>Tilgjengelig til:</strong>
-            @(Model.AvailableTo?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")
-        </p>
-
-        <p class="card-text">
-            <strong>Status:</strong>
-            @Model.Status
-        </p>
-
-        @if (!string.IsNullOrWhiteSpace(Model.GeometryType))
+        @if (canManage)
         {
-            <p class="card-text">
-                <strong>Geometri:</strong>
-                @Model.GeometryType
-            </p>
+            <div class="record-actions details-actions">
+                <a asp-action="Edit" asp-route-id="@Model.ResourceId" class="portal-button">Rediger ressurs</a>
+                <a asp-action="Delete" asp-route-id="@Model.ResourceId" class="portal-button danger">Slett ressurs</a>
+            </div>
         }
-    </div>
-</div>
-
-<a asp-controller="Resource"
-   asp-action="Overview"
-   class="btn btn-secondary mt-3">
-    Tilbake til ressursoversikten
-</a>
-@if (User.IsInRole("Admin") || User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.UserId)
-{
-    <a asp-action="Edit" asp-route-id="@Model.ResourceId" class="btn btn-primary mt-3">Rediger</a>
-    <a asp-action="Delete" asp-route-id="@Model.ResourceId" class="btn btn-danger mt-3">Slett</a>
-}
+    </article>
+</section>

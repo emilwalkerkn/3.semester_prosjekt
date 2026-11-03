@@ -314,6 +314,55 @@ body { margin-bottom:0; }
 .text-link { color:var(--portal-blue-dark); font-weight:750; text-decoration:none; white-space:nowrap; }
 .text-link:hover { text-decoration:underline; }
 
+/* Felles oppsett for registrering av behov og ressurser. */
+.registration-page { max-width:940px; margin:0 auto; }
+.registration-heading { max-width:680px; margin:0 0 28px; }
+.registration-heading h1 { margin:0 0 10px; color:var(--portal-navy); font-size:clamp(32px, 4vw, 44px); }
+.registration-heading > p:last-child { margin:0; color:#58708a; font-size:17px; line-height:1.6; }
+.registration-card { padding:28px; }
+.registration-card .form-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:20px; }
+.registration-card .form-field { min-width:0; margin:0; }
+.registration-card .form-field.full { grid-column:1 / -1; }
+.registration-card .form-field label { display:block; margin-bottom:7px; color:var(--portal-ink); font-weight:750; }
+.registration-card .form-field input,
+.registration-card .form-field select,
+.registration-card .form-field textarea { width:100%; box-sizing:border-box; }
+.registration-card .form-field textarea { min-height:128px; resize:vertical; }
+.registration-map-field { padding-top:4px; }
+.registration-map-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:12px; }
+.registration-map-heading label { margin-bottom:4px !important; }
+.registration-map-heading p { margin:0; color:#58708a; font-size:14px; line-height:1.45; }
+.required-label { flex:0 0 auto; padding:4px 8px; border-radius:999px; background:#e8f3fa; color:var(--portal-blue-dark); font-size:12px; font-weight:800; }
+.registration-map { min-height:360px; overflow:hidden; border:1px solid var(--portal-border); border-radius:12px; background:#e8f3fa; }
+.registration-map-status { margin:10px 0 0; color:#58708a; font-size:14px; }
+.registration-map-status.is-selected { color:#1b6b48; font-weight:650; }
+.registration-actions { display:flex; justify-content:flex-end; align-items:center; gap:12px; margin-top:28px; }
+.registration-actions .portal-button { margin:0; }
+.validation-summary:empty { display:none; }
+.validation-summary ul { margin:0 0 20px; padding:12px 16px 12px 34px; border:1px solid #f0b8b8; border-radius:9px; background:#fff5f5; color:#8a1f1f; }
+
+html.dark-mode .registration-heading h1,
+html.dark-mode .registration-card .form-field label { color:#f1f7ff; }
+html.dark-mode .registration-heading > p:last-child,
+html.dark-mode .registration-map-heading p,
+html.dark-mode .registration-map-status { color:#c1cede; }
+html.dark-mode .registration-card { background:#131e2b; border-color:#2c4055; }
+html.dark-mode .registration-card .form-field input,
+html.dark-mode .registration-card .form-field select,
+html.dark-mode .registration-card .form-field textarea { background:#0d1621; border-color:#3a5269; color:#f1f7ff; }
+html.dark-mode .registration-map { border-color:#3a5269; }
+html.dark-mode .required-label { background:#1b354b; color:#d9ecff; }
+
+@media (max-width:640px) {
+  .registration-card { padding:20px; }
+  .registration-card .form-grid { grid-template-columns:1fr; gap:16px; }
+  .registration-card .form-field.full { grid-column:auto; }
+  .registration-map { min-height:300px; }
+  .registration-map-heading { flex-direction:column; gap:8px; }
+  .registration-actions { flex-direction:column-reverse; align-items:stretch; }
+  .registration-actions .portal-button { width:100%; justify-content:center; }
+}
+
 @media (max-width:900px) {
   .portal-sidebar { gap:16px; padding:12px 24px; flex-wrap:wrap; }
   .portal-sidebar nav { order:3; flex:1 0 100%; overflow-x:auto; padding-bottom:2px; }
@@ -471,6 +520,211 @@ html.dark-mode .need-form textarea::placeholder {
 .portal-auth__footer {
   margin: 1.5rem 0 0;
   text-align: center;
+}
+
+/* Felles oppsett for behovs- og ressursoversikter. */
+.overview-page,
+.details-page {
+  display: grid;
+  gap: 20px;
+}
+
+.overview-heading,
+.section-heading,
+.details-heading,
+.overview-record-footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  color: var(--portal-blue-dark);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.overview-heading h1,
+.details-heading h1,
+.section-heading h2,
+.overview-record h2 {
+  margin: 0;
+}
+
+.overview-heading .page-intro {
+  margin: 8px 0 0;
+}
+
+.overview-heading-actions,
+.record-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.overview-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+}
+
+.overview-toolbar label {
+  color: var(--portal-ink);
+  font-weight: 700;
+}
+
+.overview-toolbar select {
+  width: auto;
+  min-width: 220px;
+}
+
+.overview-map-card,
+.overview-record,
+.details-card {
+  padding: 24px;
+}
+
+.overview-count {
+  color: var(--portal-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.overview-list {
+  display: grid;
+  gap: 16px;
+}
+
+.overview-record-main h2 {
+  font-size: 22px;
+}
+
+.overview-description,
+.details-description {
+  margin: 10px 0 0;
+  line-height: 1.6;
+}
+
+.overview-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin: 22px 0;
+  padding-top: 18px;
+  border-top: 1px solid var(--portal-border);
+}
+
+.overview-meta div {
+  display: grid;
+  gap: 4px;
+}
+
+.overview-meta span {
+  color: var(--portal-text);
+  font-size: 12px;
+}
+
+.overview-meta strong {
+  color: var(--portal-ink);
+}
+
+.overview-record-footer {
+  align-items: center;
+  padding-top: 18px;
+  border-top: 1px solid var(--portal-border);
+}
+
+.status-update-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--portal-border);
+}
+
+.status-update-form label {
+  color: var(--portal-ink);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.status-update-form select {
+  width: auto;
+  min-width: 180px;
+}
+
+.status-update-form .portal-button {
+  min-height: 40px;
+  padding: 8px 13px;
+}
+
+.back-link {
+  color: var(--portal-ink);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: var(--portal-blue-dark);
+  text-decoration: underline;
+}
+
+.details-heading {
+  align-items: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--portal-border);
+}
+
+.details-description {
+  margin-bottom: 26px;
+  font-size: 16px;
+}
+
+.details-actions {
+  margin-top: 28px;
+}
+
+@media (max-width: 680px) {
+  .overview-heading,
+  .section-heading,
+  .details-heading,
+  .overview-record-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .overview-heading-actions .portal-button,
+  .record-actions .portal-button {
+    flex: 1 1 auto;
+  }
+
+  .overview-toolbar,
+  .status-update-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .overview-toolbar select,
+  .status-update-form select {
+    width: 100%;
+  }
+
+  .overview-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .overview-map-card,
+  .overview-record,
+  .details-card {
+    padding: 20px;
+  }
 }
 
 @media (max-width: 576px) {

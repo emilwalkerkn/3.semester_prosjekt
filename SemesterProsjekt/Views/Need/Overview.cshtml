@@ -2,154 +2,139 @@
 @model IEnumerable<SemesterProsjekt.Models.Need>
 
 @{
-    ViewData["Title"] = "Behovsoversikt";
-}
+    ViewData["Title"] = "Behov";
+    var canRegister = User.IsInRole("Behovsaktør") || User.IsInRole("Admin");
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var mapEntries = Model
+        .Where(need => !string.IsNullOrWhiteSpace(need.GeometryData))
+        .Select(need => new { geometryData = need.GeometryData, title = need.Title });
 
-<h1>Behovsoversikt</h1>
-
-<form asp-action="Overview" method="get" class="mb-3">
-    <label for="sortBy">Sorter etter</label>
-    <select id="sortBy" name="sortBy" onchange="this.form.submit()">
-        <option value="newest" selected="@(ViewData["SortBy"]?.ToString() == "newest")">Nyeste</option>
-        <option value="deadline" selected="@(ViewData["SortBy"]?.ToString() == "deadline")">Frist</option>
-        <option value="priority" selected="@(ViewData["SortBy"]?.ToString() == "priority")">Prioritet</option>
-        <option value="status" selected="@(ViewData["SortBy"]?.ToString() == "status")">Status</option>
-    </select>
-</form>
-
-<h2>Registrerte behov på kartet</h2>
-
-<div id="needMap" style="height: 500px; margin-bottom: 30px;"></div>
-
-@if (!Model.Any())
-{
-    <p>Ingen behov er registrert ennå.</p>
-}
-else
-{
-    @foreach (var need in Model)
+    string StatusText(string status) => status switch
     {
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title">@need.Title</h5>
+        "New" => "Ny",
+        "In progress" => "Under behandling",
+        "Resolved" => "Løst",
+        _ => status
+    };
 
-                <p class="card-text">
-                    @need.Description
-                </p>
+    string StatusClass(string status) => status switch
+    {
+        "Resolved" => "resolved",
+        "New" or "In progress" => "warning",
+        _ => ""
+    };
+}
 
-                <p>
-                    <strong>Behovstype-ID:</strong>
-                    @need.NeedTypeId
-                </p>
-                
-                <p>
-                    <strong>Mengde:</strong>
-                    @need.Quantity @need.Unit
-                </p>
+<section class="overview-page">
+    <header class="overview-heading">
+        <div>
+            <p class="eyebrow">Oversikt</p>
+            <h1>Behov</h1>
+            <p class="page-intro">Følg opp registrerte behov, frister og prioritet.</p>
+        </div>
 
-                <p>
-                    <strong>Status:</strong>
-                    @need.Status
-                </p>
+        @if (canRegister)
+        {
+            <a asp-action="Create" class="portal-button">+ Registrer behov</a>
+        }
+    </header>
 
-                <p>
-                    <strong>Prioritet:</strong>
-                    @need.Priority
-                </p>
+    <form asp-action="Overview" method="get" class="portal-card overview-toolbar">
+        <label for="sortBy">Sorter behov etter</label>
+        <select id="sortBy" name="sortBy" onchange="this.form.submit()">
+            <option value="newest" selected="@(ViewData["SortBy"]?.ToString() == "newest")">Nyeste</option>
+            <option value="deadline" selected="@(ViewData["SortBy"]?.ToString() == "deadline")">Frist</option>
+            <option value="priority" selected="@(ViewData["SortBy"]?.ToString() == "priority")">Prioritet</option>
+            <option value="status" selected="@(ViewData["SortBy"]?.ToString() == "status")">Status</option>
+        </select>
+    </form>
 
-                <p>
-                    <strong>Frist:</strong>
-                    @(need.Deadline?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")
-                </p>
+    <section class="portal-card overview-map-card" aria-labelledby="need-map-heading">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">Kart</p>
+                <h2 id="need-map-heading">Registrerte behov</h2>
+            </div>
+            <span class="overview-count">@Model.Count() behov</span>
+        </div>
+        <div id="needMap" class="map-panel" aria-label="Kart med registrerte behov"></div>
+    </section>
 
-                <a asp-controller="Need"
-                   asp-action="Details"
-                   asp-route-id="@need.NeedId"
-                   class="btn btn-outline-secondary">
-                    Se detaljer
-                </a>
-
-                @if (User.IsInRole("Admin") || User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == need.UserId)
+    <section class="overview-list" aria-label="Liste over behov">
+        @if (!Model.Any())
+        {
+            <div class="portal-card empty-state">
+                <h2>Ingen behov ennå</h2>
+                <p>Nye behov dukker opp her når de er registrert.</p>
+                @if (canRegister)
                 {
-                    <a asp-action="Edit" asp-route-id="@need.NeedId" class="btn btn-outline-primary">Rediger</a>
-                    <a asp-action="Delete" asp-route-id="@need.NeedId" class="btn btn-outline-danger">Slett</a>
-
-                    <form asp-controller="Need"
-                      asp-action="UpdateStatus"
-                      method="post"
-                      class="mt-3">
-
-                    @Html.AntiForgeryToken()
-
-                    <input type="hidden"
-                           name="id"
-                           value="@need.NeedId" />
-
-                    <select name="status">
-                        <option value="New"
-                                selected="@(need.Status == "New")">
-                            Ny
-                        </option>
-
-                        <option value="In progress"
-                                selected="@(need.Status == "In progress")">
-                            Under behandling
-                        </option>
-
-                        <option value="Resolved"
-                                selected="@(need.Status == "Resolved")">
-                            Løst
-                        </option>
-                    </select>
-
-                    <button type="submit" class="btn btn-primary">
-                        Oppdater status
-                    </button>
-                    </form>
+                    <a asp-action="Create" class="portal-button">Registrer behov</a>
                 }
             </div>
-        </div>
-    }
-}
-
-@section Scripts {
-    <script>
-        // Oppretter kartet med Kristiansand som startposisjon.
-        var needMap = L.map("needMap")
-            .setView([58.1467, 7.9956], 12);
-
-        L.tileLayer(
-            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            {
-                attribution: "&copy; OpenStreetMap contributors"
-            }
-        ).addTo(needMap);
-
-        @foreach (var need in Model)
+        }
+        else
         {
-            if (!string.IsNullOrWhiteSpace(need.GeometryData))
+            @foreach (var need in Model)
             {
-                <text>
-                try {
-                    var geometryData =
-                        @Html.Raw(JsonSerializer.Serialize(need.GeometryData));
+                var canManage = User.IsInRole("Admin") || currentUserId == need.UserId;
 
-                    var geoJson = JSON.parse(geometryData);
+                <article class="portal-card overview-record">
+                    <div class="overview-record-main">
+                        <p class="record-type">@(need.NeedTypeName ?? "Behov")</p>
+                        <h2>@need.Title</h2>
+                        <p class="overview-description">@need.Description</p>
+                    </div>
 
-                    var popupText =
-                        @Html.Raw(JsonSerializer.Serialize(need.Title));
+                    <div class="overview-meta">
+                        <div>
+                            <span>Prioritet</span>
+                            <strong>@need.Priority</strong>
+                        </div>
+                        <div>
+                            <span>Frist</span>
+                            <strong>@(need.Deadline?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")</strong>
+                        </div>
+                        <div>
+                            <span>Mengde</span>
+                            <strong>@need.Quantity @need.Unit</strong>
+                        </div>
+                    </div>
 
-                    L.geoJSON(geoJson)
-                        .addTo(needMap)
-                        .bindPopup(popupText);
-                }
-                catch {
-                    console.error(
-                        "Kunne ikke vise geometri for behov @need.NeedId"
-                    );
-                }
-                </text>
+                    <div class="overview-record-footer">
+                        <span class="status @StatusClass(need.Status)">@StatusText(need.Status)</span>
+                        <div class="record-actions">
+                            <a asp-action="Details" asp-route-id="@need.NeedId" class="portal-button secondary">Se detaljer</a>
+                            @if (canManage)
+                            {
+                                <a asp-action="Edit" asp-route-id="@need.NeedId" class="portal-button secondary">Rediger</a>
+                                <a asp-action="Delete" asp-route-id="@need.NeedId" class="portal-button danger">Slett</a>
+                            }
+                        </div>
+                    </div>
+
+                    @if (canManage)
+                    {
+                        <form asp-action="UpdateStatus" method="post" class="status-update-form">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@need.NeedId" />
+                            <label for="status-@need.NeedId">Oppdater status</label>
+                            <select id="status-@need.NeedId" name="status">
+                                <option value="New" selected="@(need.Status == "New")">Ny</option>
+                                <option value="In progress" selected="@(need.Status == "In progress")">Under behandling</option>
+                                <option value="Resolved" selected="@(need.Status == "Resolved")">Løst</option>
+                            </select>
+                            <button type="submit" class="portal-button secondary">Lagre status</button>
+                        </form>
+                    }
+                </article>
             }
         }
+    </section>
+</section>
+
+@section Scripts {
+    <script src="~/js/overview-map.js" asp-append-version="true"></script>
+    <script>
+        PortalOverviewMap.create("needMap", @Html.Raw(JsonSerializer.Serialize(mapEntries)));
     </script>
 }

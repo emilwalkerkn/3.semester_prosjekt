@@ -18,20 +18,22 @@ public class ResourceRepository : IResourceRepository
 
         const string sql = """
             SELECT
-                ResourceId,
-                UserId,
-                ResourceTypeId,
-                Title,
-                Description,
-                GeometryType,
-                GeometryData,
-                ContactPoint,
-                AvailableFrom,
-                AvailableTo,
-                Quantity,
-                Unit,
-                Status
-            FROM Resources;
+                r.ResourceId,
+                r.UserId,
+                r.ResourceTypeId,
+                rt.Name AS ResourceTypeName,
+                r.Title,
+                r.Description,
+                r.GeometryType,
+                r.GeometryData,
+                r.ContactPoint,
+                r.AvailableFrom,
+                r.AvailableTo,
+                r.Quantity,
+                r.Unit,
+                r.Status
+            FROM Resources r
+            LEFT JOIN ResourceType rt ON rt.ResourceTypeId = r.ResourceTypeId;
             """;
 
         return await connection.QueryAsync<Resource>(sql);
@@ -43,21 +45,23 @@ public class ResourceRepository : IResourceRepository
 
         const string sql = """
             SELECT
-                ResourceId,
-                UserId,
-                ResourceTypeId,               
-                Title,
-                Description,
-                GeometryType,
-                GeometryData,
-                ContactPoint,
-                AvailableFrom,
-                AvailableTo,
-                Quantity,
-                Unit,
-                Status
-            FROM Resources
-            WHERE ResourceId = @ResourceId;
+                r.ResourceId,
+                r.UserId,
+                r.ResourceTypeId,
+                rt.Name AS ResourceTypeName,
+                r.Title,
+                r.Description,
+                r.GeometryType,
+                r.GeometryData,
+                r.ContactPoint,
+                r.AvailableFrom,
+                r.AvailableTo,
+                r.Quantity,
+                r.Unit,
+                r.Status
+            FROM Resources r
+            LEFT JOIN ResourceType rt ON rt.ResourceTypeId = r.ResourceTypeId
+            WHERE r.ResourceId = @ResourceId;
             """;
 
         return await connection.QuerySingleOrDefaultAsync<Resource>(

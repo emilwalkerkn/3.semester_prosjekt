@@ -4,124 +4,102 @@
     ViewData["Title"] = "Registrer ressurs";
 }
 
-<div class="resource-container">
-    <h1>Registrer ressurs</h1>
+<section class="registration-page">
+    <header class="registration-heading">
+        <p class="home-eyebrow">Ressurseier</p>
+        <h1>Registrer ressurs</h1>
+        <p>Legg inn hva dere kan bidra med, når ressursen er tilgjengelig og hvor den befinner seg.</p>
+    </header>
 
-    <form asp-controller="Resource"
-          asp-action="Create"
-          method="post"
-          class="resource-form">
+    <form asp-controller="Resource" asp-action="Create" method="post" class="portal-card registration-card">
+        <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
 
-        <div>
-            <label asp-for="ResourceTypeId">Ressurstype</label>
-            <select asp-for="ResourceTypeId" asp-items="Model.ResourceTypes">
-                <option value="">Velg ressurstype</option>
-            </select>
-            <span asp-validation-for="ResourceTypeId" class="text-danger"></span>
+        <div class="form-grid">
+            <div class="form-field">
+                <label asp-for="ResourceTypeId">Ressurstype</label>
+                <select asp-for="ResourceTypeId" asp-items="Model.ResourceTypes">
+                    <option value="">Velg ressurstype</option>
+                </select>
+                <span asp-validation-for="ResourceTypeId" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-field">
+                <label asp-for="Status">Status</label>
+                <select asp-for="Status">
+                    <option value="Available">Tilgjengelig</option>
+                    <option value="Unavailable">Ikke tilgjengelig</option>
+                </select>
+                <span asp-validation-for="Status" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-field full">
+                <label asp-for="Title">Tittel</label>
+                <input asp-for="Title" autocomplete="off" placeholder="For eksempel: Førstehjelpsutstyr" />
+                <span asp-validation-for="Title" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-field full">
+                <label asp-for="Description">Beskrivelse</label>
+                <textarea asp-for="Description" rows="5" placeholder="Beskriv ressursen, kapasitet og annen viktig informasjon."></textarea>
+                <span asp-validation-for="Description" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-field">
+                <label asp-for="Quantity">Mengde</label>
+                <input asp-for="Quantity" type="number" min="0" step="0.01" placeholder="For eksempel 10" />
+                <span asp-validation-for="Quantity" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-field">
+                <label asp-for="Unit">Enhet</label>
+                <input asp-for="Unit" placeholder="For eksempel stk, kg eller liter" />
+                <span asp-validation-for="Unit" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-field">
+                <label asp-for="AvailableFrom">Tilgjengelig fra</label>
+                <input asp-for="AvailableFrom" type="datetime-local" />
+                <span asp-validation-for="AvailableFrom" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-field">
+                <label asp-for="AvailableTo">Tilgjengelig til</label>
+                <input asp-for="AvailableTo" type="datetime-local" />
+                <span asp-validation-for="AvailableTo" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-field full">
+                <label asp-for="ContactPoint">Kontaktpunkt</label>
+                <input asp-for="ContactPoint" placeholder="Navn, telefonnummer eller e-postadresse" />
+                <span asp-validation-for="ContactPoint" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-field full registration-map-field">
+                <div class="registration-map-heading">
+                    <div>
+                        <label for="ResourceMap">Plassering på kartet</label>
+                        <p>Velg markør-knappen i kartet og plasser ett punkt på riktig sted.</p>
+                    </div>
+                    <span class="required-label">Påkrevd</span>
+                </div>
+
+                <div id="ResourceMap" class="registration-map" data-registration-map data-geometry-type-id="GeometryType" data-geometry-data-id="GeometryData" data-map-status-id="ResourceMapStatus"></div>
+                <input asp-for="GeometryType" type="hidden" id="GeometryType" />
+                <input asp-for="GeometryData" type="hidden" id="GeometryData" />
+                <p id="ResourceMapStatus" class="registration-map-status" aria-live="polite">Ingen plassering valgt ennå.</p>
+                <span asp-validation-for="GeometryType" class="field-validation-error"></span>
+                <span asp-validation-for="GeometryData" class="field-validation-error"></span>
+            </div>
         </div>
 
-        <div>
-            <label asp-for="Title">Tittel</label>
-            <input asp-for="Title" />
-            <span asp-validation-for="Title" class="text-danger"></span>
+        <div class="registration-actions">
+            <a asp-action="Overview" class="portal-button secondary">Avbryt</a>
+            <button type="submit" class="portal-button">Registrer ressurs</button>
         </div>
-
-        <div>
-            <label asp-for="Description">Beskrivelse</label>
-            <textarea asp-for="Description"></textarea>
-            <span asp-validation-for="Description" class="text-danger"></span>
-        </div>
-
-        <div>
-            <label asp-for="Quantity">Mengde</label>
-            <input asp-for="Quantity" type="number" step="0.01" />
-        </div>
-
-        <div>
-            <label asp-for="Unit">Enhet</label>
-            <input asp-for="Unit" placeholder="For eksempel stk, kg eller liter" />
-        </div>
-
-        <div>
-            <label asp-for="ContactPoint">Kontaktpunkt</label>
-            <input asp-for="ContactPoint" />
-        </div>
-
-        <div>
-            <label asp-for="AvailableFrom">Tilgjengelig fra</label>
-            <input asp-for="AvailableFrom" type="datetime-local" />
-        </div>
-
-        <div>
-            <label asp-for="AvailableTo">Tilgjengelig til</label>
-            <input asp-for="AvailableTo" type="datetime-local" />
-            <span asp-validation-for="AvailableTo" class="text-danger"></span>
-        </div>
-
-        <div>
-            <label asp-for="Status">Status</label>
-            <select asp-for="Status">
-                <option value="Available">Tilgjengelig</option>
-                <option value="Unavailable">Ikke tilgjengelig</option>
-            </select>
-        </div>
-
-        <input asp-for="GeometryType" type="hidden" id="GeometryType" />
-        <input asp-for="GeometryData" type="hidden" id="GeometryData" />
-
-        <button type="submit">
-            Registrer ressurs
-        </button>
     </form>
-
-    <h2>Velg område på kartet</h2>
-
-    <div id="map"></div>
-</div>
+</section>
 
 @section Scripts {
-    <script>
-        // Oppretter Leaflet-kartet med Kristiansand som startposisjon.
-        var map = L.map("map").setView([58.1467, 7.9956], 13);
-
-        L.tileLayer(
-            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-            {
-                attribution: "&copy; OpenStreetMap contributors"
-            }
-        ).addTo(map);
-
-        var drawnItems = new L.FeatureGroup();
-        map.addLayer(drawnItems);
-
-        var drawControl = new L.Control.Draw({
-            draw: {
-                polygon: false,
-                polyline: true,
-                circle: false,
-                rectangle: false,
-                marker: true
-            },
-            edit: {
-                featureGroup: drawnItems,
-                remove: true
-            }
-        });
-
-        map.addControl(drawControl);
-
-        // Lagrer den sist tegnede geometrien som GeoJSON.
-        map.on("draw:created", function (e) {
-            var layer = e.layer;
-
-            drawnItems.addLayer(layer);
-
-            document.getElementById("GeometryType").value = e.layerType;
-
-            var geoJson = layer.toGeoJSON();
-
-            document.getElementById("GeometryData").value =
-                JSON.stringify(geoJson);
-        });
-    </script>
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/registration-map.js" asp-append-version="true"></script>
 }

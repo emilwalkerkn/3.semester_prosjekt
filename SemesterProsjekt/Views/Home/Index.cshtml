@@ -1,4 +1,5 @@
-﻿@model SemesterProsjekt.Models.DashboardViewModel
+﻿@using SemesterProsjekt.Models
+@model SemesterProsjekt.Models.DashboardViewModel
 
 @{
     ViewData["Title"] = "Hjem";
@@ -11,17 +12,23 @@
         <p>Registrer behov, tilby ressurser og følg opp matcher på ett sted. Kriseportal gjør det enklere å koordinere en trygg og rask innsats.</p>
 
         <div class="home-hero-actions">
-            <a asp-controller="Need"
-               asp-action="Overview"
-               class="portal-button">
-                Se behov
-            </a>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                @if (User.IsInRole(AppRoles.NeedsActor) || User.IsInRole(AppRoles.Admin))
+                {
+                    <a asp-controller="Need" asp-action="Create" class="portal-button">Registrer behov</a>
+                }
 
-            <a asp-controller="Resource"
-               asp-action="Overview"
-               class="portal-button secondary">
-                Se ressurser
-            </a>
+                @if (User.IsInRole(AppRoles.ResourceOwner) || User.IsInRole(AppRoles.Admin))
+                {
+                    <a asp-controller="Resource" asp-action="Create" class="portal-button secondary">Registrer ressurs</a>
+                }
+            }
+            else
+            {
+                <a asp-controller="Account" asp-action="Register" class="portal-button">Opprett konto</a>
+                <a asp-controller="Account" asp-action="Login" class="portal-button secondary">Logg inn</a>
+            }
         </div>
     </div>
 

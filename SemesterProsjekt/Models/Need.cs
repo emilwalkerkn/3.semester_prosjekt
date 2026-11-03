@@ -11,6 +11,9 @@ public class Need
 
     public int NeedTypeId { get; set; }
 
+    // Fylles av repositoryet når behovet hentes sammen med sin type.
+    public string? NeedTypeName { get; set; }
+
     [Required(ErrorMessage = "Tittel må fylles ut.")]
     [StringLength(160)]
     public string Title { get; set; } = "";
