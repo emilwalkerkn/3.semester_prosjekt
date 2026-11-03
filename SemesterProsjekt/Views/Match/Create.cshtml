@@ -2,11 +2,52 @@
 @{
     ViewData["Title"] = "Opprett match";
 }
-<h1>Opprett match</h1>
-<form asp-action="Create" method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <div class="mb-3"><label asp-for="NeedId" class="form-label">Behov</label><select asp-for="NeedId" asp-items="Model.Needs" class="form-select"><option value="">Velg behov</option></select><span asp-validation-for="NeedId" class="text-danger"></span></div>
-    <div class="mb-3"><label asp-for="ResourceId" class="form-label">Ressurs</label><select asp-for="ResourceId" asp-items="Model.Resources" class="form-select"><option value="">Velg ressurs</option></select><span asp-validation-for="ResourceId" class="text-danger"></span></div>
-    <div class="mb-3"><label asp-for="Notes" class="form-label">Notat</label><textarea asp-for="Notes" class="form-control"></textarea></div>
-    <button type="submit" class="btn btn-primary">Opprett match</button>
-</form>
+
+<section class="overview-page match-page">
+    <header class="overview-heading">
+        <div>
+            <p class="eyebrow">Koordinering</p>
+            <h1>Opprett match</h1>
+            <p class="page-intro">Velg behovet og ressursen som skal kobles sammen.</p>
+        </div>
+
+        <a asp-action="Overview" class="portal-button secondary">Tilbake til matcher</a>
+    </header>
+
+    <form asp-action="Create" method="post" class="portal-card match-form">
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+        <div class="form-grid">
+            <div class="form-field full">
+                <label asp-for="NeedId">Behov</label>
+                <select asp-for="NeedId" asp-items="Model.Needs" class="form-control">
+                    <option value="">Velg behov</option>
+                </select>
+                <span asp-validation-for="NeedId" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-field full">
+                <label asp-for="ResourceId">Ressurs</label>
+                <select asp-for="ResourceId" asp-items="Model.Resources" class="form-control">
+                    <option value="">Velg ressurs</option>
+                </select>
+                <span asp-validation-for="ResourceId" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-field full">
+                <label asp-for="Notes">Notat til matchen <span>(valgfritt)</span></label>
+                <textarea asp-for="Notes" class="form-control" placeholder="For eksempel kontaktinformasjon eller en kort avtale."></textarea>
+                <span asp-validation-for="Notes" class="field-validation-error"></span>
+            </div>
+        </div>
+
+        <div class="record-actions">
+            <button type="submit" class="portal-button">Opprett matchforslag</button>
+            <a asp-action="Overview" class="portal-button secondary">Avbryt</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

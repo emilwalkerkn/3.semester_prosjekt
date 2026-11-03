@@ -1,11 +1,85 @@
 @model IEnumerable<SemesterProsjekt.Models.ViewModels.MatchListItemViewModel>
 @{
-    ViewData["Title"] = "Fullførte matcher";
+    ViewData["Title"] = "Matchhistorikk";
+    var matches = Model.ToList();
+
+    string StatusText(string status) => status switch
+    {
+        SemesterProsjekt.Models.MatchStatuses.Completed => "Fullført",
+        SemesterProsjekt.Models.MatchStatuses.Declined => "Avslått",
+        _ => status
+    };
+
+    string StatusClass(string status) => status switch
+    {
+        SemesterProsjekt.Models.MatchStatuses.Completed => "resolved",
+        SemesterProsjekt.Models.MatchStatuses.Declined => "critical",
+        _ => ""
+    };
 }
-<h1>Fullførte matcher</h1>
-<a asp-action="Overview" class="btn btn-secondary mb-3">Til aktive matcher</a>
-@if (!Model.Any()) { <p>Ingen fullførte matcher.</p> }
-@foreach (var item in Model)
-{
-    <div class="card mb-3"><div class="card-body"><h2 class="h5">@item.NeedTitle ↔ @item.ResourceTitle</h2><p>Fullført: @(item.ResolvedAt?.ToString("dd.MM.yyyy HH:mm"))</p><p>@item.Notes</p></div></div>
-}
+
+<section class="overview-page match-page">
+    <header class="overview-heading">
+        <div>
+            <p class="eyebrow">Historikk</p>
+            <h1>Matchhistorikk</h1>
+            <p class="page-intro">Her finner du matcher som er gjennomført eller avslått.</p>
+        </div>
+
+        <a asp-action="Overview" class="portal-button secondary">Til aktive matcher</a>
+    </header>
+
+    <section class="overview-list match-list" aria-label="Avsluttede matcher">
+        @if (matches.Count == 0)
+        {
+            <div class="portal-card empty-state">
+                <h2>Ingen avsluttede matcher ennå</h2>
+                <p>Når en match er fullført eller avslått, blir den flyttet hit.</p>
+                <a asp-action="Overview" class="portal-button secondary">Til aktive matcher</a>
+            </div>
+        }
+        else
+        {
+            @foreach (var item in matches)
+            {
+                <article class="portal-card match-card match-card-completed">
+                    <div class="match-card-heading">
+                        <div>
+                            <p class="eyebrow">Match #@item.MatchId</p>
+                            <h2>Behov og ressurs</h2>
+                        </div>
+                        <span class="status @StatusClass(item.Status)">@StatusText(item.Status)</span>
+                    </div>
+
+                    <div class="match-pair">
+                        <div class="match-party">
+                            <span class="match-party-label">Behov</span>
+                            <a asp-controller="Need" asp-action="Details" asp-route-id="@item.NeedId">@item.NeedTitle</a>
+                        </div>
+                        <span class="match-arrow" aria-label="koblet med">↔</span>
+                        <div class="match-party">
+                            <span class="match-party-label">Ressurs</span>
+                            <a asp-controller="Resource" asp-action="Details" asp-route-id="@item.ResourceId">@item.ResourceTitle</a>
+                        </div>
+                    </div>
+
+                    <div class="match-meta">
+                        <div>
+                            <span>Opprettet</span>
+                            <strong>@item.MatchedAt.ToString("dd.MM.yyyy HH:mm")</strong>
+                        </div>
+                        <div>
+                            <span>Avsluttet</span>
+                            <strong>@(item.ResolvedAt?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")</strong>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(item.Notes))
+                    {
+                        <p class="match-note"><strong>Notat:</strong> @item.Notes</p>
+                    }
+                </article>
+            }
+        }
+    </section>
+</section>

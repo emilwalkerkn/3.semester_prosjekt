@@ -25,7 +25,7 @@ public class MatchController : Controller
     }
 
     public async Task<IActionResult> Overview() => View(await _matchRepository.GetActiveAsync());
-    public async Task<IActionResult> History() => View(await _matchRepository.GetCompletedAsync());
+    public async Task<IActionResult> History() => View(await _matchRepository.GetHistoryAsync());
 
     [HttpGet]
     public async Task<IActionResult> Create()
@@ -73,15 +73,17 @@ public class MatchController : Controller
         if (match is null) return NotFound();
 
         var validTransition =
-            (match.Status == MatchStatuses.Proposed && status == MatchStatuses.Approved) ||
+            (match.Status == MatchStatuses.Proposed &&
+                (status == MatchStatuses.Approved || status == MatchStatuses.Declined)) ||
             (match.Status == MatchStatuses.Approved && status == MatchStatuses.Completed) ||
             match.Status == status;
 
         if (!validTransition) return BadRequest("Ugyldig statusovergang.");
 
-        DateTime? resolvedAt = status == MatchStatuses.Completed ? DateTime.UtcNow : null;
+        var isClosed = status == MatchStatuses.Completed || status == MatchStatuses.Declined;
+        DateTime? resolvedAt = isClosed ? DateTime.UtcNow : null;
         await _matchRepository.UpdateStatusAsync(id, status, resolvedAt);
-        return RedirectToAction(status == MatchStatuses.Completed ? nameof(History) : nameof(Overview));
+        return RedirectToAction(isClosed ? nameof(History) : nameof(Overview));
     }
 
     private async Task LoadOptionsAsync(CreateMatchViewModel model)
