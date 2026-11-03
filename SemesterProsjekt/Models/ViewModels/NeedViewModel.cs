@@ -6,6 +6,8 @@ namespace SemesterProsjekt.Models;
 // Informasjon fra behovsskjemaet.
 public class NeedViewModel
 {
+    public int NeedId { get; set; }
+
     [Required(ErrorMessage = "Velg type behov")]
     [Display(Name = "Type behov")]
     public int? NeedTypeId { get; set; }

@@ -8,7 +8,7 @@ using SemesterProsjekt.Data;
 
 #nullable disable
 
-namespace SemesterProsjekt.Data.Migrations
+namespace SemesterProsjekt.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot

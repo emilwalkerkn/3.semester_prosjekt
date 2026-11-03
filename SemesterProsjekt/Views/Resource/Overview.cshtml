@@ -60,6 +60,11 @@ else
                    class="btn btn-outline-secondary">
                     Se detaljer
                 </a>
+                @if (User.IsInRole("Admin") || User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == resource.UserId)
+                {
+                    <a asp-action="Edit" asp-route-id="@resource.ResourceId" class="btn btn-outline-primary">Rediger</a>
+                    <a asp-action="Delete" asp-route-id="@resource.ResourceId" class="btn btn-outline-danger">Slett</a>
+                }
             </div>
         </div>
     }

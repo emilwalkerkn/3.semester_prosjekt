@@ -7,7 +7,9 @@ public class Resource
     public int ResourceId { get; set; }
     
 
-    public int UserId { get; set; }
+    [Required]
+    [StringLength(255)]
+    public string UserId { get; set; } = string.Empty;
 
     public int ResourceTypeId { get; set; }
 

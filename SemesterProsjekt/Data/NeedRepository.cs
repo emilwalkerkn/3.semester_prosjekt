@@ -12,11 +12,19 @@ public class NeedRepository : INeedRepository
         _connectionFactory = connectionFactory;
     }
 
-    public async Task<IEnumerable<Need>> GetAllAsync()
+    public async Task<IEnumerable<Need>> GetAllAsync(string sortBy = "newest")
     {
         using var connection = _connectionFactory.CreateConnection();
 
-        const string sql = """
+        var orderBy = sortBy switch
+        {
+            "deadline" => "Deadline IS NULL, Deadline ASC",
+            "priority" => "FIELD(Priority, 'Critical', 'High', 'Normal', 'Low')",
+            "status" => "Status ASC, NeedId DESC",
+            _ => "NeedId DESC"
+        };
+
+        var sql = $"""
             SELECT
                 NeedId,
                 UserId,
@@ -32,7 +40,8 @@ public class NeedRepository : INeedRepository
                 Unit,
                 Status,
                 Priority
-            FROM Needs;
+            FROM Needs
+            ORDER BY {orderBy};
             """;
 
         return await connection.QueryAsync<Need>(sql);
@@ -140,5 +149,36 @@ public class NeedRepository : INeedRepository
                 Status = status
             }
         );
+    }
+
+    public async Task UpdateAsync(Need need)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        const string sql = """
+            UPDATE Needs SET
+                NeedTypeId = @NeedTypeId,
+                Title = @Title,
+                Description = @Description,
+                GeometryType = @GeometryType,
+                GeometryData = @GeometryData,
+                ContactPoint = @ContactPoint,
+                NeededFrom = @NeededFrom,
+                Deadline = @Deadline,
+                Quantity = @Quantity,
+                Unit = @Unit,
+                Status = @Status,
+                Priority = @Priority
+            WHERE NeedId = @NeedId;
+            """;
+
+        await connection.ExecuteAsync(sql, need);
+    }
+
+    public async Task DeleteAsync(int id)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        await connection.ExecuteAsync(
+            "DELETE FROM Needs WHERE NeedId = @NeedId;",
+            new { NeedId = id });
     }
 }

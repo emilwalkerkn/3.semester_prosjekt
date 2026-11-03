@@ -47,6 +47,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddSingleton<IDbConnectionFactory, MySqlConnectionFactory>();
 builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
 builder.Services.AddScoped<INeedRepository, NeedRepository>();
+builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 
 
 if (!builder.Environment.IsDevelopment())
@@ -65,8 +66,10 @@ using (var scope = app.Services.CreateScope())
     var database = scope.ServiceProvider
         .GetRequiredService<ApplicationDbContext>();
 
-    database.Database.Migrate();
+    await database.Database.MigrateAsync();
 }
+
+await IdentitySeeder.SeedRolesAsync(app.Services);
 
 if (!app.Environment.IsDevelopment())
 {

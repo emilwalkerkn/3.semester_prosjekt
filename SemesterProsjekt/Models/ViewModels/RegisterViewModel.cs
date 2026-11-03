@@ -29,6 +29,8 @@ public class RegisterViewModel
     [Compare(nameof(Password), ErrorMessage = "Passordene er ikke like.")]
     public string ConfirmPassword { get; set; } = "";
 
+    [Required(ErrorMessage = "Velg aktørtype.")]
+    public string Role { get; set; } = AppRoles.NeedsActor;
+
     public string? ReturnUrl { get; set; }
 }
-

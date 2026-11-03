@@ -73,6 +73,7 @@ public class HomeController : Controller
 
     // GET: Viser skjemaet for registrering av et behov.
     [HttpGet]
+    [Authorize(Roles = AppRoles.NeedsActor + "," + AppRoles.Admin)]
     public IActionResult Need()
     {
         return View(new NeedViewModel());
@@ -80,6 +81,7 @@ public class HomeController : Controller
 
     // POST: Registrerer et nytt behov.
     [HttpPost]
+    [Authorize(Roles = AppRoles.NeedsActor + "," + AppRoles.Admin)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Need(NeedViewModel model)
     {
@@ -94,8 +96,8 @@ public class HomeController : Controller
             NeedTypeId = model.NeedTypeId!.Value,
             Title = model.Title,
             Description = model.Description,
-            GeometryType = model.GeometryType,
-            GeometryData = model.GeometryData,
+            GeometryType = model.GeometryType!,
+            GeometryData = model.GeometryData!,
             ContactPoint = model.ContactPoint,
             NeededFrom = model.NeededFrom,
             Deadline = model.Deadline,
@@ -115,6 +117,7 @@ public class HomeController : Controller
 
     // GET: Viser skjemaet for registrering av en ressurs.
     [HttpGet]
+    [Authorize(Roles = AppRoles.ResourceOwner + "," + AppRoles.Admin)]
     public IActionResult Resource()
     {
         return View(new ResourceViewModel());
@@ -122,6 +125,7 @@ public class HomeController : Controller
 
     // POST: Registrerer en ny ressurs.
     [HttpPost]
+    [Authorize(Roles = AppRoles.ResourceOwner + "," + AppRoles.Admin)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Resource(ResourceViewModel model)
     {
@@ -186,18 +190,35 @@ public class HomeController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = AppRoles.NeedsActor + "," + AppRoles.Admin)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateNeedStatus(
         int id,
         string status)
     {
+        if (!NeedStatuses.All.Contains(status))
+        {
+            return BadRequest();
+        }
+
+        var need = await _needRepository.GetByIdAsync(id);
+        if (need is null)
+        {
+            return NotFound();
+        }
+
+        if (need.UserId != CurrentUserId && !User.IsInRole(AppRoles.Admin))
+        {
+            return Forbid();
+        }
+
         await _needRepository.UpdateStatusAsync(id, status);
 
         return RedirectToAction(nameof(NeedOverview));
     }
     
-    private int CurrentUserId => int.Parse(
+    private string CurrentUserId =>
         User.FindFirstValue(ClaimTypes.NameIdentifier)
         ?? throw new InvalidOperationException(
-            "Innlogget bruker mangler identifikator."));
+            "Innlogget bruker mangler identifikator.");
 }
