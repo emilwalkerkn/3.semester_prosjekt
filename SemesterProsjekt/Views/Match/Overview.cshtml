@@ -1,103 +1,134 @@
 @*
-    Dette er oversikten over aktive matcher.
+    Dette er oversikten over åpne matchforslag.
 
-    Siden viser:
-    - Hvor mange aktive matcher som finnes
-    - Matcher som venter på godkjenning
-    - Matcher som kan fullføres
-    - Behovet og ressursen i hver match
-    - Knapper for å godkjenne, avslå eller fullføre
+    Administratorer ser alle matcher.
+    Behovsaktører og ressurseiere ser matcher som gjelder egne registreringer.
+
+    Begge aktørtypene kan foreslå nye matcher.
+    Motparten kan godkjenne eller avslå et forslag.
+    Begge parter kan fullføre godkjente matcher fra historikken.
+    Administratorer har tilgang til alle matcher, men er ikke nødvendige i flyten.
+
+    Controlleren kontrollerer rettighetene.
+    Repositoryet filtrerer hvilke matcher brukeren får se.
 *@
 
 @model IEnumerable<SemesterProsjekt.Models.ViewModels.MatchListItemViewModel>
+@using SemesterProsjekt.Models
 
 @{
-    // Angir tittelen til siden.
     ViewData["Title"] = "Matcher";
 
-    // Gjør modellen om til en liste.
+    // Rollen avgjør hvilke tekster og handlinger som vises.
+    var isAdmin = User.IsInRole(AppRoles.Admin);
+
+    // Begge aktørtypene og admin kan foreslå matcher.
+    var canPropose = isAdmin ||
+                     User.IsInRole(AppRoles.NeedsActor) ||
+                     User.IsInRole(AppRoles.ResourceOwner);
+
+    // Controlleren sender bare matcher brukeren har tilgang til.
     var matches = Model.ToList();
 
-    // Teller hvor mange matcher som er forslag.
+    // Godkjente og avslåtte forslag ligger i historikken.
     var proposedCount = matches.Count(match =>
-        match.Status == SemesterProsjekt.Models.MatchStatuses.Proposed);
+        match.Status == MatchStatuses.Proposed);
 
-    // Teller hvor mange matcher som er godkjent.
-    var approvedCount = matches.Count(match =>
-        match.Status == SemesterProsjekt.Models.MatchStatuses.Approved);
+    var responseCount = matches.Count(match => match.CanRespond);
+    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    var sentCount = matches.Count(match => match.ProposedByUserId == currentUserId);
 
-    // Gjør statusen lettere å forstå på norsk.
+    // Gjør statusverdiene lettere å forstå i grensesnittet.
     string StatusText(string status) => status switch
     {
-        SemesterProsjekt.Models.MatchStatuses.Proposed => "Forslag",
-        SemesterProsjekt.Models.MatchStatuses.Approved => "Godkjent",
-        SemesterProsjekt.Models.MatchStatuses.Completed => "Fullført",
-        SemesterProsjekt.Models.MatchStatuses.Declined => "Avslått",
+        MatchStatuses.Proposed => "Forslag",
+        MatchStatuses.Approved => "Godkjent",
+        MatchStatuses.Completed => "Fullført",
+        MatchStatuses.Declined => "Avslått",
         _ => status
     };
 
     // Velger CSS-klassen som passer til statusen.
     string StatusClass(string status) => status switch
     {
-        SemesterProsjekt.Models.MatchStatuses.Proposed => "warning",
-        SemesterProsjekt.Models.MatchStatuses.Approved => "available",
-        SemesterProsjekt.Models.MatchStatuses.Completed => "resolved",
-        SemesterProsjekt.Models.MatchStatuses.Declined => "critical",
+        MatchStatuses.Proposed => "warning",
+        MatchStatuses.Approved => "available",
+        MatchStatuses.Completed => "resolved",
+        MatchStatuses.Declined => "critical",
         _ => ""
+    };
+
+    // Rettighetene er beregnet i controlleren, ikke bare fra brukerens rolle.
+    string NextStep(SemesterProsjekt.Models.ViewModels.MatchListItemViewModel match) => match.Status switch
+    {
+        MatchStatuses.Proposed => match.CanRespond
+            ? "Godkjenn eller avslå forslaget"
+            : string.IsNullOrWhiteSpace(match.ProposedByUserId)
+                ? "Venter på administrator"
+                : "Venter på svar fra motparten",
+
+        MatchStatuses.Approved => match.CanComplete
+            ? "Marker som fullført"
+            : "Matchen er godkjent",
+
+        _ => StatusText(match.Status)
     };
 }
 
 <section class="overview-page match-page">
 
-    @* Overskriften og introduksjonen til siden. *@
+    @* Overskriften og introduksjonen tilpasses brukerens rolle. *@
     <header class="overview-heading">
         <div>
             <p class="eyebrow">Koordinering</p>
-            <h1>Matcher</h1>
+
+            <h1>@(isAdmin ? "Matcher" : "Mine matcher")</h1>
 
             <p class="page-intro">
-                Koble behov med riktige ressurser, og følg hvert
-                forslag frem til det er fullført.
+                @(isAdmin
+                    ? "Foreslå koblinger mellom behov og ressurser, og følg matchene frem til de er fullført."
+                    : "Foreslå matcher og følg koblinger som gjelder dine behov eller ressurser.")
             </p>
         </div>
 
-        @* Knapper til historikken og oppretting av en ny match. *@
+        @* Historikken er tilgjengelig for alle de tre aktørrollene. *@
         <div class="overview-heading-actions">
             <a asp-action="History"
                class="portal-button secondary">
                 Matchhistorikk
             </a>
 
-            <a asp-action="Create"
-               class="portal-button">
-                + Opprett match
-            </a>
+            @* Begge aktørtypene og admin kan åpne forslagsskjemaet. *@
+            @if (canPropose)
+            {
+                <a asp-action="Create"
+                   class="portal-button">
+                    + Foreslå match
+                </a>
+            }
         </div>
     </header>
 
-    @* Viser en kort oppsummering av aktive matcher. *@
+    @* Oppsummerer matchene i brukerens filtrerte modell. *@
     <section class="match-summary-grid"
              aria-label="Matchstatus">
 
-        @* Viser totalt antall aktive matcher. *@
         <article class="portal-card match-summary-card">
-            <span>Aktive matcher</span>
-            <strong>@matches.Count</strong>
-            <p>Forslag og godkjente matcher.</p>
-        </article>
-
-        @* Viser hvor mange forslag som venter på svar. *@
-        <article class="portal-card match-summary-card">
-            <span>Venter på godkjenning</span>
+            <span>Åpne forslag</span>
             <strong>@proposedCount</strong>
-            <p>Forslag som må følges opp.</p>
+            <p>Matcher som venter på svar.</p>
         </article>
 
-        @* Viser hvor mange matcher som kan fullføres. *@
         <article class="portal-card match-summary-card">
-            <span>Klare for fullføring</span>
-            <strong>@approvedCount</strong>
-            <p>Godkjente matcher som kan avsluttes.</p>
+            <span>Venter på ditt svar</span>
+            <strong>@responseCount</strong>
+            <p>Forslag du kan godkjenne eller avslå.</p>
+        </article>
+
+        <article class="portal-card match-summary-card">
+            <span>Sendte forslag</span>
+            <strong>@sentCount</strong>
+            <p>Dine forslag som venter på svar.</p>
         </article>
     </section>
 
@@ -105,29 +136,36 @@
     <section class="overview-list match-list"
              aria-label="Aktive matcher">
 
-        @* Viser en melding dersom det ikke finnes aktive matcher. *@
+        @* Viser en melding og forslag til neste steg når listen er tom. *@
         @if (matches.Count == 0)
         {
             <div class="portal-card empty-state">
-                <h2>Ingen aktive matcher</h2>
+                <h2>Ingen åpne matchforslag</h2>
 
-                <p>
-                    Opprett en match når du har funnet en ressurs
-                    som kan dekke et behov.
-                </p>
+                @if (canPropose)
+                {
+                    <p>
+                        Foreslå en kobling mellom et behov og en ressurs
+                        som kan dekke behovet.
+                    </p>
 
-                <a asp-action="Create"
-                   class="portal-button">
-                    Opprett match
-                </a>
+                    <a asp-action="Create"
+                       class="portal-button">
+                        Foreslå match
+                    </a>
+                }
+                else
+                {
+                    <p>
+                        Du har ingen aktive matcher knyttet til
+                        dine behov eller ressurser ennå.
+                    </p>
+                }
             </div>
         }
         else
         {
-            @*
-                Går gjennom listen og viser
-                ett kort for hver match.
-            *@
+            @* Viser ett kort for hver match brukeren har tilgang til. *@
             @foreach (var item in matches)
             {
                 <article class="portal-card match-card">
@@ -144,7 +182,7 @@
 
                         @*
                             StatusClass bestemmer fargen.
-                            StatusText viser statusen på norsk.
+                            StatusText viser den lesbare statusteksten.
                         *@
                         <span class="status @StatusClass(item.Status)">
                             @StatusText(item.Status)
@@ -185,8 +223,14 @@
                         </div>
                     </div>
 
-                    @* Viser tidspunkt og hva som bør gjøres videre. *@
+                    @* Viser tidspunkt og rolletilpasset informasjon om neste steg. *@
                     <div class="match-meta">
+                        <div>
+                            <span>Foreslått mengde</span>
+                            <strong>@(item.AssignedQuantity.HasValue
+                                ? $"{item.AssignedQuantity:0.##} {item.AssignedUnit}"
+                                : "Resterende behov, maks ledig mengde")</strong>
+                        </div>
                         <div>
                             <span>Opprettet</span>
 
@@ -198,15 +242,8 @@
                         <div>
                             <span>Neste steg</span>
 
-                            @*
-                                Teksten endres ut fra statusen
-                                til matchen.
-                            *@
                             <strong>
-                                @(item.Status ==
-                                  SemesterProsjekt.Models.MatchStatuses.Proposed
-                                    ? "Godkjenn forslaget"
-                                    : "Marker som fullført")
+                                @NextStep(item)
                             </strong>
                         </div>
                     </div>
@@ -220,79 +257,75 @@
                         </p>
                     }
 
-                    @* Viser handlingene som passer til statusen. *@
-                    <div class="record-actions">
+                    @*
+                        Motparten får svarknapper. Godkjente matcher følges opp i historikken.
+                        Controlleren kontrollerer samme tilgang ved innsending.
+                    *@
+                    @if (item.CanRespond || item.CanComplete)
+                    {
+                        <div class="record-actions">
 
-                        @*
-                            Et forslag kan enten godkjennes
-                            eller avslås.
-                        *@
-                        @if (item.Status ==
-                             SemesterProsjekt.Models.MatchStatuses.Proposed)
-                        {
-                            @* Sender ny status til UpdateStatus. *@
-                            <form asp-action="UpdateStatus"
-                                  method="post">
+                            @* Et forslag kan godkjennes eller avslås. *@
+                            @if (item.CanRespond)
+                            {
+                                @* Sender status Godkjent til UpdateStatus. *@
+                                <form asp-action="UpdateStatus"
+                                      method="post">
 
-                                @* ID-en forteller hvilken match som skal endres. *@
-                                <input type="hidden"
-                                       name="id"
-                                       value="@item.MatchId" />
+                                    <input type="hidden"
+                                           name="id"
+                                           value="@item.MatchId" />
 
-                                @* Den nye statusen blir Godkjent. *@
-                                <input type="hidden"
-                                       name="status"
-                                       value="@SemesterProsjekt.Models.MatchStatuses.Approved" />
+                                    <input type="hidden"
+                                           name="status"
+                                           value="@MatchStatuses.Approved" />
 
-                                <button type="submit"
-                                        class="portal-button">
-                                    Godkjenn forslag
-                                </button>
-                            </form>
+                                    <button type="submit"
+                                            class="portal-button">
+                                        Godkjenn forslag
+                                    </button>
+                                </form>
 
-                            @* Sender status Avslått til UpdateStatus. *@
-                            <form asp-action="UpdateStatus"
-                                  method="post">
+                                @* Sender status Avslått til UpdateStatus. *@
+                                <form asp-action="UpdateStatus"
+                                      method="post">
 
-                                <input type="hidden"
-                                       name="id"
-                                       value="@item.MatchId" />
+                                    <input type="hidden"
+                                           name="id"
+                                           value="@item.MatchId" />
 
-                                <input type="hidden"
-                                       name="status"
-                                       value="@SemesterProsjekt.Models.MatchStatuses.Declined" />
+                                    <input type="hidden"
+                                           name="status"
+                                           value="@MatchStatuses.Declined" />
 
-                                <button type="submit"
-                                        class="portal-button danger">
-                                    Avslå forslag
-                                </button>
-                            </form>
-                        }
-                        else if (item.Status ==
-                                 SemesterProsjekt.Models.MatchStatuses.Approved)
-                        {
-                            @*
-                                En godkjent match kan merkes
-                                som fullført.
-                            *@
-                            <form asp-action="UpdateStatus"
-                                  method="post">
+                                    <button type="submit"
+                                            class="portal-button danger">
+                                        Avslå forslag
+                                    </button>
+                                </form>
+                            }
+                            else if (item.CanComplete)
+                            {
+                                @* En godkjent match kan merkes som fullført. *@
+                                <form asp-action="UpdateStatus"
+                                      method="post">
 
-                                <input type="hidden"
-                                       name="id"
-                                       value="@item.MatchId" />
+                                    <input type="hidden"
+                                           name="id"
+                                           value="@item.MatchId" />
 
-                                <input type="hidden"
-                                       name="status"
-                                       value="@SemesterProsjekt.Models.MatchStatuses.Completed" />
+                                    <input type="hidden"
+                                           name="status"
+                                           value="@MatchStatuses.Completed" />
 
-                                <button type="submit"
-                                        class="portal-button">
-                                    Marker som fullført
-                                </button>
-                            </form>
-                        }
-                    </div>
+                                    <button type="submit"
+                                            class="portal-button">
+                                        Marker som fullført
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    }
                 </article>
             }
         }

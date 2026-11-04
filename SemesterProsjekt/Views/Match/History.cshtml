@@ -2,6 +2,7 @@
     Dette er siden for matchhistorikk.
 
     Siden viser:
+    - Matcher som er godkjent og skal gjennomføres
     - Matcher som er fullført
     - Matcher som er avslått
     - Behovet og ressursen i hver match
@@ -21,6 +22,7 @@
     // Gjør statusen lettere å forstå på norsk.
     string StatusText(string status) => status switch
     {
+        SemesterProsjekt.Models.MatchStatuses.Approved => "Godkjent",
         SemesterProsjekt.Models.MatchStatuses.Completed => "Fullført",
         SemesterProsjekt.Models.MatchStatuses.Declined => "Avslått",
         _ => status
@@ -29,6 +31,7 @@
     // Velger CSS-klassen som passer til statusen.
     string StatusClass(string status) => status switch
     {
+        SemesterProsjekt.Models.MatchStatuses.Approved => "available",
         SemesterProsjekt.Models.MatchStatuses.Completed => "resolved",
         SemesterProsjekt.Models.MatchStatuses.Declined => "critical",
         _ => ""
@@ -44,35 +47,37 @@
             <h1>Matchhistorikk</h1>
 
             <p class="page-intro">
-                Her finner du matcher som er gjennomført eller avslått.
+                Her finner du godkjente, fullførte og avslåtte matcher.
+                Når en godkjent match er gjennomført, kan en av partene markere den som fullført.
+                Da oppdateres resterende mengder automatisk, og et helt dekket behov merkes som løst.
             </p>
         </div>
 
         @* Sender brukeren til oversikten over aktive matcher. *@
         <a asp-action="Overview"
            class="portal-button secondary">
-            Til aktive matcher
+            Til åpne forslag
         </a>
     </header>
 
-    @* Listen over fullførte og avslåtte matcher. *@
+    @* Listen over behandlede matcher. Godkjente matcher kan fortsatt følges opp. *@
     <section class="overview-list match-list"
-             aria-label="Avsluttede matcher">
+             aria-label="Behandlede matcher">
 
         @* Viser en melding dersom historikken er tom. *@
         @if (matches.Count == 0)
         {
             <div class="portal-card empty-state">
-                <h2>Ingen avsluttede matcher ennå</h2>
+                <h2>Ingen behandlede matcher ennå</h2>
 
                 <p>
-                    Når en match er fullført eller avslått,
+                    Når et forslag er godkjent eller avslått,
                     blir den flyttet hit.
                 </p>
 
                 <a asp-action="Overview"
                    class="portal-button secondary">
-                    Til aktive matcher
+                    Til åpne forslag
                 </a>
             </div>
         }
@@ -84,7 +89,7 @@
             *@
             @foreach (var item in matches)
             {
-                <article class="portal-card match-card match-card-completed">
+                <article class="portal-card match-card @(item.Status == SemesterProsjekt.Models.MatchStatuses.Approved ? "" : "match-card-completed")">
 
                     @* Viser nummeret og statusen til matchen. *@
                     <div class="match-card-heading">
@@ -146,6 +151,12 @@
                     @* Viser når matchen ble opprettet og avsluttet. *@
                     <div class="match-meta">
                         <div>
+                            <span>Avtalt mengde</span>
+                            <strong>@(item.AssignedQuantity.HasValue
+                                ? $"{item.AssignedQuantity:0.##} {item.AssignedUnit}"
+                                : "Ikke oppgitt – beregnes ved fullføring")</strong>
+                        </div>
+                        <div>
                             <span>Opprettet</span>
 
                             <strong>
@@ -154,11 +165,12 @@
                         </div>
 
                         <div>
-                            <span>Avsluttet</span>
+                            <span>@(item.Status == SemesterProsjekt.Models.MatchStatuses.Approved ? "Oppfølging" : "Avsluttet")</span>
 
                             <strong>
-                                @(item.ResolvedAt?.ToString("dd.MM.yyyy HH:mm")
-                                  ?? "Ikke oppgitt")
+                                @(item.Status == SemesterProsjekt.Models.MatchStatuses.Approved
+                                    ? "Godkjent – venter på gjennomføring"
+                                    : item.ResolvedAt?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")
                             </strong>
                         </div>
                     </div>
@@ -172,6 +184,16 @@
                             <strong>Notat:</strong>
                             @item.Notes
                         </p>
+                    }
+
+                    @* Begge parter kan fullføre en godkjent match uten hjelp fra admin. *@
+                    @if (item.CanComplete)
+                    {
+                        <form asp-action="UpdateStatus" method="post" class="record-actions">
+                            <input type="hidden" name="id" value="@item.MatchId" />
+                            <input type="hidden" name="status" value="@SemesterProsjekt.Models.MatchStatuses.Completed" />
+                            <button type="submit" class="portal-button">Marker som fullført</button>
+                        </form>
                     }
                 </article>
             }

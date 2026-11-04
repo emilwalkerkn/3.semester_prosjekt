@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Identity;
+using Dapper;
 using SemesterProsjekt.Models;
 
 namespace SemesterProsjekt.Data;
 
 
-/// Oppretter lokale demonstrasjonskontoer, behov, ressurser og et matchforslag
+/// Oppretter lokale demonstrasjonskontoer, behov, ressurser og matchforslag
 /// når LocalDemo:Enabled er aktivert.
 /// Kontrollerer eksisterende data før opprettelse, slik at vanlige omstarter
 /// ikke oppretter de samme demonstrasjonsdataene på nytt.
@@ -98,7 +99,9 @@ public static class LocalDemoSeeder
         // Matchen opprettes etter at behovet og ressursen finnes.
         await SeedNeedsAsync(needRepository, needsActor.Id);
         await SeedResourcesAsync(resourceRepository, resourceOwner.Id);
-        await SeedMatchAsync(needRepository, resourceRepository, matchRepository);
+        await SeedMatchAsync(needRepository, resourceRepository, matchRepository,
+            scope.ServiceProvider.GetRequiredService<IDbConnectionFactory>(),
+            needsActor.Id, resourceOwner.Id);
     }
 
    
@@ -255,38 +258,73 @@ public static class LocalDemoSeeder
     }
 
    
-    /// Oppretter et matchforslag mellom demonstrasjonsbehovet for drikkevann
-    /// og den tilhørende ressursen dersom kombinasjonen ikke allerede finnes.
+    /// Klargjør ett demoforslag i hver retning, uten å tilbakestille behandlede matcher.
+    /// Eldre åpne demoforslag får en avsender som del av testoppsettet.
+    /// Andre brukeres matcher og forslag med kjent avsender endres ikke.
    
     private static async Task SeedMatchAsync(
         INeedRepository needRepository,
         IResourceRepository resourceRepository,
-        IMatchRepository matchRepository)
+        IMatchRepository matchRepository,
+        IDbConnectionFactory connectionFactory,
+        string needsActorId,
+        string resourceOwnerId)
     {
-        // Single forventer nøyaktig én registrering med hver av de faste titlene.
-        var waterNeed = (await needRepository.GetAllAsync())
-            .Single(need => need.Title == WaterNeedTitle);
-
-        var waterResource = (await resourceRepository.GetAllAsync())
-            .Single(resource => resource.Title == WaterResourceTitle);
-
-        if (await matchRepository.ExistsAsync(
-            waterNeed.NeedId,
-            waterResource.ResourceId))
+        var needs = (await needRepository.GetAllAsync())
+            .Where(need => need.UserId == needsActorId).ToList();
+        var resources = (await resourceRepository.GetAllAsync())
+            .Where(resource => resource.UserId == resourceOwnerId).ToList();
+        var examples = new[]
         {
-            return;
+            (NeedTitle: WaterNeedTitle, ResourceTitle: WaterResourceTitle, Sender: needsActorId),
+            (NeedTitle: TransportNeedTitle, ResourceTitle: BusResourceTitle, Sender: resourceOwnerId)
+        };
+
+        using var connection = connectionFactory.CreateConnection();
+        foreach (var example in examples)
+        {
+            var need = needs.SingleOrDefault(item => item.Title == example.NeedTitle);
+            var resource = resources.SingleOrDefault(item => item.Title == example.ResourceTitle);
+            if (need is null || resource is null) continue;
+
+            if (!await matchRepository.ExistsAsync(need.NeedId, resource.ResourceId))
+            {
+                var reservations = (await matchRepository.GetReservationsAsync()).ToList();
+                if (!MatchAvailability.CanMatchNeed(need, reservations) ||
+                    !MatchAvailability.CanMatchResource(resource, reservations)) continue;
+
+                await matchRepository.CreateAsync(new Match
+                {
+                    NeedId = need.NeedId,
+                    ResourceId = resource.ResourceId,
+                    ProposedByUserId = example.Sender,
+                    Status = MatchStatuses.Proposed,
+                    MatchedAt = DateTime.UtcNow.AddHours(-1),
+                    Notes = "Testmatch for å vise matchoversikten."
+                });
+            }
+            else
+            {
+                // Bare faste demopar eid av demokontoene får testavsenderen.
+                // Status, tidspunkt og eksisterende avsender beholdes.
+                await connection.ExecuteAsync(
+                    """
+                    UPDATE `Match` m
+                    INNER JOIN Needs n ON n.NeedId = m.NeedId
+                    INNER JOIN Resources r ON r.ResourceId = m.ResourceId
+                    SET m.ProposedByUserId = @Sender
+                    WHERE m.NeedId = @NeedId AND m.ResourceId = @ResourceId
+                      AND n.UserId = @NeedsActorId AND r.UserId = @ResourceOwnerId
+                      AND m.ProposedByUserId IS NULL AND m.Status = @ProposedStatus;
+                    """,
+                    new
+                    {
+                        Sender = example.Sender, NeedId = need.NeedId,
+                        ResourceId = resource.ResourceId, NeedsActorId = needsActorId,
+                        ResourceOwnerId = resourceOwnerId, ProposedStatus = MatchStatuses.Proposed
+                    });
+            }
         }
-
-        await matchRepository.CreateAsync(new Match
-        {
-            NeedId = waterNeed.NeedId,
-            ResourceId = waterResource.ResourceId,
-            Status = MatchStatuses.Proposed,
-
-            // Setter demonstrasjonsmatchen én time tilbake i tid.
-            MatchedAt = DateTime.UtcNow.AddHours(-1),
-            Notes = "Testmatch for å vise matchoversikten."
-        });
     }
 
    
