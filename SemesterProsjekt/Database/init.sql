@@ -97,6 +97,12 @@ CREATE TABLE IF NOT EXISTS `Match` (
                                        MatchId INT AUTO_INCREMENT PRIMARY KEY,
                                        NeedId INT NOT NULL,
                                        ResourceId INT NOT NULL,
+    -- Identifiserer forslagsstilleren slik at riktig motpart kan svare.
+    -- NULL beholdes som mulighet for eldre matcher uten kjent opphavsperson.
+    ProposedByUserId VARCHAR(255),
+    -- Reserveres ved godkjenning og leveres ved fullføring.
+    AssignedQuantity DECIMAL(10,2),
+    AssignedUnit VARCHAR(50),
 
     -- Nye matcher får status Foreslått dersom status ikke oppgis.
                                        Status VARCHAR(20) NOT NULL DEFAULT 'Foreslått',
