@@ -9,7 +9,7 @@ namespace SemesterProsjekt.UnitTests;
 public class UnitTestNeedGet
 {
     [Fact]
-    public void Need_Get_ReturnsViewWithNeedViewModel()
+    public async Task Need_Get_ReturnsViewWithNeedViewModel()
     {
         // Arrange
         var needRepository = new Mock<INeedRepository>();
@@ -17,8 +17,7 @@ public class UnitTestNeedGet
         var controller = new NeedController(needRepository.Object);
 
         // Act
-        var result = controller.Create();
-
+        var result = await controller.Create();
         // Assert
         var viewResult = Assert.IsType<ViewResult>(result);
         Assert.IsType<NeedViewModel>(viewResult.Model);
