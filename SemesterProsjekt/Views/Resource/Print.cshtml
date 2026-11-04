@@ -1,16 +1,35 @@
-﻿@model IEnumerable<SemesterProsjekt.Models.Resource>
+﻿@*
+    Dette er utskriftssiden for ressurser.
+
+    Siden:
+    - Viser ressursene i en tabell
+    - Har en knapp for utskrift
+    - Har en lenke tilbake til oversikten
+    - Skjuler knappene når siden skrives ut
+*@
+
+@model IEnumerable<SemesterProsjekt.Models.Resource>
 
 @{
-Layout = null;
+    /*
+        Siden bruker ikke den vanlige layouten.
+        Den lager hele HTML-dokumentet selv.
+    */
+    Layout = null;
 }
 
 <!DOCTYPE html>
 <html lang="nb">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    @* Gjør at siden fungerer på forskjellige skjermstørrelser. *@
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1" />
+
     <title>Ressursliste – utskrift</title>
 
+    @* Egen CSS for tabellen og utskriften. *@
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -22,7 +41,8 @@ Layout = null;
             border-collapse: collapse;
         }
 
-        th, td {
+        th,
+        td {
             border: 1px solid #999;
             padding: 8px;
             text-align: left;
@@ -37,7 +57,15 @@ Layout = null;
             margin-bottom: 20px;
         }
 
+        /*
+            Disse stilene brukes bare når
+            siden skrives ut.
+        */
         @@media print {
+            /*
+                Skjuler utskriftsknappen og lenken
+                på det utskrevne arket.
+            */
             .actions {
                 display: none;
             }
@@ -46,66 +74,96 @@ Layout = null;
                 margin: 0;
             }
 
+            /*
+                Prøver å hindre at én tabellrad
+                blir delt mellom to sider.
+            */
             tr {
                 break-inside: avoid;
             }
         }
     </style>
 </head>
+
 <body>
-<div class="actions">
-    <button type="button" onclick="window.print()">
-        Skriv ut
-    </button>
 
-    <a asp-controller="Resource"
-       asp-action="Overview">
-        Tilbake til oversikten
-    </a>
-</div>
+    @* Knapper for utskrift og tilbakeføring. *@
+    <div class="actions">
 
-<h1>Ressursliste</h1>
+        @* Åpner nettleserens utskriftsvindu. *@
+        <button type="button"
+                onclick="window.print()">
+            Skriv ut
+        </button>
 
-@if (!Model.Any())
-{
-<p>Ingen ressurser funnet.</p>
-}
-else
-{
-    <table>
-        <thead>
-        <tr>
-            <th>Tittel</th>
-            <th>Ressurstype-ID</th>
-            <th>Mengde</th>
-            <th>Kontaktpunkt</th>
-            <th>Status</th>
-            <th>Tilgjengelig fra</th>
-            <th>Tilgjengelig til</th>
-        </tr>
-        </thead>
+        @* Sender brukeren tilbake til ressursoversikten. *@
+        <a asp-controller="Resource"
+           asp-action="Overview">
+            Tilbake til oversikten
+        </a>
+    </div>
 
-        <tbody>
-        @foreach (var resource in Model)
-        {
-            <tr>
-                <td>@resource.Title</td>
-                <td>@resource.ResourceTypeId</td>
-                <td>@resource.Quantity @resource.Unit</td>
-                <td>@(resource.ContactPoint ?? "Ikke oppgitt")</td>
-                <td>@resource.Status</td>
-                <td>
-                    @(resource.AvailableFrom?.ToString("dd.MM.yyyy HH:mm")
-                    ?? "Ikke oppgitt")
-                </td>
-                <td>
-                    @(resource.AvailableTo?.ToString("dd.MM.yyyy HH:mm")
-                    ?? "Ikke oppgitt")
-                </td>
-            </tr>
-        }
-        </tbody>
-    </table>
-}
+    <h1>Ressursliste</h1>
+
+    @* Viser en melding dersom listen er tom. *@
+    @if (!Model.Any())
+    {
+        <p>Ingen ressurser funnet.</p>
+    }
+    else
+    {
+        @* Tabellen viser informasjon om alle ressursene. *@
+        <table>
+            <thead>
+                <tr>
+                    <th>Tittel</th>
+                    <th>Ressurstype-ID</th>
+                    <th>Mengde</th>
+                    <th>Kontaktpunkt</th>
+                    <th>Status</th>
+                    <th>Tilgjengelig fra</th>
+                    <th>Tilgjengelig til</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @*
+                    Går gjennom listen og lager
+                    én tabellrad for hver ressurs.
+                *@
+                @foreach (var resource in Model)
+                {
+                    <tr>
+                        <td>@resource.Title</td>
+
+                        <td>@resource.ResourceTypeId</td>
+
+                        <td>
+                            @resource.Quantity @resource.Unit
+                        </td>
+
+                        <td>
+                            @(resource.ContactPoint ?? "Ikke oppgitt")
+                        </td>
+
+                        <td>@resource.Status</td>
+
+                        <td>
+                            @(resource.AvailableFrom?
+                                .ToString("dd.MM.yyyy HH:mm")
+                              ?? "Ikke oppgitt")
+                        </td>
+
+                        <td>
+                            @(resource.AvailableTo?
+                                .ToString("dd.MM.yyyy HH:mm")
+                              ?? "Ikke oppgitt")
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 </body>
 </html>

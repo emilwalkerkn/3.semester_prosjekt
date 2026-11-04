@@ -1,83 +1,222 @@
+@*
+    Dette er hovedsiden for kontoinnstillinger.
+
+    Her kan brukeren:
+    - Endre navn og e-postadresse
+    - Se hvilken rolle kontoen har
+    - Endre passord
+    - Lese informasjon om varslinger
+*@
+
 @model SemesterProsjekt.Models.ViewModels.SettingsPageViewModel
 
 @{
+    // Angir tittelen til siden.
     ViewData["Title"] = "Kontoinnstillinger";
 }
 
 <div class="settings-layout settings-page-layout">
-    <partial name="_SettingsSidebar" model="Model" />
 
+    @*
+        Setter inn sidemenyen fra _SettingsSidebar.cshtml.
+        Den samme modellen sendes videre til partial viewet.
+    *@
+    <partial name="_SettingsSidebar"
+             model="Model" />
+
+    @* Hovedinnholdet på innstillingssiden. *@
     <div class="settings-content">
         <h1>Kontoinnstillinger</h1>
-        <p class="page-intro">Administrer profilinformasjon, kontosikkerhet og portalvalg.</p>
 
+        <p class="page-intro">
+            Administrer profilinformasjon,
+            kontosikkerhet og portalvalg.
+        </p>
+
+        @*
+            Viser en bekreftelse hvis en endring er lagret.
+            TempData varer vanligvis frem til neste forespørsel.
+        *@
         @if (TempData["SettingsSuccess"] is string success)
         {
-            <div class="settings-message success" role="status">@success</div>
+            <div class="settings-message success"
+                 role="status">
+                @success
+            </div>
         }
 
         <div class="settings-grid">
-            <section class="portal-card settings-card" id="profil">
+
+            @* Området for profil- og kontaktinformasjon. *@
+            <section class="portal-card settings-card"
+                     id="profil">
+
                 <h2>Profil og kontakt</h2>
-                <p>Oppdater navnet og e-postadressen som brukes i portalen.</p>
-                <form asp-action="UpdateProfile" method="post" class="settings-form">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <p>
+                    Oppdater navnet og e-postadressen
+                    som brukes i portalen.
+                </p>
+
+                @*
+                    Skjemaet sender profilopplysningene
+                    til UpdateProfile-handlingen.
+                *@
+                <form asp-action="UpdateProfile"
+                      method="post"
+                      class="settings-form">
+
+                    @* Viser feil som gjelder hele profilskjemaet. *@
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger">
+                    </div>
+
+                    @* Felt for brukerens fornavn. *@
                     <div class="form-field">
                         <label asp-for="Profile.FirstName"></label>
+
                         <input asp-for="Profile.FirstName" />
-                        <span asp-validation-for="Profile.FirstName"></span>
+
+                        <span asp-validation-for="Profile.FirstName">
+                        </span>
                     </div>
+
+                    @* Felt for brukerens etternavn. *@
                     <div class="form-field">
                         <label asp-for="Profile.LastName"></label>
+
                         <input asp-for="Profile.LastName" />
-                        <span asp-validation-for="Profile.LastName"></span>
+
+                        <span asp-validation-for="Profile.LastName">
+                        </span>
                     </div>
+
+                    @* Felt for brukerens e-postadresse. *@
                     <div class="form-field">
                         <label asp-for="Profile.Email"></label>
-                        <input asp-for="Profile.Email" type="email" autocomplete="email" />
-                        <span asp-validation-for="Profile.Email"></span>
+
+                        <input asp-for="Profile.Email"
+                               type="email"
+                               autocomplete="email" />
+
+                        <span asp-validation-for="Profile.Email">
+                        </span>
                     </div>
+
+                    @*
+                        Viser kontorollen.
+                        readonly betyr at rollen ikke kan endres her.
+                    *@
                     <div class="form-field">
                         <label>Kontorolle</label>
-                        <input value="@Model.Profile.Role" readonly aria-readonly="true" />
+
+                        <input value="@Model.Profile.Role"
+                               readonly
+                               aria-readonly="true" />
                     </div>
-                    <button type="submit">Lagre endringer</button>
+
+                    @* Lagrer endringene i profilen. *@
+                    <button type="submit">
+                        Lagre endringer
+                    </button>
                 </form>
             </section>
 
-            <section class="portal-card settings-card" id="sikkerhet">
+            @* Området for å endre passord. *@
+            <section class="portal-card settings-card"
+                     id="sikkerhet">
+
                 <h2>Sikkerhet</h2>
-                <p>Endre passordet ditt. Du må oppgi det nåværende passordet først.</p>
-                <form asp-action="UpdatePassword" method="post" class="settings-form">
-                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                    <div class="form-field">
-                        <label asp-for="Password.CurrentPassword"></label>
-                        <input asp-for="Password.CurrentPassword" autocomplete="current-password" />
-                        <span asp-validation-for="Password.CurrentPassword"></span>
+
+                <p>
+                    Endre passordet ditt. Du må oppgi det
+                    nåværende passordet først.
+                </p>
+
+                @*
+                    Skjemaet sender passordene
+                    til UpdatePassword-handlingen.
+                *@
+                <form asp-action="UpdatePassword"
+                      method="post"
+                      class="settings-form">
+
+                    @* Viser feil som gjelder hele passordskjemaet. *@
+                    <div asp-validation-summary="ModelOnly"
+                         class="text-danger">
                     </div>
+
+                    @* Felt for brukerens nåværende passord. *@
                     <div class="form-field">
-                        <label asp-for="Password.NewPassword"></label>
-                        <input asp-for="Password.NewPassword" autocomplete="new-password" />
-                        <small class="form-text">Minst 8 tegn, med minst én stor bokstav og både bokstaver og tall.</small>
-                        <span asp-validation-for="Password.NewPassword"></span>
+                        <label asp-for="Password.CurrentPassword">
+                        </label>
+
+                        <input asp-for="Password.CurrentPassword"
+                               autocomplete="current-password" />
+
+                        <span asp-validation-for="Password.CurrentPassword">
+                        </span>
                     </div>
+
+                    @* Felt for det nye passordet. *@
                     <div class="form-field">
-                        <label asp-for="Password.ConfirmPassword"></label>
-                        <input asp-for="Password.ConfirmPassword" autocomplete="new-password" />
-                        <span asp-validation-for="Password.ConfirmPassword"></span>
+                        <label asp-for="Password.NewPassword">
+                        </label>
+
+                        <input asp-for="Password.NewPassword"
+                               autocomplete="new-password" />
+
+                        <small class="form-text">
+                            Minst 8 tegn, med minst én stor bokstav
+                            og både bokstaver og tall.
+                        </small>
+
+                        <span asp-validation-for="Password.NewPassword">
+                        </span>
                     </div>
-                    <button type="submit">Oppdater passord</button>
+
+                    @*
+                        Brukeren skriver inn det nye passordet på nytt.
+                        Dette kontrollerer at passordet er skrevet riktig.
+                    *@
+                    <div class="form-field">
+                        <label asp-for="Password.ConfirmPassword">
+                        </label>
+
+                        <input asp-for="Password.ConfirmPassword"
+                               autocomplete="new-password" />
+
+                        <span asp-validation-for="Password.ConfirmPassword">
+                        </span>
+                    </div>
+
+                    @* Sender inn skjemaet og oppdaterer passordet. *@
+                    <button type="submit">
+                        Oppdater passord
+                    </button>
                 </form>
             </section>
 
-            <section class="portal-card settings-card" id="varslinger">
+            @* Informasjon om varslinger i portalen. *@
+            <section class="portal-card settings-card"
+                     id="varslinger">
+
                 <h2>Varslinger</h2>
-                <p>Du får beskjed i portalen når en match trenger oppfølging. E-postvarsler kan aktiveres når match-funksjonen er ferdig koblet til databasen.</p>
+
+                <p>
+                    Du får beskjed i portalen når en match trenger
+                    oppfølging. E-postvarsler kan aktiveres når
+                    match-funksjonen er ferdig koblet til databasen.
+                </p>
             </section>
         </div>
     </div>
 </div>
 
 @section Scripts {
+    @*
+        Henter skript som kan vise feilmeldinger
+        før skjemaet sendes til serveren.
+    *@
     <partial name="_ValidationScriptsPartial" />
 }

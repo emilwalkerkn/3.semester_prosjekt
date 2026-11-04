@@ -1,97 +1,239 @@
+@*
+    Dette er oversikten over registrerte ressurser.
+
+    Siden viser:
+    - Alle registrerte ressurser
+    - Ressursenes plassering på et kart
+    - Status, tilgjengelighet og mengde
+    - Mulighet for å skrive ut listen
+    - Knapper for å vise, redigere og slette
+*@
+
 @using System.Text.Json
 @model IEnumerable<SemesterProsjekt.Models.Resource>
 
 @{
+    // Angir tittelen til siden.
     ViewData["Title"] = "Tilgjengelige ressurser";
-    var canRegister = User.IsInRole("Ressurseier") || User.IsInRole("Admin");
-    var currentUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+    /*
+        Ressurseiere og administratorer
+        kan registrere nye ressurser.
+    */
+    var canRegister =
+        User.IsInRole("Ressurseier") ||
+        User.IsInRole("Admin");
+
+    // Henter ID-en til brukeren som er logget inn.
+    var currentUserId = User.FindFirst(
+        System.Security.Claims.ClaimTypes.NameIdentifier
+    )?.Value;
+
+    /*
+        Henter kartinformasjon fra ressursene.
+        Ressurser uten plassering blir ikke tatt med.
+    */
     var mapEntries = Model
-        .Where(resource => !string.IsNullOrWhiteSpace(resource.GeometryData))
-        .Select(resource => new { geometryData = resource.GeometryData, title = resource.Title });
+        .Where(resource =>
+            !string.IsNullOrWhiteSpace(resource.GeometryData))
+        .Select(resource => new
+        {
+            geometryData = resource.GeometryData,
+            title = resource.Title
+        });
 }
 
 <section class="overview-page">
+
+    @* Overskriften og introduksjonen til siden. *@
     <header class="overview-heading">
         <div>
             <p class="eyebrow">Oversikt</p>
             <h1>Tilgjengelige ressurser</h1>
-            <p class="page-intro">Finn ressurser som kan brukes for å løse registrerte behov.</p>
+
+            <p class="page-intro">
+                Finn ressurser som kan brukes for å løse
+                registrerte behov.
+            </p>
         </div>
 
         <div class="overview-heading-actions">
-            <a asp-action="Print" class="portal-button secondary">Skriv ut liste</a>
+
+            @* Sender brukeren til en utskriftsvennlig side. *@
+            <a asp-action="Print"
+               class="portal-button secondary">
+                Skriv ut liste
+            </a>
+
+            @*
+                Knappen vises bare for ressurseiere
+                og administratorer.
+            *@
             @if (canRegister)
             {
-                <a asp-action="Create" class="portal-button">+ Registrer ressurs</a>
+                <a asp-action="Create"
+                   class="portal-button">
+                    + Registrer ressurs
+                </a>
             }
         </div>
     </header>
 
-    <section class="portal-card overview-map-card" aria-labelledby="resource-map-heading">
+    @* Viser plasseringen til ressursene på et kart. *@
+    <section class="portal-card overview-map-card"
+             aria-labelledby="resource-map-heading">
+
         <div class="section-heading">
             <div>
                 <p class="eyebrow">Kart</p>
-                <h2 id="resource-map-heading">Registrerte ressurser</h2>
+
+                <h2 id="resource-map-heading">
+                    Registrerte ressurser
+                </h2>
             </div>
-            <span class="overview-count">@Model.Count() ressurser</span>
+
+            @* Viser hvor mange ressurser som finnes. *@
+            <span class="overview-count">
+                @Model.Count() ressurser
+            </span>
         </div>
-        <div id="resourceMap" class="map-panel" aria-label="Kart med registrerte ressurser"></div>
+
+        @* JavaScript bruker dette området til å vise kartet. *@
+        <div id="resourceMap"
+             class="map-panel"
+             aria-label="Kart med registrerte ressurser">
+        </div>
     </section>
 
-    <section class="overview-list" aria-label="Liste over ressurser">
+    @* Listen over registrerte ressurser. *@
+    <section class="overview-list"
+             aria-label="Liste over ressurser">
+
+        @* Viser en melding dersom listen er tom. *@
         @if (!Model.Any())
         {
             <div class="portal-card empty-state">
                 <h2>Ingen ressurser ennå</h2>
-                <p>Nye ressurser dukker opp her når de er registrert.</p>
+
+                <p>
+                    Nye ressurser dukker opp her når de er registrert.
+                </p>
+
                 @if (canRegister)
                 {
-                    <a asp-action="Create" class="portal-button">Registrer ressurs</a>
+                    <a asp-action="Create"
+                       class="portal-button">
+                        Registrer ressurs
+                    </a>
                 }
             </div>
         }
         else
         {
+            @*
+                Går gjennom listen og viser
+                ett kort for hver ressurs.
+            *@
             @foreach (var resource in Model)
             {
-                var canManage = User.IsInRole("Admin") || currentUserId == resource.UserId;
-                var typeIcon = PortalTypeIcons.ForResource(resource.ResourceTypeId);
+                /*
+                    Sjekker om brukeren kan endre ressursen.
+                    Administratoren og eieren får tilgang.
+                */
+                var canManage =
+                    User.IsInRole("Admin") ||
+                    currentUserId == resource.UserId;
+
+                // Finner riktig symbol for ressurstypen.
+                var typeIcon =
+                    PortalTypeIcons.ForResource(
+                        resource.ResourceTypeId
+                    );
 
                 <article class="portal-card overview-record">
+
+                    @* Viser symbol, type, tittel og beskrivelse. *@
                     <div class="overview-record-main">
                         <div class="record-title-with-icon">
-                            <span class="type-icon" role="img" aria-label="@typeIcon.Label">@typeIcon.Symbol</span>
+
+                            <span class="type-icon"
+                                  role="img"
+                                  aria-label="@typeIcon.Label">
+                                @typeIcon.Symbol
+                            </span>
+
                             <div>
-                                <p class="record-type">@(resource.ResourceTypeName ?? "Ressurs")</p>
+                                <p class="record-type">
+                                    @(resource.ResourceTypeName ?? "Ressurs")
+                                </p>
+
                                 <h2>@resource.Title</h2>
                             </div>
                         </div>
-                        <p class="overview-description">@resource.Description</p>
+
+                        <p class="overview-description">
+                            @resource.Description
+                        </p>
                     </div>
 
+                    @* Viser viktige opplysninger om ressursen. *@
                     <div class="overview-meta">
                         <div>
                             <span>Status</span>
                             <strong>@resource.Status</strong>
                         </div>
+
                         <div>
                             <span>Tilgjengelig fra</span>
-                            <strong>@(resource.AvailableFrom?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")</strong>
+
+                            <strong>
+                                @(resource.AvailableFrom?
+                                    .ToString("dd.MM.yyyy HH:mm")
+                                  ?? "Ikke oppgitt")
+                            </strong>
                         </div>
+
                         <div>
                             <span>Mengde</span>
-                            <strong>@resource.Quantity @resource.Unit</strong>
+
+                            <strong>
+                                @resource.Quantity @resource.Unit
+                            </strong>
                         </div>
                     </div>
 
+                    @* Viser status og tilgjengelige handlinger. *@
                     <div class="overview-record-footer">
-                        <span class="status available">@resource.Status</span>
+                        <span class="status available">
+                            @resource.Status
+                        </span>
+
                         <div class="record-actions">
-                            <a asp-action="Details" asp-route-id="@resource.ResourceId" class="portal-button secondary">Se detaljer</a>
+
+                            @* Alle brukere kan se detaljene. *@
+                            <a asp-action="Details"
+                               asp-route-id="@resource.ResourceId"
+                               class="portal-button secondary">
+                                Se detaljer
+                            </a>
+
+                            @*
+                                Rediger og slett vises bare for
+                                administratoren eller eieren.
+                            *@
                             @if (canManage)
                             {
-                                <a asp-action="Edit" asp-route-id="@resource.ResourceId" class="portal-button secondary">Rediger</a>
-                                <a asp-action="Delete" asp-route-id="@resource.ResourceId" class="portal-button danger">Slett</a>
+                                <a asp-action="Edit"
+                                   asp-route-id="@resource.ResourceId"
+                                   class="portal-button secondary">
+                                    Rediger
+                                </a>
+
+                                <a asp-action="Delete"
+                                   asp-route-id="@resource.ResourceId"
+                                   class="portal-button danger">
+                                    Slett
+                                </a>
                             }
                         </div>
                     </div>
@@ -102,8 +244,19 @@
 </section>
 
 @section Scripts {
-    <script src="~/js/overview-map.js" asp-append-version="true"></script>
+    @* Henter JavaScript som viser oversiktskartet. *@
+    <script src="~/js/overview-map.js"
+            asp-append-version="true">
+    </script>
+
     <script>
-        PortalOverviewMap.create("resourceMap", @Html.Raw(JsonSerializer.Serialize(mapEntries)));
+        /*
+            Lager kartet og sender inn plasseringene
+            fra modellen som JSON-data.
+        */
+        PortalOverviewMap.create(
+            "resourceMap",
+            @Html.Raw(JsonSerializer.Serialize(mapEntries))
+        );
     </script>
 }

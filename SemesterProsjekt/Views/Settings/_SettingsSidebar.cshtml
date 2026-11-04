@@ -1,51 +1,155 @@
+@*
+    Dette er sidemenyen for innstillingssiden.
+
+    Menyen viser:
+    - Navnet og rollen til brukeren
+    - Lenker til profil og sikkerhet
+    - Knapp for nattmodus
+    - Lenker til varslinger og personvern
+    - Knapp for å logge ut
+
+    Filnavnet starter med understrek fordi dette er et partial view.
+    Det betyr at viewet brukes som en del av en annen side.
+*@
+
 @model SemesterProsjekt.Models.ViewModels.SettingsPageViewModel
 
 @{
-    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+    /*
+        Henter navnet på handlingen som viser siden.
+        Dette brukes til å markere riktig menypunkt.
+    */
+    var currentAction =
+        ViewContext.RouteData.Values["action"]?.ToString();
 }
 
-<aside class="settings-sidebar" aria-label="Innstillingsmeny">
+<aside class="settings-sidebar"
+       aria-label="Innstillingsmeny">
+
+    @* Viser informasjon om den innloggede brukeren. *@
     <div class="settings-sidebar-heading">
-        <span class="settings-sidebar-icon" aria-hidden="true">⚙</span>
+
+        @*
+            Tannhjulet er bare dekorasjon.
+            Derfor skjules det for skjermlesere.
+        *@
+        <span class="settings-sidebar-icon"
+              aria-hidden="true">
+            ⚙
+        </span>
+
         <div>
             <p>Innstillinger</p>
-            <strong>@Model.Profile.FirstName @Model.Profile.LastName</strong>
+
+            @* Viser brukerens fornavn og etternavn. *@
+            <strong>
+                @Model.Profile.FirstName
+                @Model.Profile.LastName
+            </strong>
+
+            @* Viser rollen til brukeren. *@
             <span>@Model.Profile.Role</span>
         </div>
     </div>
 
+    @* Navigasjonsmenyen for innstillingene. *@
     <nav class="settings-navigation">
-        <p class="settings-navigation-label">Konto</p>
-        <a asp-action="Index" asp-fragment="profil">👤 Profil og kontakt</a>
-        <a asp-action="Index" asp-fragment="sikkerhet">🔒 Sikkerhet</a>
 
-        <p class="settings-navigation-label">System</p>
-        <a asp-controller="Home" asp-action="Index">⌂ Til hjemmesiden</a>
+        <p class="settings-navigation-label">
+            Konto
+        </p>
+
+        @*
+            Går til profilområdet på innstillingssiden.
+            asp-fragment viser til et element med id="profil".
+        *@
+        <a asp-action="Index"
+           asp-fragment="profil">
+            👤 Profil og kontakt
+        </a>
+
+        @* Går til sikkerhetsområdet på innstillingssiden. *@
+        <a asp-action="Index"
+           asp-fragment="sikkerhet">
+            🔒 Sikkerhet
+        </a>
+
+        <p class="settings-navigation-label">
+            System
+        </p>
+
+        @* Sender brukeren tilbake til hjemmesiden. *@
+        <a asp-controller="Home"
+           asp-action="Index">
+            ⌂ Til hjemmesiden
+        </a>
+
+        @* Innstilling for å slå nattmodus av eller på. *@
         <div class="theme-setting">
             <div>
                 <span>🌙</span>
                 <strong>Nattmodus</strong>
                 <small>Bruk mørkt utseende</small>
             </div>
+
+            @*
+                JavaScript bruker denne knappen til å bytte tema.
+                role="switch" forteller at knappen fungerer som en bryter.
+            *@
             <button id="darkModeToggle"
                     class="theme-toggle"
                     type="button"
                     role="switch"
                     aria-checked="false"
                     aria-label="Slå på nattmodus">
+
+                @* Den synlige delen som flyttes i bryteren. *@
                 <span class="theme-toggle-knob"></span>
             </button>
         </div>
 
-        <p class="settings-navigation-label">Varslinger</p>
-        <a asp-action="Index" asp-fragment="varslinger">🔔 Varslingsinnstillinger</a>
+        <p class="settings-navigation-label">
+            Varslinger
+        </p>
 
-        <p class="settings-navigation-label">Personvern</p>
-        <a asp-action="Privacy" class="@(currentAction == "Privacy" ? "active" : "")">ⓘ Personvern</a>
+        @* Går til området for varslingsinnstillinger. *@
+        <a asp-action="Index"
+           asp-fragment="varslinger">
+            🔔 Varslingsinnstillinger
+        </a>
+
+        <p class="settings-navigation-label">
+            Personvern
+        </p>
+
+        @*
+            Går til personvernsiden.
+            active-klassen legges til når brukeren er på denne siden.
+        *@
+        <a asp-action="Privacy"
+           class="@(currentAction == "Privacy" ? "active" : "")">
+            ⓘ Personvern
+        </a>
     </nav>
 
-    <form asp-controller="Account" asp-action="Logout" method="post" class="settings-sign-out-form">
+    @*
+        Skjemaet sender en POST-forespørsel
+        til Logout-handlingen i AccountController.
+    *@
+    <form asp-controller="Account"
+          asp-action="Logout"
+          method="post"
+          class="settings-sign-out-form">
+
+        @*
+            Beskytter utloggingsskjemaet mot falske
+            forespørsler fra andre nettsider.
+        *@
         @Html.AntiForgeryToken()
-        <button type="submit" class="settings-sign-out">⇥ Logg ut</button>
+
+        <button type="submit"
+                class="settings-sign-out">
+            ⇥ Logg ut
+        </button>
     </form>
 </aside>

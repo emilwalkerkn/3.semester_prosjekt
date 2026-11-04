@@ -1,167 +1,273 @@
-﻿
+﻿@*
+    Dette er hovedlayouten til Kriseportal.
+
+    Layouten inneholder:
+    - CSS- og JavaScript-filer
+    - Sidemenyen for innloggede brukere
+    - Toppmenyen
+    - Lenker som vises ut fra brukerens rolle
+    - Området hvor hvert view blir vist
+*@
+
 @{
+    /*
+        Finner rollen til brukeren.
+        Teksten vises øverst til høyre på siden.
+    */
     var accountRole = !User.Identity?.IsAuthenticated ?? true
         ? "Ikke innlogget"
         : User.IsInRole("Admin")
-        ? "Administrator"
-        : User.IsInRole("Ressurseier")
-            ? "Ressurseier"
-            : "Behovsaktør";
+            ? "Administrator"
+            : User.IsInRole("Ressurseier")
+                ? "Ressurseier"
+                : "Behovsaktør";
 }
+
 <!DOCTYPE html>
 <html lang="no">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+    @* Gjør siden tilpasset mobil og forskjellige skjermstørrelser. *@
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    @* Viser tittelen til det aktive viewet i nettleserfanen. *@
     <title>@ViewData["Title"] - SemesterProsjekt</title>
 
     <script>
-        // Leser lagret utseende før siden tegnes, slik at nattmodus ikke blinker hvitt ved lasting.
+        /*
+            Leser det lagrede temaet før siden vises.
+            Dette hindrer at nattmodus blinker hvitt ved lasting.
+        */
         if (localStorage.getItem("kriseportal-theme") === "dark") {
             document.documentElement.classList.add("dark-mode");
         }
     </script>
 
-    <!-- Bootstrap -->
+    @* Henter Bootstrap. *@
     <link rel="stylesheet"
           href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
-    <!-- Prosjektets CSS -->
+    @* Henter prosjektets egen CSS. *@
     <link rel="stylesheet"
           href="~/css/site.css"
           asp-append-version="true" />
 
-    <!-- Leaflet CSS -->
+    @* Henter CSS for kartbiblioteket Leaflet. *@
     <link rel="stylesheet"
           href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
           crossorigin="" />
 
-    <!-- Leaflet Draw CSS -->
+    @* Henter CSS for tegneverktøyene i kartet. *@
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
 
-    <!-- Razor-generert CSS -->
+    @* Henter CSS som er laget for enkelte Razor-filer. *@
     <link rel="stylesheet"
           href="~/SemesterProsjekt.styles.css"
           asp-append-version="true" />
 
-    <!-- CSS for individuelle sider -->
+    @*
+        Views kan legge til egne CSS-filer i Styles-seksjonen.
+        required: false betyr at seksjonen ikke er påkrevd.
+    *@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 
 <body>
 
+    @* Sjekker om brukeren er logget inn. *@
     @if (User.Identity?.IsAuthenticated == true)
     {
-    <div class="portal-layout">
+        @* Innloggede brukere får sidemeny og toppmeny. *@
+        <div class="portal-layout">
 
-        <!-- SIDEMENY -->
-        <aside class="portal-sidebar">
-            <a asp-controller="Home"
-               asp-action="Index"
-               class="portal-brand"
-               aria-label="Kriseportal – gå til hjemmesiden">
-                <span class="portal-brand-mark" aria-hidden="true">K</span><span>Kriseportal</span>
-            </a>
-            <p class="portal-sidebar-label">Arbeidsområde</p>
+            @* Sidemenyen med logo og navigasjon. *@
+            <aside class="portal-sidebar">
 
-            <nav aria-label="Hovedmeny">
-
-                <a asp-controller="Home" asp-action="Index" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Home") ? "active" : "")">
-                    Hjem
-                </a>
-
-                <a asp-controller="Need" asp-action="Overview" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Need" && ViewContext.RouteData.Values["action"]?.ToString() != "Create") ? "active" : "")">
-                    Behov
-                </a>
-
-                <a asp-controller="Resource" asp-action="Overview" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Resource" && ViewContext.RouteData.Values["action"]?.ToString() != "Create") ? "active" : "")">
-                    Tilgjengelige ressurser
-                </a>
-
-                @if (User.IsInRole("Admin"))
-                {
-                    <a asp-controller="Match" asp-action="Overview" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Match") ? "active" : "")">
-                        Matcher
-                    </a>
-                }
-
-                @if (User.IsInRole("Behovsaktør") || User.IsInRole("Admin"))
-                {
-                    <a asp-controller="Need" asp-action="Create" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Need" && ViewContext.RouteData.Values["action"]?.ToString() == "Create") ? "active" : "")">
-                        Registrer behov
-                    </a>
-                }
-
-                @if (User.IsInRole("Ressurseier") || User.IsInRole("Admin"))
-                {
-                    <a asp-controller="Resource" asp-action="Create" class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Resource" && ViewContext.RouteData.Values["action"]?.ToString() == "Create") ? "active" : "")">
-                        Registrer ressurs
-                    </a>
-                }
-
-                <a asp-controller="Settings"
+                @* Logoen fungerer også som lenke til hjemmesiden. *@
+                <a asp-controller="Home"
                    asp-action="Index"
-                   class="settings-nav-link @((ViewContext.RouteData.Values["controller"]?.ToString() == "Settings") ? "active" : "")"
-                   aria-label="Innstillinger"
-                   title="Innstillinger">
-                    <span aria-hidden="true">⚙</span>
+                   class="portal-brand"
+                   aria-label="Kriseportal – gå til hjemmesiden">
+
+                    <span class="portal-brand-mark"
+                          aria-hidden="true">
+                        K
+                    </span>
+
+                    <span>Kriseportal</span>
                 </a>
 
-            </nav>
+                <p class="portal-sidebar-label">
+                    Arbeidsområde
+                </p>
 
-        </aside>
+                @* Hovedmenyen i portalen. *@
+                <nav aria-label="Hovedmeny">
 
-        <!-- HOVEDINNHOLD -->
-        <div class="portal-main">
+                    @*
+                        Lenke til hjemmesiden.
+                        active-klassen brukes når HomeController er aktiv.
+                    *@
+                    <a asp-controller="Home"
+                       asp-action="Index"
+                       class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Home") ? "active" : "")">
+                        Hjem
+                    </a>
 
-            <!-- Toppmeny -->
-            <header class="portal-topbar">
-                <p class="portal-context">Ressurs- og behovsoppfølging</p>
-                <div class="portal-account">
-                    <span class="notification" aria-label="3 varsler">♧</span>
-                    <span>@accountRole</span>
-                </div>
-            </header>
+                    @*
+                        Lenke til behovsoversikten.
+                        Opprettingssiden markeres med en annen lenke.
+                    *@
+                    <a asp-controller="Need"
+                       asp-action="Overview"
+                       class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Need" &&
+                                 ViewContext.RouteData.Values["action"]?.ToString() != "Create")
+                                    ? "active"
+                                    : "")">
+                        Behov
+                    </a>
 
-            <!-- Sideinnhold -->
-            <main role="main" class="portal-content">
-                @RenderBody()
-            </main>
+                    @* Lenke til oversikten over ressurser. *@
+                    <a asp-controller="Resource"
+                       asp-action="Overview"
+                       class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Resource" &&
+                                 ViewContext.RouteData.Values["action"]?.ToString() != "Create")
+                                    ? "active"
+                                    : "")">
+                        Tilgjengelige ressurser
+                    </a>
 
+                    @*
+                        Bare administratorer får se
+                        lenken til matcher.
+                    *@
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Match"
+                           asp-action="Overview"
+                           class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Match") ? "active" : "")">
+                            Matcher
+                        </a>
+                    }
+
+                    @*
+                        Behovsaktører og administratorer
+                        kan registrere nye behov.
+                    *@
+                    @if (User.IsInRole("Behovsaktør") ||
+                         User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Need"
+                           asp-action="Create"
+                           class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Need" &&
+                                     ViewContext.RouteData.Values["action"]?.ToString() == "Create")
+                                        ? "active"
+                                        : "")">
+                            Registrer behov
+                        </a>
+                    }
+
+                    @*
+                        Ressurseiere og administratorer
+                        kan registrere nye ressurser.
+                    *@
+                    @if (User.IsInRole("Ressurseier") ||
+                         User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Resource"
+                           asp-action="Create"
+                           class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Resource" &&
+                                     ViewContext.RouteData.Values["action"]?.ToString() == "Create")
+                                        ? "active"
+                                        : "")">
+                            Registrer ressurs
+                        </a>
+                    }
+
+                    @* Lenke til innstillingssiden. *@
+                    <a asp-controller="Settings"
+                       asp-action="Index"
+                       class="settings-nav-link @((ViewContext.RouteData.Values["controller"]?.ToString() == "Settings") ? "active" : "")"
+                       aria-label="Innstillinger"
+                       title="Innstillinger">
+
+                        <span aria-hidden="true">⚙</span>
+                    </a>
+                </nav>
+            </aside>
+
+            @* Området som inneholder toppmenyen og sideinnholdet. *@
+            <div class="portal-main">
+
+                @* Toppmenyen viser portalens område og brukerens rolle. *@
+                <header class="portal-topbar">
+                    <p class="portal-context">
+                        Ressurs- og behovsoppfølging
+                    </p>
+
+                    <div class="portal-account">
+                        <span class="notification"
+                              aria-label="3 varsler">
+                            ♧
+                        </span>
+
+                        <span>@accountRole</span>
+                    </div>
+                </header>
+
+                @*
+                    RenderBody viser innholdet fra viewet
+                    som brukeren har åpnet.
+                *@
+                <main role="main"
+                      class="portal-content">
+                    @RenderBody()
+                </main>
+            </div>
         </div>
-
-    </div>
     }
     else
     {
-        <main class="public-page" role="main">
+        @*
+            Brukere som ikke er logget inn får bare sideinnholdet.
+            De får ikke sidemenyen eller toppmenyen.
+        *@
+        <main class="public-page"
+              role="main">
             @RenderBody()
         </main>
     }
 
-    <!-- JavaScript -->
+    @* Henter jQuery. *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
 
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @* Henter JavaScript fra Bootstrap. *@
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js">
+    </script>
 
+    @* Henter prosjektets egen JavaScript-fil. *@
     <script src="~/js/site.js"
-            asp-append-version="true"></script>
+            asp-append-version="true">
+    </script>
 
-    <!-- Leaflet JavaScript -->
+    @* Henter JavaScript for kartbiblioteket Leaflet. *@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin="">
     </script>
 
-    <!-- Leaflet Draw JavaScript -->
+    @* Henter JavaScript for tegneverktøyene i kartet. *@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js">
     </script>
 
-    <!-- JavaScript for individuelle sider -->
+    @*
+        Views kan legge til egne skript i Scripts-seksjonen.
+        required: false betyr at seksjonen ikke er påkrevd.
+    *@
     @await RenderSectionAsync("Scripts", required: false)
-
 </body>
 </html>

@@ -1,44 +1,63 @@
-﻿/* Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-for details on configuring this project to bundle and minify static web assets. */
+﻿/*
+    Denne CSS-filen inneholder stiler som hører til _Layout.cshtml.
 
+    Den styrer blant annet:
+    - Logoen i navigasjonsmenyen
+    - Lenker og knapper
+    - Aktiv navigasjon
+    - Kantlinjer og skygger
+    - Sidens bunntekst
+*/
+
+/* Gjør at teksten i logoen kan tilpasse seg tilgjengelig plass. */
 a.navbar-brand {
   white-space: normal;
   text-align: center;
   word-break: break-all;
 }
 
+/* Angir standardfargen for lenker. */
 a {
   color: #0077cc;
 }
 
+/* Angir farger for Bootstrap-knapper med klassen btn-primary. */
 .btn-primary {
   color: #fff;
   background-color: #1b6ec2;
   border-color: #1861ac;
 }
 
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
+/* Angir utseendet til et aktivt menypunkt. */
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
   color: #fff;
   background-color: #1b6ec2;
   border-color: #1861ac;
 }
 
+/* Legger til en lys kantlinje øverst. */
 .border-top {
   border-top: 1px solid #e5e5e5;
 }
+
+/* Legger til en lys kantlinje nederst. */
 .border-bottom {
   border-bottom: 1px solid #e5e5e5;
 }
 
+/* Legger til en svak skygge rundt et element. */
 .box-shadow {
   box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
 }
 
+/* Angir tekststørrelse og linjehøyde for personvernknappen. */
 button.accept-policy {
   font-size: 1rem;
   line-height: inherit;
 }
 
+/* Plasserer bunnteksten nederst og gir den fast linjehøyde. */
 .footer {
   position: absolute;
   bottom: 0;
