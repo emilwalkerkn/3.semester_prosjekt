@@ -9,16 +9,14 @@ namespace SemesterProsjekt.UnitTests;
 public class TestNeedGetError
 {
     [Fact]
-    public void NeedGet_ShouldNotReturnResourceViewModel()
-    {
+    public async Task NeedGet_ShouldNotReturnResourceViewModel()    {
         // Arrange
         var needRepository = new Mock<INeedRepository>();
 
         var controller = new NeedController(needRepository.Object);
 
         // Act
-        var result = controller.Create();
-
+        var result = await controller.Create();
         // Assert
         var viewResult = Assert.IsType<ViewResult>(result);
 
