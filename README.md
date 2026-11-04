@@ -4,7 +4,7 @@
  
 ## Om prosjektet
 Dette prosjektet er en ASP.NET Core MVC-applikasjon basert på caset om en ressurs- og behovsportal for Totalforsvaret. Formålet med løsningen er å støtte registreringen og delingen av informasjon om behov og ressurser under krise og større hendelser.
-I denne versjonen av applikasjonen er hovedfokuset frontend, registrering av behov og ressurser, dataoverføring i Leaflet/kart.
+Applikasjonen støtter registrering, visning, redigering og sletting av behov og ressurser, med databaselagring, brukerinnlogging, tilgangskontroll og kartvisning.
 
  
 ## Teknologier
@@ -16,9 +16,17 @@ I denne versjonen av applikasjonen er hovedfokuset frontend, registrering av beh
 | JavaScript | Brukes til interaksjon med Leaflet-kartet. |
 | Bootstrap | Brukes til styling og responsivt design. |
 | Leaflet | Brukes til kart og geografiske koordinater. |
-| Docker | Brukes til å kjøre applikasjonen i en container. |
+| Docker | Kjører applikasjonen og MariaDB i separate containere. |
 | Git | Brukes til versjonskontroll. |
 | GitHub | Brukes til lagring av Git-repository og samarbeid i gruppen. |
+| MariaDB | Lagrer behov, ressurser, matcher og brukeropplysninger. |
+| Dapper | Utfører SQL-spørringer og kobler resultater til C#-objekter i repositoryene. |
+| Entity Framework Core | Håndterer databasetilgang og migrasjoner for Identity-tabellene. |
+| ASP.NET Core Identity | Håndterer brukere, passord, innlogging og roller. |
+| Leaflet Draw | Lar brukeren tegne, redigere og slette punkter og linjer på kartet. |
+| Docker Compose | Starter og konfigurerer applikasjonen og databasen sammen. |
+| xUnit | Testrammeverk for enhetstestene. |
+| Moq | Simulerer repositories slik at controllerne kan testes uten en ekte database. |
 
 
 ## Drift
@@ -40,131 +48,226 @@ docker compose down
 
 
 ## Systemarkitektur
-Vi bruker MVC-arkitektur (Model-View-Controller). Dette gjør at vi kan skille mellom håndtering av forespørsler, data og det brukeren ser på nettsiden.
 
-| Del | Bruk i prosjektet |
+Applikasjonen bruker ASP.NET Core MVC (Model-View-Controller).
+Løsningen skiller mellom brukergrensesnitt, behandling av forespørsler
+og tilgang til databasen. Applikasjonen og MariaDB kjører i hver sin
+Docker-container og startes sammen med Docker Compose.
+
+| Del | Ansvar i prosjektet |
 |---|---|
-| Controller | HomeController.cs håndterer GET- og POST-forespørsler for behov og ressurser. |
-| ViewModel | NeedViewModel og ResourceViewModel inneholder data fra skjemaene, inkludert koordinater. |
-| View | Razor Views brukes til skjemaene og visning av registrert data. |
-| Leaflet | Brukes til å vise kart og hente koordinater når brukeren klikker på kartet. |
-| Docker | Brukes til å bygge og kjøre applikasjonen i en container. |
+| Controllers | `NeedController` og `ResourceController` håndterer visning, registrering, redigering og sletting av behov og ressurser. |
+| Models | `Need` og `Resource` representerer behov og ressurser som hentes fra eller lagres i databasen. |
+| ViewModels | `NeedViewModel` og `ResourceViewModel` inneholder skjemadata og valideringsregler. |
+| Razor Views | Lager HTML-sidene som viser skjemaer, oversikter, detaljer og bekreftelser. |
+| Repositories | Samler databasetilgangen bak interfaces som `INeedRepository` og `IResourceRepository`. Implementasjonene bruker Dapper og SQL. |
+| ASP.NET Core Identity | Håndterer brukere, passord og roller. Identity bruker Entity Framework Core gjennom `ApplicationDbContext`. |
+| MariaDB | Lagrer blant annet behov, ressurser, koblinger mellom dem og brukeropplysninger. |
+| Leaflet og JavaScript | Håndterer kartvisning og registrering av geografiske punkter og linjer. |
+| Docker Compose | Konfigurerer og starter applikasjonen og databasen, med nettverk og lagringsvolumer. |
 
- 
-**Dataflyt**
-Dataflyten for registrering av behov er: brukeren fyller ut skjemaet → POST sendes til HomeController → dataene bindes til NeedViewModel → brukeren sendes til NeedResult, hvor informasjonen vises. Ressursregistreringen fungerer på samme måte, men dataene bindes til ResourceViewModel og brukeren sendes til ResourceResult.
-**Bruker → Skjema → POST → HomeController → NeedViewModel → NeedResult → Bruker**
+### Sammenheng mellom komponentene
 
-Kartet er koblet opp til skjemaet med JavaScript. Når brukeren klikker på kartet, lagres latitude og longitude i ViewModel-en. Disse koordinatene blir deretter sendt videre og vises på resultatsiden.
+```mermaid
+flowchart TD
+    A["Nettleser"] --> B["ASP.NET Core MVC"]
+    B --> C["Razor Views"]
+    C --> A
+    B --> D["Repositories med Dapper"]
+    B --> E["Identity med Entity Framework Core"]
+    D --> F["MariaDB"]
+    E --> F
+```
+
+Controllerne mottar repositories gjennom dependency injection.
+Dette betyr at ASP.NET Core leverer objektene controllerne trenger,
+basert på registreringene i `Program.cs`. Controllerne trenger derfor
+ikke å opprette databaseforbindelser eller skrive SQL selv.
+I enhetstestene kan repositories erstattes med simulerte objekter.
+
+### Dataflyt ved registrering
+
+1. Brukeren åpner registreringsskjemaet. Controllerens GET-metode
+   oppretter en ViewModel og henter tilgjengelige behovs- eller ressurstyper.
+2. Brukeren fyller ut skjemaet og velger plassering på kartet.
+3. Skjemaet sendes som en POST-forespørsel, og feltene bindes til en ViewModel.
+4. Controlleren kontrollerer `ModelState`. Ved feil vises skjemaet igjen.
+5. Ved gyldige data opprettes en `Need` eller `Resource`.
+   Eierens bruker-ID hentes fra den innloggede brukeren.
+6. Repositoryet lagrer registreringen i MariaDB og returnerer den nye ID-en.
+7. Controlleren videresender til `Result`, som henter registreringen
+   og viser en bekreftelsesside.
+
+### Kartdata
+
+Kartet bruker Leaflet og Leaflet Draw. Brukeren kan velge et punkt
+eller tegne en linje. JavaScript overfører geometritypen til
+`GeometryType` og geografien som GeoJSON til `GeometryData`.
+Disse feltene sendes med skjemaet og lagres sammen med registreringen.
+
+### Innlogging og tilgang
+
+Behovs- og ressurscontrollerne krever innlogging. Handlinger som
+oppretting, redigering og sletting har i tillegg rollekontroll.
+Ved redigering og sletting kontrolleres det også at brukeren eier
+registreringen eller er administrator.
+
+POST-metodene for disse endringene bruker
+`ValidateAntiForgeryToken` som beskyttelse mot forfalskede
+forespørsler fra andre nettsteder.
+
+### Database og oppstart
+
+Domenedata håndteres gjennom repositories med Dapper.
+Identity-tabellene håndteres gjennom Entity Framework Core.
+Ved oppstart kjøres Identity-migrasjoner, opprettelse av roller
+og `DomainSchemaMigrator`, som tilpasser eldre domenetabeller.
+
+Docker Compose monterer `Database/init.sql` for initialisering av
+en ny database. Databasefilene lagres i volumet `mariadb_data`,
+mens applikasjonens Data Protection-nøkler lagres i
+`dataprotection_keys`.
+
+Applikasjonen er tilgjengelig på port 8080 på vertsmaskinen.
+MariaDB er tilgjengelig på port 3308 fra vertsmaskinen, mens
+applikasjonen bruker tjenestenavnet `mariadb` og port 3306
+internt mellom containerne.
+
+### Databasens fagtabeller
+
+`Database/init.sql` oppretter følgende fem fagtabeller:
+
+| Tabell | Innhold |
+|---|---|
+| `NeedType` | Kategorier for behov. |
+| `ResourceType` | Kategorier for ressurser. |
+| `Needs` | Registrerte behov med eier-ID, kartgeometri, status og prioritet. |
+| `Resources` | Registrerte ressurser med eier-ID, kartgeometri og tilgjengelighet. |
+| `Match` | Koblinger mellom behov og ressurser, med status, tidspunkt og merknader. |
+
+Behov og ressurser er knyttet til sine kategorier gjennom
+fremmednøkler. `Match` kobler behov og ressurser i en
+mange-til-mange-relasjon: Ett behov kan kobles til flere ressurser,
+og én ressurs kan kobles til flere behov.
+
+Kombinasjonen av `NeedId` og `ResourceId` er unik i `Match`.
+Dersom et behov eller en ressurs slettes, slettes tilhørende
+matcher automatisk gjennom `ON DELETE CASCADE`.
+
+`UserId` i `Needs` og `Resources` lagrer brukerens Identity-ID.
+`init.sql` definerer ikke fremmednøkler fra disse feltene til
+`AspNetUsers`.
+
+Filen legger også inn faste behovs- og ressurstyper.
+`INSERT IGNORE` gjør at eksisterende typer med samme ID eller
+unike navn ikke settes inn på nytt.
+
+Docker kjører `init.sql` ved første initialisering av en tom
+database. Endringer i filen oppdaterer derfor ikke automatisk
+en eksisterende database. `CREATE TABLE IF NOT EXISTS`
+oppretter manglende tabeller, men endrer ikke eksisterende
+tabellstrukturer.
 
 
 ## Testscenarioer og resultater
 Applikasjonen er testet gjennom både enhetstester og manuelle tester. Enhetstestene brukes til å kontrollere deler av controller-funksjonaliteten, og de manuelle testene brukes til å kontrollere funksjonaliteter i applikasjonen som brukeren møter. For hver test dokumenteres det forventede resultatet og det faktiske resultatet.
 
 ### Enhetstester
-| # | Test | Forventet resultat | Resultat |
+
+Enhetstestene ligger i prosjektet `SemesterProsjekt.UnitTests`.
+Vi bruker xUnit som testrammeverk og Moq til å simulere repositories.
+Testene kontrollerer dermed controllerlogikken uten å koble til
+en ekte database.
+
+Testene følger Arrange–Act–Assert:
+- **Arrange:** Opprette testdata, simulert repository og eventuelt en testbruker.
+- **Act:** Kalle controller-metoden som skal testes.
+- **Assert:** Kontrollere resultatet og hvilke repository-metoder som ble kalt.
+
+Metodene som testes er asynkrone. Testene bruker derfor `async`
+og `await` for å undersøke det ferdige resultatet.
+
+**Resultat fra gruppens bekreftede testkjøring 4. november 2026:
+9 av 9 enhetstester bestått.**
+
+| # | Testmetode | Forventet resultat | Resultat |
 |---|---|---|---|
-| 1 | TestNeedGet | Need returnerer en ViewResult med NeedViewModel | Bestått |
-| 2 | TestNeedPost | Need videresender til NeedResult | Bestått |
-| 3 | TestResourceGet | Resource returnerer en ViewResult med ResourceViewModel | Bestått |
-| 4 | TestResourcePost | Resource videresender til ResourceResult | Bestått |
-| 5 | TestNeedGetError | Testen forventer feilaktig ResourceViewModel i stedet for NeedViewModel | Feilet som forventet |
-| 6 | TestResourcePostError | Testen forventer feilaktig videresending til NeedResult i stedet for ResourceResult | Feilet som forventet |
+| 1 | `Need_Get_ReturnsViewWithNeedViewModel` | GET `Create()` returnerer `ViewResult` med `NeedViewModel`. | Bestått |
+| 2 | `Need_Post_RedirectsToResult` | Videresender til `Result` med ID 1. Repositoryets `CreateAsync` kalles én gang med forventet bruker-ID og tittel. | Bestått |
+| 3 | `Resource_Get_ReturnsViewWithResourceViewModel` | GET `Create()` returnerer `ViewResult` med `ResourceViewModel`. | Bestått |
+| 4 | `Resource_Post_RedirectsToResult` | Videresender til `Result` med ID 1. Repositoryets `CreateAsync` kalles én gang med forventet bruker-ID og tittel. | Bestått |
+| 5 | `NeedGet_ShouldNotReturnResourceViewModel` | GET `Create()` returnerer et view der modellen ikke er en `ResourceViewModel`. | Bestått |
+| 6 | `ResourcePost_InvalidModel_ReturnsViewWithoutSaving` | Ved feil i `ModelState` returneres samme modell til viewet, og `CreateAsync` kalles ikke. | Bestått |
+| 7 | `DeleteConfirmed_OtherUsersResource_ReturnsForbid` | En bruker som ikke er eier eller administrator får `ForbidResult`. `DeleteAsync` kalles ikke. | Bestått |
+| 8 | `DeleteConfirmed_OwnResource_DeletesAndRedirects` | Eieren får slettet ressursen gjennom ett kall til `DeleteAsync(1)` og videresendes til `Overview`. | Bestått |
+| 9 | `DeleteConfirmed_MissingResource_ReturnsNotFound` | En ressurs som ikke finnes gir `NotFoundResult`. `DeleteAsync` kalles ikke. | Bestått |
 
- 
-### Forklaring av enhetstestene
-For å forklare enhetstestingene i mer detalj har vi valgt å ta utgangspunkt i fire tester: 
-Test 1 (TestNeedGet)
-Test 4 (TestResourcePost) 
-Test 5 (TestNeedGetError)
-Test 6 (TestResourcePostError)  
+### Hva testene kontrollerer
 
-Test 1 og 4 er valgt fordi de to testene dekker både GET- og POST-forespørsler, samt funksjonaliteten for  både Need og Resource.
-Test 5 og 6 forklares fordi testene med vilje er skrevet med feil ønsket resultat. Dette er for å demonstrere at enhetstestene oppdager avvik. 
+**Visning av skjemaer**
 
+GET-testene kontrollerer at controllerne returnerer riktig
+resultattype og ViewModel. Testen `NeedGet_ShouldNotReturnResourceViewModel`
+kontrollerer at behovsskjemaet ikke mottar ressursmodellen.
+Dette er en test som skal bestå, ikke en bevisst feilende test.
 
+**Registrering av behov og ressurser**
 
-#### Test 1  - TestNeedGet
-TestNeedGet (‘NeedGet_ReturnsViewWithNeedViewModel’)
-```csharp
-var controller = new HomeController();
-var result = controller.Need();
-var viewResult = Assert.IsType<ViewResult>(result);
-Assert.IsType<NeedViewModel>(viewResult.Model);
+POST-testene oppretter en simulert innlogget bruker med ID-en
+`testbruker-1`. Repositoryet konfigureres til å returnere ID 1
+ved opprettelse. Testene kontrollerer videresendingen og at
+objektet som sendes til repositoryet har riktig eier og tittel.
+
+**Ugyldige skjemadata**
+
+Testen for ugyldig ressursregistrering legger manuelt en feil
+i `ModelState`. Den kontrollerer at controlleren viser skjemaet
+igjen uten å kalle lagringsmetoden.
+
+**Sletting og eierskap**
+
+De tre slettetestene kontrollerer at en annen bruker blir avvist,
+at eieren kan slette, og at en manglende ressurs håndteres.
+`Times.Once` og `Times.Never` brukes for å kontrollere om
+repositoryets slettemetode blir kalt.
+
+### Avgrensning av enhetstestene
+
+Testene kaller controller-metodene direkte. De tester ikke ekte
+databaseoperasjoner, rendering av HTML eller hele innloggingsflyten.
+
+Autorisasjonsfiltre og antiforgery-validering kjøres ikke ved slike
+direkte metodekall. Slettetestene kontrollerer eierskapskontrollen
+inne i metoden, men dokumenterer ikke alene at hele tilgangskontrollen
+fungerer gjennom HTTP.
+
+Automatisk skjemavalidering fra MVC kjøres heller ikke ved direkte
+metodekall. Testen for ugyldige data simulerer derfor en valideringsfeil
+ved å legge den til i `ModelState`.
+
+### Kjøre enhetstestene
+
+Fra repositoryets rotmappe kjøres:
+
+```bash
+dotnet test SemesterProsjekt.UnitTests/SemesterProsjekt.UnitTests.csproj
 ```
 
-**Hva skjer:**
-Testen oppretter en HomeController og kaller på GET-metoden Need(). Need() lager en ny og tom NeedViewModel og returnerer View(model).
-Den første sjekken kontrollerer at resultatet er et ViewResult. Slik kontrollerer vi at metoden faktisk returnerer et view.
-Den andre sjekken kontrollerer at modellen som sendes til viewet er av typen NeedViewModel. Testen blir da bestått siden dette stemmer med hva Need() returnerer.
-
-**Hensikt med testen:**
-Testen kontrollerer at GET-metoden  Need() returnerer et view med riktig ViewModel. Hvis metoden hadde returnert feil type resultat eller feil type modell, ville testen ikke vært bestått og vi kunne se den konkrete feilen og fikse det.
-
-
-
-#### Test 4 - TestResourcePost
-TestResourcePost (‘ResourcePost_RedirectsToResourceResult’)
-```csharp
-var controller = new HomeController();
-var model = new ResourceViewModel
-{Type = "Brannbil",
-Description = "Brannbil med mannskap",
-Location = "Kristiansand",
-Latitude = "58.1467",
-Longitude = "7.9956"};
-var result = controller.Resource(model);
-var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-Assert.Equal("ResourceResult", redirectResult.ActionName);
-```
-
-**Hva skjer:**
-Testen oppretter en HomeController og en ResourceViewModel med testdata. ResourceViewModel inneholder type, beskrivelse, sted, latitude og longitude. Modellen representerer data som kan bli sendt inn fra ressursskjemaet.
-Så kalles POST-metoden Resource(model), hvor modellen sendes inn som parameter.
-Den første sjekken kontrollerer at resultatet er et RedirectToActionResult. Dette betyr at controlleren skal sende brukeren videre til en action etter at skjemaet er sendt.
-Den andre sjekken kontrollerer at brukeren faktisk sendes videre til ResourceResult. Testen består fordi Resource() sender brukeren videre til ResourceResult.
-
-**Hensikt med testen:**
-Testen kontrollerer at POST-metoden for ressursregistrering sender brukeren videre til riktig resultatside. Hvis Resource() hadde sendt brukeren til feil action ville testen feilet og vi kunne ha sett feilen og fikset det.
-
-
-#### Test 5 og 6 - TestNeedGetError og TestResourcePostError
-TestNeedGetError (`NeedGet_ShouldFail`)
-```csharp
-var controller = new HomeController();
-var result = controller.Need();
-
-var viewResult = Assert.IsType<ViewResult>(result);   // Består
-Assert.IsType<ResourceViewModel>(viewResult.Model);   // Feiler
-```
-
-**Hva skjer:**
-Testen oppretter en HomeController og kaller på GET-metoden Need(). Need lager så en ny, tom NeedViewModel og returnerer View(model).
-Den første sjekken (at resultatet er en ViewResult) består fordi metoden faktisk returnerer et view. 
-Den andre sjekken forventer derimot at modellen er av typen ResourceViewModel. Dette er bevisst feil, siden Need() returnerer en NeedViewModel. Testen feiler derfor på denne sjekken.
-Assert.IsType<T>() kontrollerer at objektet er nøyaktig av den angitte typen. NeedViewModel og ResourceViewModel har de samme egenskapene, men de er to separate klasser.
-
-**Hensikt med testen:**
-Testen viser at enhetstesten oppdager det dersom feil type ViewModel blir returnert. Hvis Need() bruker feil modell vil testen feile og gjøre oss oppmerksomme på det. 
-
-
+Dette krever .NET SDK 10. Testene kan også kjøres gjennom
+testverktøyet i Rider.
 
 
 
 ### Manuelle tester
 I tillegg til enhetstestene har vi gjennomført manuelle tester av applikasjonen. Dette gjorde vi for å kontrollere funksjonalitet som brukeren møter i nettleseren. Testene ble gjennomført ved å bruke applikasjonen som en vanlig bruker og sammenligne det forventede resultatet med det faktiske resultatet.
 
-| # | Test | Forventet resultat | Resultat |
+| # | Test | Tidligere forventet resultat | Resultat |
 |---|---|---|---|
 | 1 | Åpne startsiden | Startsiden vises og brukeren kan velge behov og ressurs | Bestått |
 | 2 | Registrere behov | Utfylt behov vises på resultatsiden | Bestått |
 | 3 | Velge posisjon på kart | Markør vises og latitude/longitude fylles inn | Bestått |
 | 4 | Registrere ressurs | Utfylt ressurs og koordinater vises på resultatsiden | Bestått |
 | 5 | Mobilvisning 400 px bredde | Navigasjon, skjema, resultatsider og kart tilpasser seg skjermbredden uten feil | Bestått |
-
-
-
-
 
 
 
