@@ -4,17 +4,33 @@ using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
 using Microsoft.AspNetCore.DataProtection;
 
+
+// Oppretter en builder som brukes til å konfigurere
+// tjenestene og innstillingene i applikasjonen.
+
 var builder = WebApplication.CreateBuilder(args);
+
+
+// Henter tilkoblingsstrengen fra konfigurasjonen.
+// Programmet avbrytes dersom tilkoblingsstrengen ikke finnes.
 
 var connectionString =
     builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException(
         "Connection string 'DefaultConnection' ble ikke funnet.");
 
+
+// Registrerer ApplicationDbContext og kobler EF Core
+// til MariaDB-databasen som applikasjonen bruker.
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySql(
         connectionString,
         new MariaDbServerVersion(new Version(10, 11, 0))));
+
+
+// Konfigurerer ASP.NET Core Identity for brukere og roller.
+// Her bestemmes kravene til passord, e-post og kontolåsing.
 
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -27,46 +43,74 @@ builder.Services
 
         options.User.RequireUniqueEmail = true;
         options.SignIn.RequireConfirmedAccount = false;
-        
+
         options.Lockout.AllowedForNewUsers = true;
         options.Lockout.MaxFailedAccessAttempts = 5;
-        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
-        
-        
+        options.Lockout.DefaultLockoutTimeSpan =
+            TimeSpan.FromMinutes(15);
     })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
+
+// Angir hvilke sider brukeren sendes til når brukeren
+// ikke er innlogget eller ikke har riktig tilgang.
+
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    // All protected pages send unauthenticated users to one predictable entry point.
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
+
+// Legger til støtte for MVC-controllere, views og Razor Pages.
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
-/*
- * Dapper brukes fortsatt midlertidig for behov og ressurser.
- * Vi erstatter disse når domenemodellene kobles til EF Core.
- */
-builder.Services.AddSingleton<IDbConnectionFactory, MySqlConnectionFactory>();
-builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
-builder.Services.AddScoped<INeedRepository, NeedRepository>();
-builder.Services.AddScoped<IMatchRepository, MatchRepository>();
 
+// Registrerer databasetilkoblingen og repositoryene.
+// Dapper brukes til å hente og lagre behov,
+// ressurser og matcher i databasen.
+
+builder.Services.AddSingleton<
+    IDbConnectionFactory,
+    MySqlConnectionFactory>();
+
+builder.Services.AddScoped<
+    IResourceRepository,
+    ResourceRepository>();
+
+builder.Services.AddScoped<
+    INeedRepository,
+    NeedRepository>();
+
+builder.Services.AddScoped<
+    IMatchRepository,
+    MatchRepository>();
+
+
+// I produksjonsmiljøet lagres nøklene for databeskyttelse
+// i en egen mappe, slik at de bevares ved omstart.
 
 if (!builder.Environment.IsDevelopment())
 {
     builder.Services
         .AddDataProtection()
-        .PersistKeysToFileSystem(new DirectoryInfo("/keys"))
+        .PersistKeysToFileSystem(
+            new DirectoryInfo("/keys"))
         .SetApplicationName("SemesterProsjekt");
 }
 
 
+// Bygger applikasjonen med tjenestene
+// og innstillingene som er registrert.
+
 var app = builder.Build();
+
+
+// Oppretter et eget tjenesteområde og henter databasen.
+// Ventende EF Core-migrasjoner kjøres ved oppstart.
 
 using (var scope = app.Services.CreateScope())
 {
@@ -76,9 +120,19 @@ using (var scope = app.Services.CreateScope())
     await database.Database.MigrateAsync();
 }
 
+
+// Oppretter nødvendige roller, oppdaterer domeneskjemaet
+// og legger inn lokale eksempeldata dersom det er konfigurert.
+
 await IdentitySeeder.SeedRolesAsync(app.Services);
 await DomainSchemaMigrator.MigrateAsync(app.Services);
-await LocalDemoSeeder.SeedAsync(app.Services, app.Configuration);
+await LocalDemoSeeder.SeedAsync(
+    app.Services,
+    app.Configuration);
+
+
+// I produksjonsmiljøet sendes uventede feil til feilsiden.
+// HSTS ber nettleseren bruke HTTPS ved senere besøk.
 
 if (!app.Environment.IsDevelopment())
 {
@@ -86,19 +140,40 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+
+// Sender HTTP-forespørsler videre til HTTPS
+// og finner riktig rute for hver forespørsel.
+
 app.UseHttpsRedirection();
 app.UseRouting();
+
+
+// Kontrollerer hvem brukeren er og hva brukeren
+// har tilgang til før forespørselen behandles.
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+
+// Gjør statiske filer som CSS, JavaScript og bilder tilgjengelige.
+
 app.MapStaticAssets();
+
+
+// Setter opp standardruten i applikasjonen.
+// Innloggingssiden åpnes dersom ingen annen rute er oppgitt.
 
 app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Account}/{action=Login}/{id?}")
     .WithStaticAssets();
 
+
+// Gjør Razor Pages tilgjengelige i applikasjonen.
+
 app.MapRazorPages();
+
+
+// Starter applikasjonen og begynner å ta imot forespørsler.
 
 app.Run();
