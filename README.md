@@ -269,6 +269,37 @@ I tillegg til enhetstestene har vi gjennomført manuelle tester av applikasjonen
 | 4 | Registrere ressurs | Utfylt ressurs og koordinater vises på resultatsiden | Bestått |
 | 5 | Mobilvisning 400 px bredde | Navigasjon, skjema, resultatsider og kart tilpasser seg skjermbredden uten feil | Bestått |
 
+### Systemtesting
+
+| ID | Test og fremgangsmåte | Forventet resultat | Status |
+|---|---|---|---|
+| SYS-01 | Registrer en ny bruker med en ubrukt e-postadresse. Logg ut og logg inn igjen. | Brukeren opprettes og kan logge inn med de registrerte opplysningene. | Bestått |
+| SYS-02 | Logg inn som ressurseier. Opprett en ressurs med gyldige felt og et punkt på kartet. | Ressursen lagres og vises i ressursoversikten. | Betstått | 
+| SYS-03 | Åpne den opprettede ressursen og oppdater nettlesersiden. | Opplysningene og kartpunktet vises fortsatt riktig. | Bestått |
+| SYS-04 | Rediger tittelen på din egen ressurs. Lagre og åpne ressursen på nytt. | Den nye tittelen vises og er lagret. | Bestått |
+| SYS-05 | Slett en egen testressurs og oppdater oversikten. | Ressursen er fjernet fra oversikten og er ikke lenger tilgjengelig på detaljsiden. | Bestått |
+| SYS-06 | Send inn ressursskjemaet uten et obligatorisk felt. | En forståelig valideringsmelding vises, og ressursen blir ikke lagret. | Bestått |
+
+### Sikkerhetstesting
+
+| ID | Test og fremgangsmåte | Forventet resultat | Status |
+|---|---|---|---|
+| SIK-01 | Logg ut og åpne /Resource/Create direkte. | Brukeren sendes til innlogging og får ikke tilgang til skjemaet. | Bestått | 
+| SIK-02 | Opprett en ressurs med bruker A. Kopier redigeringsadressen. Logg inn som bruker B og åpne adressen. | Bruker B får avslag og kan ikke redigere ressursen. | Bestått |
+| SIK-03 | Kopier sletteadressen til bruker A sin testressurs. Åpne den som bruker B. | Bruker B får avslag. Ressursen finnes fortsatt når bruker A kontrollerer den. | bestått |
+| SIK-04 | Forsøk å logge inn med riktig e-postadresse og feil passord. | Innlogging avvises med en forståelig feilmelding. | Bestått |
+| SIK-05 | Bruk en egen testkonto og skriv feil passord fem ganger. Prøv deretter riktig passord. | Kontoen blir midlertidig låst i henhold til innstillingene i appen. | Bestått |
+
+
+### Mobil- og brukervennlighetstesting
+
+| ID | Oppgave | Forventet resultat | Observasjon |Status |
+|---|---|---|---|---|
+
+| BRU-01 | Opprett en testressurs og plasser et punkt på kartet med berøring. | Skjema og kart kan brukes på mobil, og ressursen lagres med riktig punkt. |  | Bestått |
+| BRU-02 | La en person som ikke har laget siden finne og opprette en ressurs uten veiledning. | Personen klarer oppgaven og forstår feltene og knappene. | Litt mer synelig registrer ressurs og lettere å plassere på kart| Bestått |
+| BRU-03 | Be testpersonen finne og redigere ressursen de nettopp opprettet. | Personen finner funksjonen og forstår om endringen ble lagret. | gjerne gjøre at en ressursleverandør bare kan se egne ressurser | Bestått|
+
 
 
 ## Dokumentasjon i koden
