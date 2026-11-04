@@ -5,43 +5,58 @@ namespace SemesterProsjekt.Data;
 
 
 /// Definerer operasjonene for å hente, opprette og oppdatere matcher.
-/// Gjør at controlleren kan bruke databaselaget uten å kjenne SQL-implementasjonen.
+/// Tilbyr både samlet oversikt for admin og filtrert oversikt for brukere.
 
 public interface IMatchRepository
 {
-   
-    /// Henter matcher som verken er fullført eller avslått.
-    /// Resultatet inkluderer behovs- og ressurstitler til oversiktsvisningen.
-  
+
+    /// Henter åpne matchforslag til administratorens oversikt.
+
     Task<IEnumerable<MatchListItemViewModel>> GetActiveAsync();
 
-   
-    /// Henter fullførte og avslåtte matcher med behovs- og ressurstitler
-    /// til historikkvisningen.
-  
+
+    /// Henter godkjente, fullførte og avslåtte matcher til administratorens historikk.
+
     Task<IEnumerable<MatchListItemViewModel>> GetHistoryAsync();
 
-   
-    /// Henter matchen med angitt ID.
-    /// Returnerer null dersom matchen ikke finnes.
-  
+
+    /// Henter åpne matchforslag der brukeren eier behovet eller ressursen.
+
+    Task<IEnumerable<MatchListItemViewModel>> GetActiveForUserAsync(string userId);
+
+
+    /// Henter behandlede matcher der brukeren eier behovet eller ressursen.
+
+    Task<IEnumerable<MatchListItemViewModel>> GetHistoryForUserAsync(string userId);
+
+
+    /// Henter én match, eller null dersom den ikke finnes.
+
     Task<Match?> GetByIdAsync(int id);
 
-   
-    /// Undersøker om kombinasjonen av behov og ressurs allerede finnes,
-    /// uavhengig av matchens status.
-  
+    /// Henter reserverte mengder slik at opptatte registreringer ikke tilbys på nytt.
+    Task<IEnumerable<MatchReservation>> GetReservationsAsync();
+
+
+    /// Undersøker om kombinasjonen allerede finnes, uavhengig av status.
+
     Task<bool> ExistsAsync(int needId, int resourceId);
 
-   
+
     /// Lagrer en ny match og returnerer den genererte ID-en.
-  
+
     Task<int> CreateAsync(Match match);
 
-   
-    /// Oppdaterer status og avslutningstidspunkt for matchen med angitt ID.
-    /// Avslutningstidspunktet kan være null for en aktiv match.
-    /// Tilgang og tillatt statusovergang må kontrolleres før metoden kalles.
-  
+
+    /// Oppdaterer status og avslutningstidspunkt.
+    /// Controlleren må kontrollere tilgang og tillatt statusovergang.
+
     Task UpdateStatusAsync(int id, string status, DateTime? resolvedAt);
+
+
+    /// Oppdaterer bare dersom statusen fortsatt er den controlleren kontrollerte.
+    /// Hindrer at samtidige svar overskriver hverandre.
+   
+    Task<bool> TryUpdateStatusAsync(
+        int id, string expectedStatus, string status, DateTime? resolvedAt);
 }

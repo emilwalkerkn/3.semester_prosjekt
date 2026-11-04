@@ -102,6 +102,13 @@ public static class DomainSchemaMigrator
    
     private static async Task MigrateMatchTableAsync(IDbConnection connection)
     {
+        // Legger til forslagsstiller uten å gjette hvem som opprettet eldre matcher.
+        if (!await ColumnExistsAsync(connection, "Match", "ProposedByUserId"))
+        {
+            await connection.ExecuteAsync(
+                "ALTER TABLE `Match` ADD COLUMN ProposedByUserId VARCHAR(255) NULL;");
+        }
+
         if (!await ColumnExistsAsync(connection, "Match", "MatchedAt"))
         {
             // Oppretter først feltet som valgfritt, slik at eldre rader kan fylles ut.
@@ -130,13 +137,25 @@ public static class DomainSchemaMigrator
                 "ALTER TABLE `Match` ADD COLUMN Notes VARCHAR(500) NULL;");
         }
 
-        if (await ColumnExistsAsync(connection, "Match", "AssignedQuantity"))
+        if (!await ColumnExistsAsync(connection, "Match", "AssignedQuantity"))
         {
-            // Beholder eldre mengdedata og gir feltet standardverdien 0.
-            // Dermed kan dagens kode opprette matcher uten å sende inn dette feltet.
-            // ALTER-kommandoen kjøres hver gang feltet finnes.
             await connection.ExecuteAsync(
-                "ALTER TABLE `Match` MODIFY COLUMN AssignedQuantity DECIMAL(10,2) NOT NULL DEFAULT 0;");
+                "ALTER TABLE `Match` ADD COLUMN AssignedQuantity DECIMAL(10,2) NULL;");
+        }
+        else
+        {
+            // Eldre standardverdi 0 betyr ukjent mengde. Ingen beholdning trekkes
+            // retroaktivt; eldre godkjente matcher beregnes ved fullføring.
+            await connection.ExecuteAsync(
+                "ALTER TABLE `Match` MODIFY COLUMN AssignedQuantity DECIMAL(10,2) NULL DEFAULT NULL;");
+            await connection.ExecuteAsync(
+                "UPDATE `Match` SET AssignedQuantity = NULL WHERE AssignedQuantity = 0;");
+        }
+
+        if (!await ColumnExistsAsync(connection, "Match", "AssignedUnit"))
+        {
+            await connection.ExecuteAsync(
+                "ALTER TABLE `Match` ADD COLUMN AssignedUnit VARCHAR(50) NULL;");
         }
     }
 
