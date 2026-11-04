@@ -3,26 +3,36 @@ using System.Data;
 
 namespace SemesterProsjekt.Data;
 
-/// <summary>
-/// Oppgraderer eldre Dapper-tabeller til dagens Identity-baserte bruker-ID-er.
-/// Eldre lokale databaser lagret UserId som et tall, mens ASP.NET Identity
-/// bruker tekstbaserte ID-er. Oppgraderingen kjøres trygt ved oppstart og er
-/// uten effekt når kolonnene allerede har riktig type.
-/// </summary>
+
+/// Tilpasser eldre fagtabeller til datatypene og feltene applikasjonen bruker.
+/// Endrer UserId til tekstformat og legger til manglende felt i Match-tabellen.
+/// Bruker direkte SQL gjennom Dapper, separat fra Identity-migreringene i EF Core.
+
 public static class DomainSchemaMigrator
 {
+    // Bare disse tabellene undersøkes for eldre UserId-kolonner.
     private static readonly string[] TablesWithIdentityUserId = ["Needs", "Resources"];
 
+   
+    /// Undersøker eksisterende fagtabeller og utfører nødvendige tilpasninger.
+    /// Forutsetter at tabellene allerede finnes.
+    /// Konverterer datatypen til UserId, men kobler ikke gamle bruker-ID-er
+    /// til nye Identity-kontoer.
+   
     public static async Task MigrateAsync(IServiceProvider services)
     {
+        // Oppretter et eget tjenesteområde for oppstartsjobben.
         using var scope = services.CreateScope();
 
         var connectionFactory = scope.ServiceProvider
             .GetRequiredService<IDbConnectionFactory>();
+
         using var connection = connectionFactory.CreateConnection();
 
         foreach (var tableName in TablesWithIdentityUserId)
         {
+            // INFORMATION_SCHEMA inneholder metadata om databasens struktur.
+            // DATABASE() begrenser oppslaget til databasen i den aktive tilkoblingen.
             const string columnTypeSql = """
                 SELECT DATA_TYPE
                 FROM INFORMATION_SCHEMA.COLUMNS
@@ -41,11 +51,16 @@ public static class DomainSchemaMigrator
                     $"Fant ikke UserId-kolonnen i tabellen {tableName}.");
             }
 
-            if (string.Equals(currentType, "varchar", StringComparison.OrdinalIgnoreCase))
+            // Kolonner som allerede bruker varchar, hoppes over.
+            if (string.Equals(
+                currentType,
+                "varchar",
+                StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
 
+            // Finner fremmednøkler på UserId som må fjernes før typen endres.
             const string foreignKeySql = """
                 SELECT kcu.CONSTRAINT_NAME
                 FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
@@ -65,12 +80,15 @@ public static class DomainSchemaMigrator
 
             foreach (var foreignKeyName in foreignKeys)
             {
-                // Tabellenavnene kommer fra den faste listen over, ikke fra brukerdata.
+                // Tabellenavnet kommer fra den faste listen.
+                // Fremmednøkkelnavnet hentes fra databasens metadata.
+                // Disse navnene kommer ikke fra et brukerskjema.
                 await connection.ExecuteAsync(
                     $"ALTER TABLE `{tableName}` DROP FOREIGN KEY `{foreignKeyName}`;");
             }
 
-            // Tabellenavnene kommer fra den faste listen over, ikke fra brukerdata.
+            // Endrer kolonnen til tekstformat for Identity-baserte bruker-ID-er.
+            // Fremmednøklene som ble fjernet, opprettes ikke på nytt her.
             await connection.ExecuteAsync(
                 $"ALTER TABLE `{tableName}` MODIFY COLUMN UserId VARCHAR(255) NOT NULL;");
         }
@@ -78,20 +96,28 @@ public static class DomainSchemaMigrator
         await MigrateMatchTableAsync(connection);
     }
 
+   
+    /// Tilpasser eldre Match-tabeller til feltene MatchedAt, ResolvedAt og Notes.
+    /// Beholder det eldre feltet AssignedQuantity dersom det finnes.
+   
     private static async Task MigrateMatchTableAsync(IDbConnection connection)
     {
-        // Den tidligere Match-tabellen brukte CreatedAt og AssignedQuantity.
-        // Match-funksjonen bruker nå MatchedAt, ResolvedAt og Notes.
         if (!await ColumnExistsAsync(connection, "Match", "MatchedAt"))
         {
+            // Oppretter først feltet som valgfritt, slik at eldre rader kan fylles ut.
             await connection.ExecuteAsync(
                 "ALTER TABLE `Match` ADD COLUMN MatchedAt DATETIME NULL;");
+
+            // Forutsetter at den eldre tabellen har CreatedAt.
+            // Tidspunktene kopieres før det nye feltet gjøres obligatorisk.
             await connection.ExecuteAsync(
                 "UPDATE `Match` SET MatchedAt = CreatedAt WHERE MatchedAt IS NULL;");
+
             await connection.ExecuteAsync(
                 "ALTER TABLE `Match` MODIFY COLUMN MatchedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP;");
         }
 
+        // Avslutningstidspunktet kan være tomt for aktive matcher.
         if (!await ColumnExistsAsync(connection, "Match", "ResolvedAt"))
         {
             await connection.ExecuteAsync(
@@ -106,13 +132,18 @@ public static class DomainSchemaMigrator
 
         if (await ColumnExistsAsync(connection, "Match", "AssignedQuantity"))
         {
-            // Behold feltet fra den gamle modellen, men gi det standardverdi
-            // slik at dagens matchregistrering ikke stopper på eldre databaser.
+            // Beholder eldre mengdedata og gir feltet standardverdien 0.
+            // Dermed kan dagens kode opprette matcher uten å sende inn dette feltet.
+            // ALTER-kommandoen kjøres hver gang feltet finnes.
             await connection.ExecuteAsync(
                 "ALTER TABLE `Match` MODIFY COLUMN AssignedQuantity DECIMAL(10,2) NOT NULL DEFAULT 0;");
         }
     }
 
+   
+    /// Undersøker om en kolonne finnes i en tabell i den aktive databasen.
+    /// Brukes før opprettelse eller tilpasning av felter.
+   
     private static async Task<bool> ColumnExistsAsync(
         IDbConnection connection,
         string tableName,
@@ -126,6 +157,8 @@ public static class DomainSchemaMigrator
               AND COLUMN_NAME = @ColumnName;
             """;
 
+        // Tabell- og kolonnenavn brukes som søkeverdier i metadataoppslaget.
+        // Dapper konverterer antallet treff til en boolsk verdi.
         return await connection.ExecuteScalarAsync<bool>(sql, new
         {
             TableName = tableName,
