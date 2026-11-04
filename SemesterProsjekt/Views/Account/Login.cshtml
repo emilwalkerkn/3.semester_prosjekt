@@ -1,5 +1,16 @@
+@*
+    Dette er innloggingssiden til Kriseportal.
+
+    Her kan brukeren:
+    - Logge inn med e-post og passord
+    - Velge «Husk meg»
+    - Gå til registreringssiden
+*@
+
 @model SemesterProsjekt.Models.ViewModels.LoginViewModel
+
 @{
+    // Siden bruker ikke den vanlige layouten.
     Layout = null;
 }
 
@@ -7,57 +18,129 @@
 <html lang="no">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    @* Gjør at siden fungerer bra på mobil. *@
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
     <title>Logg inn – Kriseportal</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    @* Henter Bootstrap og vår egen CSS. *@
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
 </head>
+
 <body class="login-page">
-<main class="login-shell">
-    <section class="login-intro">
-        <div class="portal-brand">
-            <span class="portal-brand-mark">K</span>
-            <span>Kriseportal</span>
-        </div>
-        <h1>Koordiner behov og ressurser med oversikt.</h1>
-        <p>Logg inn for å registrere behov, tilby ressurser og følge opp saker.</p>
-    </section>
 
-    <section class="login-card" aria-labelledby="login-heading">
-        <h2 id="login-heading">Velkommen tilbake</h2>
-        <p>Logg inn med e-post og passord.</p>
+    @* Hovedinnholdet på siden. *@
+    <main class="login-shell">
 
-        <form asp-action="Login" method="post" class="login-form">
-            <input asp-for="ReturnUrl" type="hidden" />
-            <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
-
-            <div class="form-field">
-                <label asp-for="Email">E-postadresse</label>
-                <input asp-for="Email" autocomplete="email" placeholder="Skriv inn e-postadressen din" autofocus />
-                <span asp-validation-for="Email"></span>
+        @* Informasjon om Kriseportal. *@
+        <section class="login-intro">
+            <div class="portal-brand">
+                <span class="portal-brand-mark">K</span>
+                <span>Kriseportal</span>
             </div>
 
-            <div class="form-field">
-                <label asp-for="Password">Passord</label>
-                <input asp-for="Password" autocomplete="current-password" placeholder="Skriv inn passord" />
-                <span asp-validation-for="Password"></span>
-            </div>
+            <h1>Koordiner behov og ressurser med oversikt.</h1>
 
-            <label class="login-remember">
-                <input asp-for="RememberMe" />
-                <span>Husk meg på denne enheten</span>
-            </label>
+            <p>
+                Logg inn for å registrere behov, tilby ressurser
+                og følge opp saker.
+            </p>
+        </section>
 
-            <button type="submit">Logg inn</button>
-        </form>
+        @* Boksen som inneholder innloggingsskjemaet. *@
+        <section class="login-card"
+                 aria-labelledby="login-heading">
 
-        <p class="login-switch">
-            Har du ikke konto?
-            <a asp-action="Register" asp-route-returnUrl="@Model.ReturnUrl">Opprett konto</a>
-        </p>
-    </section>
-</main>
+            <h2 id="login-heading">Velkommen tilbake</h2>
+            <p>Logg inn med e-post og passord.</p>
 
-<partial name="_ValidationScriptsPartial" />
+            @*
+                Skjemaet sender opplysningene til Login
+                når brukeren trykker på knappen.
+            *@
+            <form asp-action="Login"
+                  method="post"
+                  class="login-form">
+
+                @*
+                    Lagrer siden brukeren skal sendes til
+                    etter innlogging.
+                *@
+                <input asp-for="ReturnUrl"
+                       type="hidden" />
+
+                @* Viser vanlige feilmeldinger fra innloggingen. *@
+                <div asp-validation-summary="ModelOnly"
+                     class="validation-summary-errors">
+                </div>
+
+                @* Felt for e-postadresse. *@
+                <div class="form-field">
+                    <label asp-for="Email">
+                        E-postadresse
+                    </label>
+
+                    <input asp-for="Email"
+                           autocomplete="email"
+                           placeholder="Skriv inn e-postadressen din"
+                           autofocus />
+
+                    @* Viser feil hvis e-postadressen ikke er gyldig. *@
+                    <span asp-validation-for="Email"></span>
+                </div>
+
+                @* Felt for passord. *@
+                <div class="form-field">
+                    <label asp-for="Password">
+                        Passord
+                    </label>
+
+                    <input asp-for="Password"
+                           autocomplete="current-password"
+                           placeholder="Skriv inn passord" />
+
+                    @* Viser feil hvis passordet ikke er gyldig. *@
+                    <span asp-validation-for="Password"></span>
+                </div>
+
+                @*
+                    Brukeren kan velge om innloggingen
+                    skal huskes på enheten.
+                *@
+                <label class="login-remember">
+                    <input asp-for="RememberMe" />
+                    <span>Husk meg på denne enheten</span>
+                </label>
+
+                @* Knappen sender inn skjemaet. *@
+                <button type="submit">
+                    Logg inn
+                </button>
+            </form>
+
+            <p class="login-switch">
+                Har du ikke konto?
+
+                @* Sender brukeren til registreringssiden. *@
+                <a asp-action="Register"
+                   asp-route-returnUrl="@Model.ReturnUrl">
+                    Opprett konto
+                </a>
+            </p>
+        </section>
+    </main>
+
+    @*
+        Henter skript som gjør at feilmeldinger
+        kan vises før skjemaet sendes inn.
+    *@
+    <partial name="_ValidationScriptsPartial" />
 </body>
 </html>

@@ -1,10 +1,32 @@
-@model IEnumerable<SemesterProsjekt.Models.ViewModels.MatchListItemViewModel>
-@{
-    ViewData["Title"] = "Matcher";
-    var matches = Model.ToList();
-    var proposedCount = matches.Count(match => match.Status == SemesterProsjekt.Models.MatchStatuses.Proposed);
-    var approvedCount = matches.Count(match => match.Status == SemesterProsjekt.Models.MatchStatuses.Approved);
+@*
+    Dette er oversikten over aktive matcher.
 
+    Siden viser:
+    - Hvor mange aktive matcher som finnes
+    - Matcher som venter på godkjenning
+    - Matcher som kan fullføres
+    - Behovet og ressursen i hver match
+    - Knapper for å godkjenne, avslå eller fullføre
+*@
+
+@model IEnumerable<SemesterProsjekt.Models.ViewModels.MatchListItemViewModel>
+
+@{
+    // Angir tittelen til siden.
+    ViewData["Title"] = "Matcher";
+
+    // Gjør modellen om til en liste.
+    var matches = Model.ToList();
+
+    // Teller hvor mange matcher som er forslag.
+    var proposedCount = matches.Count(match =>
+        match.Status == SemesterProsjekt.Models.MatchStatuses.Proposed);
+
+    // Teller hvor mange matcher som er godkjent.
+    var approvedCount = matches.Count(match =>
+        match.Status == SemesterProsjekt.Models.MatchStatuses.Approved);
+
+    // Gjør statusen lettere å forstå på norsk.
     string StatusText(string status) => status switch
     {
         SemesterProsjekt.Models.MatchStatuses.Proposed => "Forslag",
@@ -14,6 +36,7 @@
         _ => status
     };
 
+    // Velger CSS-klassen som passer til statusen.
     string StatusClass(string status) => status switch
     {
         SemesterProsjekt.Models.MatchStatuses.Proposed => "warning",
@@ -25,30 +48,52 @@
 }
 
 <section class="overview-page match-page">
+
+    @* Overskriften og introduksjonen til siden. *@
     <header class="overview-heading">
         <div>
             <p class="eyebrow">Koordinering</p>
             <h1>Matcher</h1>
-            <p class="page-intro">Koble behov med riktige ressurser, og følg hvert forslag frem til det er fullført.</p>
+
+            <p class="page-intro">
+                Koble behov med riktige ressurser, og følg hvert
+                forslag frem til det er fullført.
+            </p>
         </div>
 
+        @* Knapper til historikken og oppretting av en ny match. *@
         <div class="overview-heading-actions">
-            <a asp-action="History" class="portal-button secondary">Matchhistorikk</a>
-            <a asp-action="Create" class="portal-button">+ Opprett match</a>
+            <a asp-action="History"
+               class="portal-button secondary">
+                Matchhistorikk
+            </a>
+
+            <a asp-action="Create"
+               class="portal-button">
+                + Opprett match
+            </a>
         </div>
     </header>
 
-    <section class="match-summary-grid" aria-label="Matchstatus">
+    @* Viser en kort oppsummering av aktive matcher. *@
+    <section class="match-summary-grid"
+             aria-label="Matchstatus">
+
+        @* Viser totalt antall aktive matcher. *@
         <article class="portal-card match-summary-card">
             <span>Aktive matcher</span>
             <strong>@matches.Count</strong>
             <p>Forslag og godkjente matcher.</p>
         </article>
+
+        @* Viser hvor mange forslag som venter på svar. *@
         <article class="portal-card match-summary-card">
             <span>Venter på godkjenning</span>
             <strong>@proposedCount</strong>
             <p>Forslag som må følges opp.</p>
         </article>
+
+        @* Viser hvor mange matcher som kan fullføres. *@
         <article class="portal-card match-summary-card">
             <span>Klare for fullføring</span>
             <strong>@approvedCount</strong>
@@ -56,76 +101,195 @@
         </article>
     </section>
 
-    <section class="overview-list match-list" aria-label="Aktive matcher">
+    @* Listen over aktive matcher. *@
+    <section class="overview-list match-list"
+             aria-label="Aktive matcher">
+
+        @* Viser en melding dersom det ikke finnes aktive matcher. *@
         @if (matches.Count == 0)
         {
             <div class="portal-card empty-state">
                 <h2>Ingen aktive matcher</h2>
-                <p>Opprett en match når du har funnet en ressurs som kan dekke et behov.</p>
-                <a asp-action="Create" class="portal-button">Opprett match</a>
+
+                <p>
+                    Opprett en match når du har funnet en ressurs
+                    som kan dekke et behov.
+                </p>
+
+                <a asp-action="Create"
+                   class="portal-button">
+                    Opprett match
+                </a>
             </div>
         }
         else
         {
+            @*
+                Går gjennom listen og viser
+                ett kort for hver match.
+            *@
             @foreach (var item in matches)
             {
                 <article class="portal-card match-card">
+
+                    @* Viser nummeret og statusen til matchen. *@
                     <div class="match-card-heading">
                         <div>
-                            <p class="eyebrow">Match #@item.MatchId</p>
+                            <p class="eyebrow">
+                                Match #@item.MatchId
+                            </p>
+
                             <h2>Behov og ressurs</h2>
                         </div>
-                        <span class="status @StatusClass(item.Status)">@StatusText(item.Status)</span>
+
+                        @*
+                            StatusClass bestemmer fargen.
+                            StatusText viser statusen på norsk.
+                        *@
+                        <span class="status @StatusClass(item.Status)">
+                            @StatusText(item.Status)
+                        </span>
                     </div>
 
+                    @* Viser behovet og ressursen som er koblet sammen. *@
                     <div class="match-pair">
                         <div class="match-party">
-                            <span class="match-party-label">Behov</span>
-                            <a asp-controller="Need" asp-action="Details" asp-route-id="@item.NeedId">@item.NeedTitle</a>
+                            <span class="match-party-label">
+                                Behov
+                            </span>
+
+                            @* Lenke til detaljsiden for behovet. *@
+                            <a asp-controller="Need"
+                               asp-action="Details"
+                               asp-route-id="@item.NeedId">
+                                @item.NeedTitle
+                            </a>
                         </div>
-                        <span class="match-arrow" aria-label="koblet med">↔</span>
+
+                        <span class="match-arrow"
+                              aria-label="koblet med">
+                            ↔
+                        </span>
+
                         <div class="match-party">
-                            <span class="match-party-label">Ressurs</span>
-                            <a asp-controller="Resource" asp-action="Details" asp-route-id="@item.ResourceId">@item.ResourceTitle</a>
+                            <span class="match-party-label">
+                                Ressurs
+                            </span>
+
+                            @* Lenke til detaljsiden for ressursen. *@
+                            <a asp-controller="Resource"
+                               asp-action="Details"
+                               asp-route-id="@item.ResourceId">
+                                @item.ResourceTitle
+                            </a>
                         </div>
                     </div>
 
+                    @* Viser tidspunkt og hva som bør gjøres videre. *@
                     <div class="match-meta">
                         <div>
                             <span>Opprettet</span>
-                            <strong>@item.MatchedAt.ToString("dd.MM.yyyy HH:mm")</strong>
+
+                            <strong>
+                                @item.MatchedAt.ToString("dd.MM.yyyy HH:mm")
+                            </strong>
                         </div>
+
                         <div>
                             <span>Neste steg</span>
-                            <strong>@(item.Status == SemesterProsjekt.Models.MatchStatuses.Proposed ? "Godkjenn forslaget" : "Marker som fullført")</strong>
+
+                            @*
+                                Teksten endres ut fra statusen
+                                til matchen.
+                            *@
+                            <strong>
+                                @(item.Status ==
+                                  SemesterProsjekt.Models.MatchStatuses.Proposed
+                                    ? "Godkjenn forslaget"
+                                    : "Marker som fullført")
+                            </strong>
                         </div>
                     </div>
 
+                    @* Viser notatet bare dersom det inneholder tekst. *@
                     @if (!string.IsNullOrWhiteSpace(item.Notes))
                     {
-                        <p class="match-note"><strong>Notat:</strong> @item.Notes</p>
+                        <p class="match-note">
+                            <strong>Notat:</strong>
+                            @item.Notes
+                        </p>
                     }
 
+                    @* Viser handlingene som passer til statusen. *@
                     <div class="record-actions">
-                        @if (item.Status == SemesterProsjekt.Models.MatchStatuses.Proposed)
+
+                        @*
+                            Et forslag kan enten godkjennes
+                            eller avslås.
+                        *@
+                        @if (item.Status ==
+                             SemesterProsjekt.Models.MatchStatuses.Proposed)
                         {
-                            <form asp-action="UpdateStatus" method="post">
-                                <input type="hidden" name="id" value="@item.MatchId" />
-                                <input type="hidden" name="status" value="@SemesterProsjekt.Models.MatchStatuses.Approved" />
-                                <button type="submit" class="portal-button">Godkjenn forslag</button>
+                            @* Sender ny status til UpdateStatus. *@
+                            <form asp-action="UpdateStatus"
+                                  method="post">
+
+                                @* ID-en forteller hvilken match som skal endres. *@
+                                <input type="hidden"
+                                       name="id"
+                                       value="@item.MatchId" />
+
+                                @* Den nye statusen blir Godkjent. *@
+                                <input type="hidden"
+                                       name="status"
+                                       value="@SemesterProsjekt.Models.MatchStatuses.Approved" />
+
+                                <button type="submit"
+                                        class="portal-button">
+                                    Godkjenn forslag
+                                </button>
                             </form>
-                            <form asp-action="UpdateStatus" method="post">
-                                <input type="hidden" name="id" value="@item.MatchId" />
-                                <input type="hidden" name="status" value="@SemesterProsjekt.Models.MatchStatuses.Declined" />
-                                <button type="submit" class="portal-button danger">Avslå forslag</button>
+
+                            @* Sender status Avslått til UpdateStatus. *@
+                            <form asp-action="UpdateStatus"
+                                  method="post">
+
+                                <input type="hidden"
+                                       name="id"
+                                       value="@item.MatchId" />
+
+                                <input type="hidden"
+                                       name="status"
+                                       value="@SemesterProsjekt.Models.MatchStatuses.Declined" />
+
+                                <button type="submit"
+                                        class="portal-button danger">
+                                    Avslå forslag
+                                </button>
                             </form>
                         }
-                        else if (item.Status == SemesterProsjekt.Models.MatchStatuses.Approved)
+                        else if (item.Status ==
+                                 SemesterProsjekt.Models.MatchStatuses.Approved)
                         {
-                            <form asp-action="UpdateStatus" method="post">
-                                <input type="hidden" name="id" value="@item.MatchId" />
-                                <input type="hidden" name="status" value="@SemesterProsjekt.Models.MatchStatuses.Completed" />
-                                <button type="submit" class="portal-button">Marker som fullført</button>
+                            @*
+                                En godkjent match kan merkes
+                                som fullført.
+                            *@
+                            <form asp-action="UpdateStatus"
+                                  method="post">
+
+                                <input type="hidden"
+                                       name="id"
+                                       value="@item.MatchId" />
+
+                                <input type="hidden"
+                                       name="status"
+                                       value="@SemesterProsjekt.Models.MatchStatuses.Completed" />
+
+                                <button type="submit"
+                                        class="portal-button">
+                                    Marker som fullført
+                                </button>
                             </form>
                         }
                     </div>

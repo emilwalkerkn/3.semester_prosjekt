@@ -1,38 +1,134 @@
+@*
+    Dette er detaljsiden for en ressurs.
+
+    Siden viser:
+    - Tittel og beskrivelse
+    - Type og mengde
+    - Kontaktinformasjon
+    - Når ressursen er tilgjengelig
+    - Status
+    - Knapper for redigering og sletting
+*@
+
 @model SemesterProsjekt.Models.Resource
 
 @{
+    // Angir tittelen til siden.
     ViewData["Title"] = "Ressursdetaljer";
-    var canManage = User.IsInRole("Admin") || User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.UserId;
+
+    /*
+        Sjekker om brukeren kan endre ressursen.
+        Administratoren og brukeren som opprettet ressursen
+        får tilgang til knappene.
+    */
+    var canManage =
+        User.IsInRole("Admin") ||
+        User.FindFirst(
+            System.Security.Claims.ClaimTypes.NameIdentifier
+        )?.Value == Model.UserId;
 }
 
 <section class="details-page">
-    <a asp-action="Overview" class="back-link">← Tilbake til ressurser</a>
 
+    @* Sender brukeren tilbake til oversikten over ressurser. *@
+    <a asp-action="Overview"
+       class="back-link">
+        ← Tilbake til ressurser
+    </a>
+
+    @* Kortet som viser informasjonen om ressursen. *@
     <article class="portal-card details-card">
+
+        @* Viser typen, tittelen og statusen til ressursen. *@
         <header class="details-heading">
             <div>
-                <p class="record-type">@(Model.ResourceTypeName ?? "Ressurs")</p>
+                <p class="record-type">
+                    @(Model.ResourceTypeName ?? "Ressurs")
+                </p>
+
                 <h1>@Model.Title</h1>
             </div>
-            <span class="status available">@Model.Status</span>
+
+            <span class="status available">
+                @Model.Status
+            </span>
         </header>
 
-        <p class="details-description">@Model.Description</p>
+        @* Viser beskrivelsen av ressursen. *@
+        <p class="details-description">
+            @Model.Description
+        </p>
 
+        @*
+            Viser detaljene som en beskrivelsesliste.
+            dt er navnet på opplysningen, mens dd er verdien.
+        *@
         <dl class="details-grid">
-            <div><dt>Type</dt><dd>@(Model.ResourceTypeName ?? "Ikke oppgitt")</dd></div>
-            <div><dt>Mengde</dt><dd>@Model.Quantity @Model.Unit</dd></div>
-            <div><dt>Kontaktpunkt</dt><dd>@(Model.ContactPoint ?? "Ikke oppgitt")</dd></div>
-            <div><dt>Tilgjengelig fra</dt><dd>@(Model.AvailableFrom?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")</dd></div>
-            <div><dt>Tilgjengelig til</dt><dd>@(Model.AvailableTo?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")</dd></div>
-            <div><dt>Status</dt><dd>@Model.Status</dd></div>
+
+            <div>
+                <dt>Type</dt>
+                <dd>
+                    @(Model.ResourceTypeName ?? "Ikke oppgitt")
+                </dd>
+            </div>
+
+            <div>
+                <dt>Mengde</dt>
+                <dd>
+                    @Model.Quantity @Model.Unit
+                </dd>
+            </div>
+
+            <div>
+                <dt>Kontaktpunkt</dt>
+                <dd>
+                    @(Model.ContactPoint ?? "Ikke oppgitt")
+                </dd>
+            </div>
+
+            <div>
+                <dt>Tilgjengelig fra</dt>
+                <dd>
+                    @(Model.AvailableFrom?.ToString("dd.MM.yyyy HH:mm")
+                      ?? "Ikke oppgitt")
+                </dd>
+            </div>
+
+            <div>
+                <dt>Tilgjengelig til</dt>
+                <dd>
+                    @(Model.AvailableTo?.ToString("dd.MM.yyyy HH:mm")
+                      ?? "Ikke oppgitt")
+                </dd>
+            </div>
+
+            <div>
+                <dt>Status</dt>
+                <dd>@Model.Status</dd>
+            </div>
         </dl>
 
+        @*
+            Knappene vises bare hvis brukeren er administrator
+            eller personen som opprettet ressursen.
+        *@
         @if (canManage)
         {
             <div class="record-actions details-actions">
-                <a asp-action="Edit" asp-route-id="@Model.ResourceId" class="portal-button">Rediger ressurs</a>
-                <a asp-action="Delete" asp-route-id="@Model.ResourceId" class="portal-button danger">Slett ressurs</a>
+
+                @* Sender brukeren til siden for redigering. *@
+                <a asp-action="Edit"
+                   asp-route-id="@Model.ResourceId"
+                   class="portal-button">
+                    Rediger ressurs
+                </a>
+
+                @* Sender brukeren til siden for sletting. *@
+                <a asp-action="Delete"
+                   asp-route-id="@Model.ResourceId"
+                   class="portal-button danger">
+                    Slett ressurs
+                </a>
             </div>
         }
     </article>

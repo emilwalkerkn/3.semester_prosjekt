@@ -1,62 +1,129 @@
-﻿@using SemesterProsjekt.Models
+﻿@*
+    Dette er forsiden til Kriseportal.
+
+    Siden viser:
+    - Knapper basert på brukerens rolle
+    - Hvordan Kriseportal fungerer
+    - Antall behov og ressurser
+    - De siste registreringene
+*@
+
+@using SemesterProsjekt.Models
 @model SemesterProsjekt.Models.DashboardViewModel
 
 @{
+    // Tittelen som vises i fanen og sidens layout.
     ViewData["Title"] = "Hjem";
 }
 
+@* Øverste del av forsiden. *@
 <section class="home-hero">
     <div class="home-hero-copy">
         <p class="home-eyebrow">Kriseportal</p>
-        <h1>Samlet oversikt når det virkelig gjelder.</h1>
-        <p>Registrer behov, tilby ressurser og følg opp matcher på ett sted. Kriseportal gjør det enklere å koordinere en trygg og rask innsats.</p>
 
+        <h1>Samlet oversikt når det virkelig gjelder.</h1>
+
+        <p>
+            Registrer behov, tilby ressurser og følg opp matcher på ett sted.
+            Kriseportal gjør det enklere å koordinere en trygg og rask innsats.
+        </p>
+
+        @* Viser forskjellige knapper basert på innlogging og rolle. *@
         <div class="home-hero-actions">
+
+            @* Sjekker om brukeren er logget inn. *@
             @if (User.Identity?.IsAuthenticated == true)
             {
-                @if (User.IsInRole(AppRoles.NeedsActor) || User.IsInRole(AppRoles.Admin))
+                @*
+                    Behovsaktører og administratorer
+                    kan registrere nye behov.
+                *@
+                @if (User.IsInRole(AppRoles.NeedsActor) ||
+                     User.IsInRole(AppRoles.Admin))
                 {
-                    <a asp-controller="Need" asp-action="Create" class="portal-button">Registrer behov</a>
+                    <a asp-controller="Need"
+                       asp-action="Create"
+                       class="portal-button">
+                        Registrer behov
+                    </a>
                 }
 
-                @if (User.IsInRole(AppRoles.ResourceOwner) || User.IsInRole(AppRoles.Admin))
+                @*
+                    Ressurseiere og administratorer
+                    kan registrere nye ressurser.
+                *@
+                @if (User.IsInRole(AppRoles.ResourceOwner) ||
+                     User.IsInRole(AppRoles.Admin))
                 {
-                    <a asp-controller="Resource" asp-action="Create" class="portal-button secondary">Registrer ressurs</a>
+                    <a asp-controller="Resource"
+                       asp-action="Create"
+                       class="portal-button secondary">
+                        Registrer ressurs
+                    </a>
                 }
             }
             else
             {
-                <a asp-controller="Account" asp-action="Register" class="portal-button">Opprett konto</a>
-                <a asp-controller="Account" asp-action="Login" class="portal-button secondary">Logg inn</a>
+                @* Disse knappene vises når brukeren ikke er logget inn. *@
+                <a asp-controller="Account"
+                   asp-action="Register"
+                   class="portal-button">
+                    Opprett konto
+                </a>
+
+                <a asp-controller="Account"
+                   asp-action="Login"
+                   class="portal-button secondary">
+                    Logg inn
+                </a>
             }
         </div>
     </div>
 
+    @* Illustrasjonen som vises øverst på siden. *@
     <img src="~/images/kriseportal-hero.png"
          alt="Et team som planlegger beredskapsinnsats rundt et kart" />
 </section>
 
-<section class="home-info-grid" aria-label="Slik fungerer Kriseportal">
+@*
+    Forklarer de tre stegene i Kriseportal.
+    aria-label beskriver området for skjermlesere.
+*@
+<section class="home-info-grid"
+         aria-label="Slik fungerer Kriseportal">
+
     <article class="home-info-card">
         <span aria-hidden="true">1</span>
         <h2>Registrer</h2>
-        <p>Legg inn et behov eller en ressurs med mengde, kontaktinformasjon og plassering.</p>
+        <p>
+            Legg inn et behov eller en ressurs med mengde,
+            kontaktinformasjon og plassering.
+        </p>
     </article>
 
     <article class="home-info-card">
         <span aria-hidden="true">2</span>
         <h2>Finn en match</h2>
-        <p>Koble riktig ressurs til et behov, og la ressurseieren godta forslaget.</p>
+        <p>
+            Koble riktig ressurs til et behov,
+            og la ressurseieren godta forslaget.
+        </p>
     </article>
 
     <article class="home-info-card">
         <span aria-hidden="true">3</span>
         <h2>Følg opp</h2>
-        <p>Bruk oversiktene til å se hva som er nytt, pågående og løst.</p>
+        <p>
+            Bruk oversiktene til å se hva som er nytt,
+            pågående og løst.
+        </p>
     </article>
 </section>
 
-<section class="home-overview" aria-labelledby="oversikt-heading">
+@* Viser tall fra DashboardViewModel. *@
+<section class="home-overview"
+         aria-labelledby="oversikt-heading">
+
     <div>
         <p class="home-eyebrow">Akkurat nå</p>
         <h2 id="oversikt-heading">Oversikt</h2>
@@ -64,23 +131,30 @@
     </div>
 
     <div class="stat-grid home-stat-grid">
+
+        @* Viser totalt antall registrerte behov. *@
         <article class="portal-card stat-card">
             <p>Registrerte behov</p>
             <strong>@Model.TotalNeeds</strong>
         </article>
 
+        @* Viser totalt antall tilgjengelige ressurser. *@
         <article class="portal-card stat-card">
             <p>Tilgjengelige ressurser</p>
             <strong>@Model.TotalResources</strong>
         </article>
 
+        @* Legger sammen antall behov og ressurser. *@
         <article class="portal-card stat-card">
             <p>Saker i oversikt</p>
-            <strong>@(Model.TotalNeeds + Model.TotalResources)</strong>
+            <strong>
+                @(Model.TotalNeeds + Model.TotalResources)
+            </strong>
         </article>
     </div>
 </section>
 
+@* Viser de siste behovene og ressursene som er registrert. *@
 <section class="portal-card section-card home-latest">
     <div class="section-heading-row">
         <div>
@@ -89,29 +163,54 @@
         </div>
     </div>
 
-    @if (!Model.RecentNeeds.Any() && !Model.RecentResources.Any())
+    @*
+        Hvis listene med behov og ressurser er tomme,
+        vises en melding til brukeren.
+    *@
+    @if (!Model.RecentNeeds.Any() &&
+         !Model.RecentResources.Any())
     {
-        <p class="empty-state">Ingen registreringer ennå.</p>
+        <p class="empty-state">
+            Ingen registreringer ennå.
+        </p>
     }
     else
     {
         <ul class="summary-list">
+
+            @*
+                Går gjennom de siste behovene
+                og lager ett listepunkt for hvert behov.
+            *@
             @foreach (var need in Model.RecentNeeds)
             {
                 <li>
+                    @* Lenke til detaljsiden for behovet. *@
                     <a asp-controller="Need"
                        asp-action="Details"
                        asp-route-id="@need.NeedId">
+
                         @{
-                            var typeIcon = PortalTypeIcons.ForNeed(need.NeedTypeId);
+                            // Finner riktig symbol for typen behov.
+                            var typeIcon =
+                                PortalTypeIcons.ForNeed(need.NeedTypeId);
                         }
+
                         <span class="summary-link-with-icon">
-                            <span class="summary-type-icon" role="img" aria-label="@typeIcon.Label">@typeIcon.Symbol</span>
+                            <span class="summary-type-icon"
+                                  role="img"
+                                  aria-label="@typeIcon.Label">
+                                @typeIcon.Symbol
+                            </span>
+
                             @need.Title
                         </span>
                     </a>
 
-                    <span class="status new">@need.Status</span>
+                    @* Viser statusen til behovet. *@
+                    <span class="status new">
+                        @need.Status
+                    </span>
 
                     <a asp-controller="Need"
                        asp-action="Details"
@@ -121,22 +220,40 @@
                 </li>
             }
 
+            @*
+                Går gjennom de siste ressursene
+                og lager ett listepunkt for hver ressurs.
+            *@
             @foreach (var resource in Model.RecentResources)
             {
                 <li>
+                    @* Lenke til detaljsiden for ressursen. *@
                     <a asp-controller="Resource"
                        asp-action="Details"
                        asp-route-id="@resource.ResourceId">
+
                         @{
-                            var typeIcon = PortalTypeIcons.ForResource(resource.ResourceTypeId);
+                            // Finner riktig symbol for typen ressurs.
+                            var typeIcon =
+                                PortalTypeIcons.ForResource(
+                                    resource.ResourceTypeId);
                         }
+
                         <span class="summary-link-with-icon">
-                            <span class="summary-type-icon" role="img" aria-label="@typeIcon.Label">@typeIcon.Symbol</span>
+                            <span class="summary-type-icon"
+                                  role="img"
+                                  aria-label="@typeIcon.Label">
+                                @typeIcon.Symbol
+                            </span>
+
                             @resource.Title
                         </span>
                     </a>
 
-                    <span class="status available">@resource.Status</span>
+                    @* Viser statusen til ressursen. *@
+                    <span class="status available">
+                        @resource.Status
+                    </span>
 
                     <a asp-controller="Resource"
                        asp-action="Details"

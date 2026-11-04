@@ -1,8 +1,24 @@
+@*
+    Dette er siden for matchhistorikk.
+
+    Siden viser:
+    - Matcher som er fullført
+    - Matcher som er avslått
+    - Behovet og ressursen i hver match
+    - Når matchen ble opprettet og avsluttet
+    - Et notat dersom matchen har et notat
+*@
+
 @model IEnumerable<SemesterProsjekt.Models.ViewModels.MatchListItemViewModel>
+
 @{
+    // Angir tittelen til siden.
     ViewData["Title"] = "Matchhistorikk";
+
+    // Gjør modellen om til en liste.
     var matches = Model.ToList();
 
+    // Gjør statusen lettere å forstå på norsk.
     string StatusText(string status) => status switch
     {
         SemesterProsjekt.Models.MatchStatuses.Completed => "Fullført",
@@ -10,6 +26,7 @@
         _ => status
     };
 
+    // Velger CSS-klassen som passer til statusen.
     string StatusClass(string status) => status switch
     {
         SemesterProsjekt.Models.MatchStatuses.Completed => "resolved",
@@ -19,64 +36,142 @@
 }
 
 <section class="overview-page match-page">
+
+    @* Overskriften og introduksjonen til siden. *@
     <header class="overview-heading">
         <div>
             <p class="eyebrow">Historikk</p>
             <h1>Matchhistorikk</h1>
-            <p class="page-intro">Her finner du matcher som er gjennomført eller avslått.</p>
+
+            <p class="page-intro">
+                Her finner du matcher som er gjennomført eller avslått.
+            </p>
         </div>
 
-        <a asp-action="Overview" class="portal-button secondary">Til aktive matcher</a>
+        @* Sender brukeren til oversikten over aktive matcher. *@
+        <a asp-action="Overview"
+           class="portal-button secondary">
+            Til aktive matcher
+        </a>
     </header>
 
-    <section class="overview-list match-list" aria-label="Avsluttede matcher">
+    @* Listen over fullførte og avslåtte matcher. *@
+    <section class="overview-list match-list"
+             aria-label="Avsluttede matcher">
+
+        @* Viser en melding dersom historikken er tom. *@
         @if (matches.Count == 0)
         {
             <div class="portal-card empty-state">
                 <h2>Ingen avsluttede matcher ennå</h2>
-                <p>Når en match er fullført eller avslått, blir den flyttet hit.</p>
-                <a asp-action="Overview" class="portal-button secondary">Til aktive matcher</a>
+
+                <p>
+                    Når en match er fullført eller avslått,
+                    blir den flyttet hit.
+                </p>
+
+                <a asp-action="Overview"
+                   class="portal-button secondary">
+                    Til aktive matcher
+                </a>
             </div>
         }
         else
         {
+            @*
+                Går gjennom listen og viser
+                ett "kort" for hver match.
+            *@
             @foreach (var item in matches)
             {
                 <article class="portal-card match-card match-card-completed">
+
+                    @* Viser nummeret og statusen til matchen. *@
                     <div class="match-card-heading">
                         <div>
-                            <p class="eyebrow">Match #@item.MatchId</p>
+                            <p class="eyebrow">
+                                Match #@item.MatchId
+                            </p>
+
                             <h2>Behov og ressurs</h2>
                         </div>
-                        <span class="status @StatusClass(item.Status)">@StatusText(item.Status)</span>
+
+                        @*
+                            StatusClass bestemmer fargen.
+                            StatusText viser statusen på norsk.
+                        *@
+                        <span class="status @StatusClass(item.Status)">
+                            @StatusText(item.Status)
+                        </span>
                     </div>
 
+                    @* Viser behovet og ressursen som ble koblet sammen. *@
                     <div class="match-pair">
                         <div class="match-party">
-                            <span class="match-party-label">Behov</span>
-                            <a asp-controller="Need" asp-action="Details" asp-route-id="@item.NeedId">@item.NeedTitle</a>
+                            <span class="match-party-label">
+                                Behov
+                            </span>
+
+                            @* Lenke til detaljsiden for behovet. *@
+                            <a asp-controller="Need"
+                               asp-action="Details"
+                               asp-route-id="@item.NeedId">
+                                @item.NeedTitle
+                            </a>
                         </div>
-                        <span class="match-arrow" aria-label="koblet med">↔</span>
+
+                        @*
+                            Pilen viser at behovet og ressursen
+                            er koblet sammen.
+                        *@
+                        <span class="match-arrow"
+                              aria-label="koblet med">
+                            ↔
+                        </span>
+
                         <div class="match-party">
-                            <span class="match-party-label">Ressurs</span>
-                            <a asp-controller="Resource" asp-action="Details" asp-route-id="@item.ResourceId">@item.ResourceTitle</a>
+                            <span class="match-party-label">
+                                Ressurs
+                            </span>
+
+                            @* Lenke til detaljsiden for ressursen. *@
+                            <a asp-controller="Resource"
+                               asp-action="Details"
+                               asp-route-id="@item.ResourceId">
+                                @item.ResourceTitle
+                            </a>
                         </div>
                     </div>
 
+                    @* Viser når matchen ble opprettet og avsluttet. *@
                     <div class="match-meta">
                         <div>
                             <span>Opprettet</span>
-                            <strong>@item.MatchedAt.ToString("dd.MM.yyyy HH:mm")</strong>
+
+                            <strong>
+                                @item.MatchedAt.ToString("dd.MM.yyyy HH:mm")
+                            </strong>
                         </div>
+
                         <div>
                             <span>Avsluttet</span>
-                            <strong>@(item.ResolvedAt?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")</strong>
+
+                            <strong>
+                                @(item.ResolvedAt?.ToString("dd.MM.yyyy HH:mm")
+                                  ?? "Ikke oppgitt")
+                            </strong>
                         </div>
                     </div>
 
+                    @*
+                        Notatet vises bare dersom det inneholder tekst.
+                    *@
                     @if (!string.IsNullOrWhiteSpace(item.Notes))
                     {
-                        <p class="match-note"><strong>Notat:</strong> @item.Notes</p>
+                        <p class="match-note">
+                            <strong>Notat:</strong>
+                            @item.Notes
+                        </p>
                     }
                 </article>
             }

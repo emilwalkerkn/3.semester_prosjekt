@@ -1,13 +1,27 @@
+@*
+    Dette er bekreftelsessiden etter at et behov er registrert.
+
+    Siden viser:
+    - En bekreftelse på at behovet er registrert
+    - De viktigste opplysningene om behovet
+    - Lenke til detaljsiden
+    - Lenke for å registrere et nytt behov
+*@
+
 @model SemesterProsjekt.Models.Need
 
 @{
+    // Angir tittelen til siden.
     ViewData["Title"] = "Behov registrert";
 }
 
+@* Viser innholdet midtstilt på siden. *@
 <div class="text-center">
     <h1>Behov registrert</h1>
 
+    @* Viser opplysningene som ble lagret. *@
     <div class="mt-4">
+
         <p>
             <strong>Tittel:</strong>
             @Model.Title
@@ -22,7 +36,7 @@
             <strong>Behovstype-ID:</strong>
             @Model.NeedTypeId
         </p>
-        
+
         <p>
             <strong>Mengde:</strong>
             @Model.Quantity @Model.Unit
@@ -39,6 +53,10 @@
         </p>
     </div>
 
+    @*
+        Sender brukeren til detaljsiden
+        for behovet som nettopp ble registrert.
+    *@
     <a asp-controller="Need"
        asp-action="Details"
        asp-route-id="@Model.NeedId"
@@ -46,6 +64,10 @@
         Se detaljer
     </a>
 
+    @*
+        Sender brukeren til skjemaet
+        for å registrere et nytt behov.
+    *@
     <a asp-controller="Need"
        asp-action="Create"
        class="btn btn-primary mt-3">

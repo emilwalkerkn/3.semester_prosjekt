@@ -1,13 +1,27 @@
+@*
+    Dette er bekreftelsessiden etter at en ressurs er registrert.
+
+    Siden viser:
+    - En bekreftelse på at ressursen er registrert
+    - De viktigste opplysningene om ressursen
+    - En lenke til detaljsiden
+    - En lenke for å registrere en ny ressurs
+*@
+
 @model SemesterProsjekt.Models.Resource
 
 @{
+    // Angir tittelen til siden.
     ViewData["Title"] = "Ressurs registrert";
 }
 
+@* Viser innholdet midtstilt på siden. *@
 <div class="text-center">
     <h1>Ressurs registrert</h1>
 
+    @* Viser opplysningene som ble lagret. *@
     <div class="mt-4">
+
         <p>
             <strong>Tittel:</strong>
             @Model.Title
@@ -22,7 +36,6 @@
             <strong>Ressurstype-ID:</strong>
             @Model.ResourceTypeId
         </p>
-        
 
         <p>
             <strong>Mengde:</strong>
@@ -35,6 +48,10 @@
         </p>
     </div>
 
+    @*
+        Sender brukeren til detaljsiden
+        for ressursen som nettopp ble registrert.
+    *@
     <a asp-controller="Resource"
        asp-action="Details"
        asp-route-id="@Model.ResourceId"
@@ -42,6 +59,10 @@
         Se detaljer
     </a>
 
+    @*
+        Sender brukeren til skjemaet
+        for å registrere en ny ressurs.
+    *@
     <a asp-controller="Resource"
        asp-action="Create"
        class="btn btn-primary mt-3">

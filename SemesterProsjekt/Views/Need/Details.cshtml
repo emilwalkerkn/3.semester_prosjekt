@@ -1,8 +1,32 @@
+@*
+    Dette er detaljsiden for et behov.
+
+    Siden viser:
+    - Tittel og beskrivelse
+    - Status og prioritet
+    - Mengde og kontaktinformasjon
+    - Tidspunkt og frist
+    - Knapper for å redigere eller slette
+*@
+
 @model SemesterProsjekt.Models.Need
 
 @{
+    // Angir tittelen til siden.
     ViewData["Title"] = "Behovsdetaljer";
-    var canManage = User.IsInRole("Admin") || User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value == Model.UserId;
+
+    /*
+        Sjekker om brukeren kan endre behovet.
+        Administratoren og brukeren som opprettet behovet
+        får tilgang til knappene for redigering og sletting.
+    */
+    var canManage =
+        User.IsInRole("Admin") ||
+        User.FindFirst(
+            System.Security.Claims.ClaimTypes.NameIdentifier
+        )?.Value == Model.UserId;
+
+    // Gjør statusen lettere å forstå på norsk.
     var statusText = Model.Status switch
     {
         "New" => "Ny",
@@ -10,37 +34,116 @@
         "Resolved" => "Løst",
         _ => Model.Status
     };
-    var statusClass = Model.Status == "Resolved" ? "resolved" : Model.Status is "New" or "In progress" ? "warning" : "";
+
+    // Velger CSS-klassen som passer til statusen.
+    var statusClass = Model.Status == "Resolved"
+        ? "resolved"
+        : Model.Status is "New" or "In progress"
+            ? "warning"
+            : "";
 }
 
 <section class="details-page">
-    <a asp-action="Overview" class="back-link">← Tilbake til behov</a>
 
+    @* Sender brukeren tilbake til oversikten over behov. *@
+    <a asp-action="Overview"
+       class="back-link">
+        ← Tilbake til behov
+    </a>
+
+    @* Kortet som viser informasjonen om behovet. *@
     <article class="portal-card details-card">
+
+        @* Viser typen, tittelen og statusen til behovet. *@
         <header class="details-heading">
             <div>
-                <p class="record-type">@(Model.NeedTypeName ?? "Behov")</p>
+                <p class="record-type">
+                    @(Model.NeedTypeName ?? "Behov")
+                </p>
+
                 <h1>@Model.Title</h1>
             </div>
-            <span class="status @statusClass">@statusText</span>
+
+            <span class="status @statusClass">
+                @statusText
+            </span>
         </header>
 
-        <p class="details-description">@Model.Description</p>
+        @* Viser beskrivelsen av behovet. *@
+        <p class="details-description">
+            @Model.Description
+        </p>
 
+        @*
+            Viser detaljene som en beskrivelsesliste.
+            dt er navnet på opplysningen, mens dd er verdien.
+        *@
         <dl class="details-grid">
-            <div><dt>Type</dt><dd>@(Model.NeedTypeName ?? "Ikke oppgitt")</dd></div>
-            <div><dt>Prioritet</dt><dd>@Model.Priority</dd></div>
-            <div><dt>Mengde</dt><dd>@Model.Quantity @Model.Unit</dd></div>
-            <div><dt>Kontaktpunkt</dt><dd>@(Model.ContactPoint ?? "Ikke oppgitt")</dd></div>
-            <div><dt>Behov fra</dt><dd>@(Model.NeededFrom?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")</dd></div>
-            <div><dt>Frist</dt><dd>@(Model.Deadline?.ToString("dd.MM.yyyy HH:mm") ?? "Ikke oppgitt")</dd></div>
+
+            <div>
+                <dt>Type</dt>
+                <dd>
+                    @(Model.NeedTypeName ?? "Ikke oppgitt")
+                </dd>
+            </div>
+
+            <div>
+                <dt>Prioritet</dt>
+                <dd>@Model.Priority</dd>
+            </div>
+
+            <div>
+                <dt>Mengde</dt>
+                <dd>
+                    @Model.Quantity @Model.Unit
+                </dd>
+            </div>
+
+            <div>
+                <dt>Kontaktpunkt</dt>
+                <dd>
+                    @(Model.ContactPoint ?? "Ikke oppgitt")
+                </dd>
+            </div>
+
+            <div>
+                <dt>Behov fra</dt>
+                <dd>
+                    @(Model.NeededFrom?.ToString("dd.MM.yyyy HH:mm")
+                      ?? "Ikke oppgitt")
+                </dd>
+            </div>
+
+            <div>
+                <dt>Frist</dt>
+                <dd>
+                    @(Model.Deadline?.ToString("dd.MM.yyyy HH:mm")
+                      ?? "Ikke oppgitt")
+                </dd>
+            </div>
         </dl>
 
+        @*
+            Knappene vises bare hvis brukeren er administrator
+            eller eier behovet.
+        *@
         @if (canManage)
         {
             <div class="record-actions details-actions">
-                <a asp-action="Edit" asp-route-id="@Model.NeedId" class="portal-button">Rediger behov</a>
-                <a asp-action="Delete" asp-route-id="@Model.NeedId" class="portal-button danger">Slett behov</a>
+
+                @* Sender brukeren til siden for redigering. *@
+                <a asp-action="Edit"
+                   asp-route-id="@Model.NeedId"
+                   class="portal-button">
+                    Rediger behov
+                </a>
+
+                @* Sender brukeren til siden for sletting. *@
+                <a asp-action="Delete"
+                   asp-route-id="@Model.NeedId"
+                   class="portal-button danger">
+                    Slett behov
+                </a>
             </div>
         }
     </article>

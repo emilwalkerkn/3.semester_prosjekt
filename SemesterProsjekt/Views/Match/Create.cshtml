@@ -1,53 +1,143 @@
+@*
+    Dette er siden for å opprette en match.
+
+    Her kan brukeren:
+    - Velge et behov
+    - Velge en ressurs
+    - Skrive et valgfritt notat
+    - Opprette et matchforslag
+*@
+
 @model SemesterProsjekt.Models.ViewModels.CreateMatchViewModel
+
 @{
+    // Angir tittelen til siden.
     ViewData["Title"] = "Opprett match";
 }
 
 <section class="overview-page match-page">
+
+    @* Overskriften og introduksjonen til siden. *@
     <header class="overview-heading">
         <div>
             <p class="eyebrow">Koordinering</p>
             <h1>Opprett match</h1>
-            <p class="page-intro">Velg behovet og ressursen som skal kobles sammen.</p>
+
+            <p class="page-intro">
+                Velg behovet og ressursen som skal kobles sammen.
+            </p>
         </div>
 
-        <a asp-action="Overview" class="portal-button secondary">Tilbake til matcher</a>
+        @* Sender brukeren tilbake til oversikten over matcher. *@
+        <a asp-action="Overview"
+           class="portal-button secondary">
+            Tilbake til matcher
+        </a>
     </header>
 
-    <form asp-action="Create" method="post" class="portal-card match-form">
-        <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+    @*
+        Skjemaet sender valgene til Create-handlingen
+        når brukeren trykker på knappen.
+    *@
+    <form asp-action="Create"
+          method="post"
+          class="portal-card match-form">
+
+        @* Viser vanlige feilmeldinger fra skjemaet. *@
+        <div asp-validation-summary="ModelOnly"
+             class="validation-summary-errors">
+        </div>
 
         <div class="form-grid">
+
+            @* Nedtrekksliste for å velge et behov. *@
             <div class="form-field full">
-                <label asp-for="NeedId">Behov</label>
-                <select asp-for="NeedId" asp-items="Model.Needs" class="form-control">
-                    <option value="">Velg behov</option>
+                <label asp-for="NeedId">
+                    Behov
+                </label>
+
+                @*
+                    Model.Needs inneholder behovene
+                    som brukeren kan velge mellom.
+                *@
+                <select asp-for="NeedId"
+                        asp-items="Model.Needs"
+                        class="form-control">
+
+                    <option value="">
+                        Velg behov
+                    </option>
                 </select>
-                <span asp-validation-for="NeedId" class="field-validation-error"></span>
+
+                @* Viser en feil hvis et behov ikke er valgt. *@
+                <span asp-validation-for="NeedId"
+                      class="field-validation-error">
+                </span>
             </div>
 
+            @* Nedtrekksliste for å velge en ressurs. *@
             <div class="form-field full">
-                <label asp-for="ResourceId">Ressurs</label>
-                <select asp-for="ResourceId" asp-items="Model.Resources" class="form-control">
-                    <option value="">Velg ressurs</option>
+                <label asp-for="ResourceId">
+                    Ressurs
+                </label>
+
+                @*
+                    Model.Resources inneholder ressursene
+                    som brukeren kan velge mellom.
+                *@
+                <select asp-for="ResourceId"
+                        asp-items="Model.Resources"
+                        class="form-control">
+
+                    <option value="">
+                        Velg ressurs
+                    </option>
                 </select>
-                <span asp-validation-for="ResourceId" class="field-validation-error"></span>
+
+                @* Viser en feil hvis en ressurs ikke er valgt. *@
+                <span asp-validation-for="ResourceId"
+                      class="field-validation-error">
+                </span>
             </div>
 
+            @* Valgfritt felt for ekstra informasjon om matchen. *@
             <div class="form-field full">
-                <label asp-for="Notes">Notat til matchen <span>(valgfritt)</span></label>
-                <textarea asp-for="Notes" class="form-control" placeholder="For eksempel kontaktinformasjon eller en kort avtale."></textarea>
-                <span asp-validation-for="Notes" class="field-validation-error"></span>
+                <label asp-for="Notes">
+                    Notat til matchen
+                    <span>(valgfritt)</span>
+                </label>
+
+                <textarea asp-for="Notes"
+                          class="form-control"
+                          placeholder="For eksempel kontaktinformasjon eller en kort avtale.">
+                </textarea>
+
+                @* Viser en feil dersom notatet ikke er gyldig. *@
+                <span asp-validation-for="Notes"
+                      class="field-validation-error">
+                </span>
             </div>
         </div>
 
+        @* Knapper for å opprette eller avbryte matchen. *@
         <div class="record-actions">
-            <button type="submit" class="portal-button">Opprett matchforslag</button>
-            <a asp-action="Overview" class="portal-button secondary">Avbryt</a>
+            <button type="submit"
+                    class="portal-button">
+                Opprett matchforslag
+            </button>
+
+            <a asp-action="Overview"
+               class="portal-button secondary">
+                Avbryt
+            </a>
         </div>
     </form>
 </section>
 
 @section Scripts {
+    @*
+        Henter skript som kan vise feilmeldinger
+        før skjemaet sendes til serveren.
+    *@
     <partial name="_ValidationScriptsPartial" />
 }

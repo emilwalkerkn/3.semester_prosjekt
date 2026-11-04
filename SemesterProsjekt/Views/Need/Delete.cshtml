@@ -1,10 +1,48 @@
+@*
+    Dette er siden for å slette et behov.
+
+    Siden:
+    - Viser hvilket behov som skal slettes
+    - Ber brukeren bekrefte slettingen
+    - Lar brukeren avbryte
+*@
+
 @model SemesterProsjekt.Models.Need
+
 @{
+    // Angir tittelen til siden.
     ViewData["Title"] = "Slett behov";
 }
+
 <h1>Slett behov</h1>
-<p>Er du sikker på at du vil slette <strong>@Model.Title</strong>?</p>
-<form asp-action="Delete" asp-route-id="@Model.NeedId" method="post">
-    <button type="submit" class="btn btn-danger">Slett</button>
-    <a asp-action="Details" asp-route-id="@Model.NeedId" class="btn btn-secondary">Avbryt</a>
+
+@* Viser tittelen på behovet som skal slettes. *@
+<p>
+    Er du sikker på at du vil slette
+    <strong>@Model.Title</strong>?
+</p>
+
+@*
+    Skjemaet sender en POST-forespørsel til Delete-handlingen.
+    NeedId forteller controlleren hvilket behov som skal slettes.
+*@
+<form asp-action="Delete"
+      asp-route-id="@Model.NeedId"
+      method="post">
+
+    @* Bekrefter at behovet skal slettes. *@
+    <button type="submit"
+            class="btn btn-danger">
+        Slett
+    </button>
+
+    @*
+        Avbryter slettingen og sender brukeren
+        tilbake til detaljsiden for behovet.
+    *@
+    <a asp-action="Details"
+       asp-route-id="@Model.NeedId"
+       class="btn btn-secondary">
+        Avbryt
+    </a>
 </form>

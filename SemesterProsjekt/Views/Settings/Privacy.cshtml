@@ -1,30 +1,72 @@
+@*
+    Dette er personvernsiden i innstillingene.
+
+    Siden forklarer:
+    - Hvordan kontoopplysninger brukes
+    - Hvordan passord og innlogging sikres
+    - Hvordan informasjon om behov og ressurser brukes
+*@
+
 @model SemesterProsjekt.Models.ViewModels.SettingsPageViewModel
 
 @{
+    // Angir tittelen til siden.
     ViewData["Title"] = "Personvern";
 }
 
 <div class="settings-layout settings-page-layout">
-    <partial name="_SettingsSidebar" model="Model" />
 
+    @*
+        Setter inn sidemenyen fra _SettingsSidebar.cshtml.
+        Den samme modellen sendes videre til partial viewet.
+    *@
+    <partial name="_SettingsSidebar"
+             model="Model" />
+
+    @* Hovedinnholdet på personvernsiden. *@
     <div class="settings-content privacy-content">
         <p class="home-eyebrow">Personvern</p>
-        <h1>Slik behandles informasjonen din</h1>
-        <p class="page-intro">Kriseportal bruker bare opplysninger som er nødvendige for å registrere, koordinere og følge opp ressurser og behov.</p>
 
+        <h1>Slik behandles informasjonen din</h1>
+
+        <p class="page-intro">
+            Kriseportal bruker bare opplysninger som er nødvendige
+            for å registrere, koordinere og følge opp ressurser og behov.
+        </p>
+
+        @* Forklarer hvordan brukerens kontoopplysninger brukes. *@
         <section class="portal-card settings-card privacy-card">
             <h2>Kontoopplysninger</h2>
-            <p>Navn og e-postadresse brukes for å identifisere kontaktpersonen i portalen.</p>
+
+            <p>
+                Navn og e-postadresse brukes for å identifisere
+                kontaktpersonen i portalen.
+            </p>
         </section>
 
+        @* Forklarer hvordan passord og innlogging beskyttes. *@
         <section class="portal-card settings-card privacy-card">
             <h2>Passord og innlogging</h2>
-            <p>Passord lagres aldri som vanlig tekst. ASP.NET Identity lagrer dem som en sikker hash, og innloggingen bruker en beskyttet informasjonskapsel.</p>
+
+            <p>
+                Passord lagres aldri som vanlig tekst.
+                ASP.NET Identity lagrer dem som en sikker hash,
+                og innloggingen bruker en beskyttet informasjonskapsel.
+            </p>
         </section>
 
+        @*
+            Forklarer hvordan registrerte behov,
+            ressurser og plasseringer brukes.
+        *@
         <section class="portal-card settings-card privacy-card">
             <h2>Ressurser, behov og kart</h2>
-            <p>Informasjon du registrerer om behov, ressurser og plassering brukes for at andre autoriserte brukere skal kunne koordinere innsatsen.</p>
+
+            <p>
+                Informasjon du registrerer om behov, ressurser
+                og plassering brukes for at andre autoriserte brukere
+                skal kunne koordinere innsatsen.
+            </p>
         </section>
     </div>
 </div>
