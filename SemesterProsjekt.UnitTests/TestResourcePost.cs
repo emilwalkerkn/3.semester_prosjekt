@@ -3,6 +3,8 @@ using Moq;
 using SemesterProsjekt.Controllers;
 using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
 
 namespace SemesterProsjekt.UnitTests;
 
@@ -20,6 +22,22 @@ public class UnitTestResourcePost
 
         var controller = new ResourceController(resourceRepository.Object);
 
+        // Simuler en innlogget bruker uten å kontakte databasen.
+        var identity = new ClaimsIdentity(
+            new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "testbruker-1")
+            },
+            authenticationType: "Test");
+
+        controller.ControllerContext = new ControllerContext
+        {
+            HttpContext = new DefaultHttpContext
+            {
+                User = new ClaimsPrincipal(identity)
+            }
+        };
+        
         var model = new ResourceViewModel
         {
             ResourceTypeId = 1,
@@ -40,7 +58,10 @@ public class UnitTestResourcePost
         Assert.Equal(1, redirectResult.RouteValues?["id"]);
 
         resourceRepository.Verify(
-            repository => repository.CreateAsync(It.IsAny<Resource>()),
+            repository => repository.CreateAsync(
+                It.Is<Resource>(resource =>
+                    resource.UserId == "testbruker-1" &&
+                    resource.Title == model.Title)),
             Times.Once
         );
     }
