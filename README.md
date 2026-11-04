@@ -295,8 +295,7 @@ I tillegg til enhetstestene har vi gjennomført manuelle tester av applikasjonen
 
 | ID | Oppgave | Forventet resultat | Observasjon |Status |
 |---|---|---|---|---|
-
-| BRU-01 | Opprett en testressurs og plasser et punkt på kartet med berøring. | Skjema og kart kan brukes på mobil, og ressursen lagres med riktig punkt. |  | Bestått |
+| BRU-01 | Opprett en testressurs og plasser et punkt på kartet med berøring. | Skjema og kart kan brukes på mobil, og ressursen lagres med riktig punkt. | kartet kan være litt vanskelig å bruke mtp at man må velge "plasser på kart knappen" | Bestått |
 | BRU-02 | La en person som ikke har laget siden finne og opprette en ressurs uten veiledning. | Personen klarer oppgaven og forstår feltene og knappene. | Litt mer synelig registrer ressurs og lettere å plassere på kart| Bestått |
 | BRU-03 | Be testpersonen finne og redigere ressursen de nettopp opprettet. | Personen finner funksjonen og forstår om endringen ble lagret. | gjerne gjøre at en ressursleverandør bare kan se egne ressurser | Bestått|
 
