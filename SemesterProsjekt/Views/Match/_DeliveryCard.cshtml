@@ -1,40 +1,153 @@
 @model SemesterProsjekt.Models.ViewModels.MatchListItemViewModel
+
 @{
-    var color = Model.Status switch { MatchStatuses.Proposed or MatchStatuses.Delivered => "pending", MatchStatuses.Approved => "approved", MatchStatuses.Completed => "completed", _ => "closed" };
+    // Bestemmer hvilken farge statusen skal ha på nettsiden.
+    var color = Model.Status switch
+    {
+        MatchStatuses.Proposed or MatchStatuses.Delivered => "pending",
+        MatchStatuses.Approved => "approved",
+        MatchStatuses.Completed => "completed",
+        _ => "closed"
+    };
 }
+
+@* Viser en oversikt over matchen mellom et behov og en ressurs. *@
 <article class="portal-card delivery-summary" id="delivery-@Model.MatchId">
-    <div class="overview-heading"><div><p class="eyebrow">Forespørsel #@Model.MatchId</p><h2>@Model.ResourceTitle</h2></div><span class="delivery-status delivery-status-@color">@MatchStatuses.DisplayName(Model.Status)</span></div>
-    <p class="delivery-next"><strong>@Model.NextStep</strong></p>
+
+    @* Viser ressursens navn og nåværende status. *@
+    <div class="overview-heading">
+        <div>
+            <p class="eyebrow">Forespørsel #@Model.MatchId</p>
+            <h2>@Model.ResourceTitle</h2>
+        </div>
+        <span class="delivery-status delivery-status-@color">
+            @MatchStatuses.DisplayName(Model.Status)
+        </span>
+    </div>
+
+    @* Informerer brukeren om neste steg i leveringsprosessen. *@
+    <p class="delivery-next">
+        <strong>@Model.NextStep</strong>
+    </p>
+
+    @* Viser informasjon om behovet, ressursen og avtalt levering. *@
     <dl class="delivery-facts">
-        <div><dt>Gjelder behov</dt><dd>@Model.NeedTitle</dd></div>
-        <div><dt>Fra</dt><dd>@(Model.RequesterName ?? "Offentlig aktør")</dd></div>
-        <div><dt>Ressurseier</dt><dd>@(Model.SupplierName ?? "Ikke oppgitt")</dd></div>
-        <div><dt>Mengde</dt><dd>@(Model.AssignedQuantity.HasValue ? $"{Model.AssignedQuantity:0.##} {Model.AssignedUnit}" : "Etter avtale")</dd></div>
-        <div><dt>Ønsket levering</dt><dd>@(Model.DeliveryAt?.ToString("dd.MM.yyyy HH:mm") ?? "Eldre avtale – avklar tidspunkt med motparten")</dd></div>
-        <div><dt>Leveringssted</dt><dd>@(Model.DeliveryLocation ?? "Ikke oppgitt – avklar med motparten")</dd></div>
-        <div><dt>Kontakt ved levering</dt><dd>@(Model.DeliveryContact ?? "Ikke oppgitt – avklar med motparten")</dd></div>
-        @if (Model.DeliveredAt.HasValue) { <div><dt>Markert levert</dt><dd>@Model.DeliveredAt.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</dd></div> }
-        @if (Model.ResolvedAt.HasValue) { <div><dt>Avsluttet</dt><dd>@Model.ResolvedAt.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</dd></div> }
+        <div>
+            <dt>Gjelder behov</dt>
+            <dd>@Model.NeedTitle</dd>
+        </div>
+        <div>
+            <dt>Fra</dt>
+            <dd>@(Model.RequesterName ?? "Offentlig aktør")</dd>
+        </div>
+        <div>
+            <dt>Ressurseier</dt>
+            <dd>@(Model.SupplierName ?? "Ikke oppgitt")</dd>
+        </div>
+        <div>
+            <dt>Mengde</dt>
+            <dd>@(Model.AssignedQuantity.HasValue ? $"{Model.AssignedQuantity:0.##} {Model.AssignedUnit}" : "Etter avtale")</dd>
+        </div>
+        <div>
+            <dt>Ønsket levering</dt>
+            <dd>@(Model.DeliveryAt?.ToString("dd.MM.yyyy HH:mm") ?? "Eldre avtale – avklar tidspunkt med motparten")</dd>
+        </div>
+        <div>
+            <dt>Leveringssted</dt>
+            <dd>@(Model.DeliveryLocation ?? "Ikke oppgitt – avklar med motparten")</dd>
+        </div>
+        <div>
+            <dt>Kontakt ved levering</dt>
+            <dd>@(Model.DeliveryContact ?? "Ikke oppgitt – avklar med motparten")</dd>
+        </div>
+
+        @* Viser leveringstidspunkt dersom ressursen er levert. *@
+        @if (Model.DeliveredAt.HasValue)
+        {
+            <div>
+                <dt>Markert levert</dt>
+                <dd>@Model.DeliveredAt.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</dd>
+            </div>
+        }
+
+        @* Viser avslutningstidspunkt dersom matchen er avsluttet. *@
+        @if (Model.ResolvedAt.HasValue)
+        {
+            <div>
+                <dt>Avsluttet</dt>
+                <dd>@Model.ResolvedAt.Value.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</dd>
+            </div>
+        }
     </dl>
-    @if (!string.IsNullOrWhiteSpace(Model.Notes)) { <p><strong>Notat:</strong> @Model.Notes</p> }
-    @if (Model.Status == MatchStatuses.Approved || Model.Status == MatchStatuses.Delivered) { <p>Avtalt mengde er reservert frem til mottak er bekreftet.</p> }
+
+    @* Viser eventuelle notater knyttet til avtalen. *@
+    @if (!string.IsNullOrWhiteSpace(Model.Notes))
+    {
+        <p><strong>Notat:</strong> @Model.Notes</p>
+    }
+
+    @* Informerer om at den avtalte mengden er reservert frem til mottak. *@
+    @if (Model.Status == MatchStatuses.Approved || Model.Status == MatchStatuses.Delivered)
+    {
+        <p>Avtalt mengde er reservert frem til mottak er bekreftet.</p>
+    }
+
+    @* Viser bare handlingene som den innloggede brukeren har tilgang til. *@
     <div class="record-actions">
+
+        @* Mottakeren av forespørselen kan godkjenne eller avslå matchen. *@
         @if (Model.CanRespond)
         {
-            <form asp-action="UpdateStatus" asp-controller="Match" method="post"><input type="hidden" name="id" value="@Model.MatchId" /><input type="hidden" name="status" value="@MatchStatuses.Approved" /><button type="submit" class="portal-button">Bekreft levering</button></form>
-            <form asp-action="UpdateStatus" asp-controller="Match" method="post"><input type="hidden" name="id" value="@Model.MatchId" /><input type="hidden" name="status" value="@MatchStatuses.Declined" /><button type="submit" class="portal-button secondary">Avslå forespørsel</button></form>
+            <form asp-action="UpdateStatus" asp-controller="Match" method="post">
+                <input type="hidden" name="id" value="@Model.MatchId" />
+                <input type="hidden" name="status" value="@MatchStatuses.Approved" />
+                <button type="submit" class="portal-button">Bekreft levering</button>
+            </form>
+
+            <form asp-action="UpdateStatus" asp-controller="Match" method="post">
+                <input type="hidden" name="id" value="@Model.MatchId" />
+                <input type="hidden" name="status" value="@MatchStatuses.Declined" />
+                <button type="submit" class="portal-button secondary">Avslå forespørsel</button>
+            </form>
         }
+
+        @* Ressurseieren kan markere ressursen som levert. *@
         @if (Model.CanDeliver)
         {
-            <form asp-action="UpdateStatus" asp-controller="Match" method="post"><input type="hidden" name="id" value="@Model.MatchId" /><input type="hidden" name="status" value="@MatchStatuses.Delivered" /><button type="submit" class="portal-button">Marker som levert</button></form>
+            <form asp-action="UpdateStatus" asp-controller="Match" method="post">
+                <input type="hidden" name="id" value="@Model.MatchId" />
+                <input type="hidden" name="status" value="@MatchStatuses.Delivered" />
+                <button type="submit" class="portal-button">Marker som levert</button>
+            </form>
         }
+
+        @* Behovseieren kan bekrefte at ressursen er mottatt. *@
         @if (Model.CanComplete)
         {
-            <form asp-action="UpdateStatus" asp-controller="Match" method="post"><input type="hidden" name="id" value="@Model.MatchId" /><input type="hidden" name="status" value="@MatchStatuses.Completed" /><button type="submit" class="portal-button">Bekreft mottak @(Model.AssignedQuantity.HasValue ? $"av {Model.AssignedQuantity:0.##} {Model.AssignedUnit}" : "")</button></form>
+            <form asp-action="UpdateStatus" asp-controller="Match" method="post">
+                <input type="hidden" name="id" value="@Model.MatchId" />
+                <input type="hidden" name="status" value="@MatchStatuses.Completed" />
+                <button type="submit" class="portal-button">
+                    Bekreft mottak @(Model.AssignedQuantity.HasValue ? $"av {Model.AssignedQuantity:0.##} {Model.AssignedUnit}" : "")
+                </button>
+            </form>
         }
+
+        @* Brukere med riktig tilgang kan avbryte avtalen. *@
         @if (Model.CanCancel)
         {
-            <form asp-action="UpdateStatus" asp-controller="Match" method="post" onsubmit="return confirm('Vil du avbryte avtalen? Eventuell reservert mengde blir frigitt.');"><input type="hidden" name="id" value="@Model.MatchId" /><input type="hidden" name="status" value="@MatchStatuses.Cancelled" /><button type="submit" class="portal-button secondary">Avbryt avtale</button></form>
+            <form asp-action="UpdateStatus"
+                  asp-controller="Match"
+                  method="post"
+                  onsubmit="return confirm('Vil du avbryte avtalen? Eventuell reservert mengde blir frigitt.');">
+
+                <input type="hidden" name="id" value="@Model.MatchId" />
+                <input type="hidden" name="status" value="@MatchStatuses.Cancelled" />
+
+                <button type="submit" class="portal-button secondary">
+                    Avbryt avtale
+                </button>
+            </form>
         }
     </div>
 </article>

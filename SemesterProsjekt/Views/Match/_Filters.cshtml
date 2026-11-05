@@ -1,29 +1,66 @@
 @{
+    // Sjekker om brukeren er på historikksiden eller oversikten over aktive avtaler.
     var history = ViewData["IsHistory"] is true;
     var selected = ViewData["Status"] as string;
+
+    // Velger hvilke statuser som skal vises i filteret.
     var statuses = history
         ? new[] { MatchStatuses.Completed, MatchStatuses.Declined, MatchStatuses.Cancelled }
         : new[] { MatchStatuses.Proposed, MatchStatuses.Approved, MatchStatuses.Delivered };
 }
-<form asp-controller="Match" asp-action="@(history ? "History" : "Overview")" method="get" class="portal-card resource-search delivery-filters" role="search" aria-label="Søk og filtrer avtaler">
+
+@* Skjema for å søke og filtrere aktive avtaler eller tidligere avtaler. *@
+<form asp-controller="Match"
+      asp-action="@(history ? "History" : "Overview")"
+      method="get"
+      class="portal-card resource-search delivery-filters"
+      role="search"
+      aria-label="Søk og filtrer avtaler">
+
+    @* Søker etter informasjon knyttet til en avtale. *@
     <div class="form-field resource-search-text">
         <label for="agreement-search">Søk i avtaler</label>
-        <input type="search" id="agreement-search" name="search" value="@ViewData["Search"]" placeholder="Søk etter ressurs, behov, navn, sted eller nummer" />
+        <input type="search"
+               id="agreement-search"
+               name="search"
+               value="@ViewData["Search"]"
+               placeholder="Søk etter ressurs, behov, navn, sted eller nummer" />
     </div>
+
+    @* Lar brukeren filtrere avtaler etter status. *@
     <div class="form-field">
         <label for="agreement-status">Status</label>
         <select id="agreement-status" name="status">
             <option value="">Alle statuser</option>
+
             @foreach (var status in statuses)
             {
-                <option value="@status" selected="@(selected == status)">@MatchStatuses.DisplayName(status)</option>
+                <option value="@status" selected="@(selected == status)">
+                    @MatchStatuses.DisplayName(status)
+                </option>
             }
         </select>
     </div>
+
+    @* Viser et ekstra filter for avtaler som krever oppfølging. *@
     @if (!history)
     {
-        <label class="delivery-action-filter" for="agreement-action"><input type="checkbox" id="agreement-action" name="requiresAction" value="true" checked="@(ViewData["RequiresAction"] is true)" /> Krever min oppfølging</label>
+        <label class="delivery-action-filter" for="agreement-action">
+            <input type="checkbox"
+                   id="agreement-action"
+                   name="requiresAction"
+                   value="true"
+                   checked="@(ViewData["RequiresAction"] is true)" />
+            Krever min oppfølging
+        </label>
     }
+
+    @* Sender søket og filtrene til riktig action i MatchController. *@
     <button type="submit" class="portal-button">Søk og filtrer</button>
-    <a asp-action="@(history ? "History" : "Overview")" class="portal-button secondary">Nullstill</a>
+
+    @* Nullstiller filtrene og viser alle avtalene på den aktuelle siden. *@
+    <a asp-action="@(history ? "History" : "Overview")"
+       class="portal-button secondary">
+        Nullstill
+    </a>
 </form>

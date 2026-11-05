@@ -1,8 +1,22 @@
 @model SemesterProsjekt.Models.NeedViewModel
-@{ ViewData["Title"] = "Registrer behov"; }
+
+@{
+    ViewData["Title"] = "Registrer behov";
+}
+
+@* Henter registreringsskjemaet fra _Form.cshtml og sender med modellen. *@
 <partial name="_Form" model="Model" />
+
 @section Scripts {
+
+    @* Laster inn JavaScript for validering av skjemafeltene. *@
     <partial name="_ValidationScriptsPartial" />
-    <script src="~/js/registration-map.js" asp-append-version="true"></script>
-    <script src="~/js/need-registration.js" asp-append-version="true"></script>
+
+    @* Håndterer Leaflet-kartet og registrering av geografiske data. *@
+    <script src="~/js/registration-map.js"
+            asp-append-version="true"></script>
+
+    @* Håndterer funksjonalitet knyttet til registrering av behov. *@
+    <script src="~/js/need-registration.js"
+            asp-append-version="true"></script>
 }
