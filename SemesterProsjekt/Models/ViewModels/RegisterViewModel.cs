@@ -37,7 +37,7 @@ public class RegisterViewModel
 
     // Rollen brukeren velger. Kontrolleren sjekker at den er i AppRoles.SelfServiceRoles.
     [Required(ErrorMessage = "Velg aktørtype.")]
-    public string Role { get; set; } = AppRoles.NeedsActor;
+    public string Role { get; set; } = AppRoles.ResourceOwner;
 
     // Siden brukeren skal sendes tilbake til etter registrering.
     public string? ReturnUrl { get; set; }
