@@ -23,6 +23,13 @@ public static class MatchStatuses
     public const string Approved = "Godkjent";
     public const string Completed = "Fullført";
     public const string Declined = "Avslått";
+    public const string Delivered = "Levert";
+    public const string Cancelled = "Avbrutt";
 
-    public static readonly string[] All = [Proposed, Approved, Completed, Declined];
+    public static readonly string[] All = [Proposed, Approved, Delivered, Completed, Declined, Cancelled];
+
+    public static string DisplayName(string status) => status switch
+    {
+        Proposed => "Venter på svar", Approved => "Avtalt", _ => status
+    };
 }

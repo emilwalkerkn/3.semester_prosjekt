@@ -15,4 +15,5 @@ public class DashboardViewModel
 
     // De sist registrerte ressursene (de tre med høyest ID).
     public IEnumerable<Resource> RecentResources { get; set; } = new List<Resource>();
+    public IEnumerable<SemesterProsjekt.Models.ViewModels.MatchListItemViewModel> DeliveryActions { get; set; } = [];
 }

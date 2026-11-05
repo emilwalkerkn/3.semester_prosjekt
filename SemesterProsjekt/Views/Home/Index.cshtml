@@ -17,6 +17,18 @@
 }
 
 @* Øverste del av forsiden. *@
+@if (Model.DeliveryActions.Any())
+{
+    <section class="portal-card delivery-summary delivery-home-actions" aria-labelledby="delivery-actions-heading">
+        <p class="eyebrow">Krever din oppfølging</p><h2 id="delivery-actions-heading">Forespørsler og leveranser</h2>
+        <ul class="summary-list">
+        @foreach (var item in Model.DeliveryActions)
+        {
+            <li><div><strong>@item.ResourceTitle</strong><p>@(item.CanRespond ? "Ny forespørsel" : item.CanComplete ? "Bekreft mottak" : "Avtalt levering") · @item.AssignedQuantity @item.AssignedUnit</p><p>@item.NextStep</p></div><a asp-controller="Match" asp-action="Overview" asp-fragment="delivery-@item.MatchId" class="portal-button">Åpne avtalen</a></li>
+        }
+        </ul>
+    </section>
+}
 <section class="home-hero">
     <div class="home-hero-copy">
         <p class="home-eyebrow">Kriseportal</p>

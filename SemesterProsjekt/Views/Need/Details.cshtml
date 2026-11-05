@@ -44,6 +44,10 @@
 }
 
 <section class="details-page">
+    @if (canManage && Model.Status != NeedStatuses.Resolved)
+    {
+        <div><a asp-controller="Match" asp-action="FindResources" asp-route-needId="@Model.NeedId" class="portal-button">Finn ressurser til behovet</a></div>
+    }
 
     @* Sender brukeren tilbake til oversikten over behov. *@
     <a asp-action="Overview"

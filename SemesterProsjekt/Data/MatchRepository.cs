@@ -25,7 +25,7 @@ public class MatchRepository : IMatchRepository
         GetByHistoryAsync(isHistory: false);
 
 
-    /// Henter godkjente, fullførte og avslåtte matcher til administratorens historikk.
+    /// Henter fullførte, avslåtte og avbrutte matcher til administratorens historikk.
 
     public Task<IEnumerable<MatchListItemViewModel>> GetHistoryAsync() =>
         GetByHistoryAsync(isHistory: true);
@@ -64,18 +64,23 @@ public class MatchRepository : IMatchRepository
         using var connection = _connectionFactory.CreateConnection();
 
         const string sql = """
-            SELECT m.MatchId, m.NeedId, n.Title AS NeedTitle,
-                   m.ResourceId, r.Title AS ResourceTitle, m.Status,
+            SELECT m.MatchId, m.NeedId, COALESCE(m.RequestNeedTitle, n.Title) AS NeedTitle,
+                   m.ResourceId, COALESCE(m.RequestResourceTitle, r.Title) AS ResourceTitle, m.Status,
                    m.MatchedAt, m.ResolvedAt, m.Notes, m.ProposedByUserId,
+                   m.DeliveryAt, m.DeliveredAt, m.DeliveryLocation, m.DeliveryContact,
+                   COALESCE(NULLIF(TRIM(CONCAT(nu.FirstName, ' ', nu.LastName)), ''), nu.Email) AS RequesterName,
+                   COALESCE(NULLIF(TRIM(CONCAT(ru.FirstName, ' ', ru.LastName)), ''), ru.Email) AS SupplierName,
                    m.AssignedQuantity, COALESCE(m.AssignedUnit, n.Unit, r.Unit) AS AssignedUnit,
                    n.UserId AS NeedUserId, r.UserId AS ResourceUserId
             FROM `Match` m
             INNER JOIN Needs n ON n.NeedId = m.NeedId
             INNER JOIN Resources r ON r.ResourceId = m.ResourceId
+            LEFT JOIN AspNetUsers nu ON nu.Id = n.UserId
+            LEFT JOIN AspNetUsers ru ON ru.Id = r.UserId
             WHERE (
-                (@IsHistory = 1 AND m.Status IN (@ApprovedStatus, @CompletedStatus, @DeclinedStatus))
+                (@IsHistory = 1 AND m.Status IN (@CompletedStatus, @DeclinedStatus, @CancelledStatus))
                 OR
-                (@IsHistory = 0 AND m.Status NOT IN (@ApprovedStatus, @CompletedStatus, @DeclinedStatus))
+                (@IsHistory = 0 AND m.Status NOT IN (@CompletedStatus, @DeclinedStatus, @CancelledStatus))
             )
             AND (
                 @UserId IS NULL
@@ -91,9 +96,9 @@ public class MatchRepository : IMatchRepository
         {
             IsHistory = isHistory,
             UserId = userId,
-            ApprovedStatus = MatchStatuses.Approved,
             CompletedStatus = MatchStatuses.Completed,
-            DeclinedStatus = MatchStatuses.Declined
+            DeclinedStatus = MatchStatuses.Declined,
+            CancelledStatus = MatchStatuses.Cancelled
         });
     }
 
@@ -120,9 +125,9 @@ public class MatchRepository : IMatchRepository
         connection.QueryAsync<MatchReservation>(
             """
             SELECT NeedId, ResourceId, AssignedQuantity FROM `Match`
-            WHERE Status = @Status AND MatchId <> @ExceptMatchId;
+            WHERE Status IN (@Status, @Delivered) AND MatchId <> @ExceptMatchId;
             """,
-            new { Status = MatchStatuses.Approved, ExceptMatchId = exceptMatchId }, transaction);
+            new { Status = MatchStatuses.Approved, Delivered = MatchStatuses.Delivered, ExceptMatchId = exceptMatchId }, transaction);
 
 
     /// Kontrollerer om kombinasjonen av behov og ressurs allerede finnes.
@@ -136,12 +141,13 @@ public class MatchRepository : IMatchRepository
             SELECT COUNT(*) > 0
             FROM `Match`
             WHERE NeedId = @NeedId
-              AND ResourceId = @ResourceId;
+              AND ResourceId = @ResourceId
+              AND Status NOT IN (@Declined, @Cancelled, @Completed);
             """,
             new
             {
                 NeedId = needId,
-                ResourceId = resourceId
+                ResourceId = resourceId, Declined = MatchStatuses.Declined, Cancelled = MatchStatuses.Cancelled, Completed = MatchStatuses.Completed
             });
     }
 
@@ -163,16 +169,19 @@ public class MatchRepository : IMatchRepository
         if (need is null || resource is null)
             throw new MatchAvailabilityException("Behovet eller ressursen finnes ikke lenger.");
         var reservations = await ReadReservationsAsync(connection, transaction);
-        MatchAvailability.Allocate(need, resource, reservations, match.AssignedQuantity);
+        match.AssignedQuantity = MatchAvailability.Allocate(need, resource, reservations, match.AssignedQuantity);
+        match.AssignedUnit = need.Unit?.Trim() ?? resource.Unit?.Trim();
+        match.RequestNeedTitle = need.Title;
+        match.RequestResourceTitle = resource.Title;
 
         if (await connection.ExecuteScalarAsync<bool>(
-            "SELECT COUNT(*) > 0 FROM `Match` WHERE NeedId = @NeedId AND ResourceId = @ResourceId;",
-            match, transaction))
+            "SELECT COUNT(*) > 0 FROM `Match` WHERE NeedId = @NeedId AND ResourceId = @ResourceId AND Status NOT IN (@Declined, @Cancelled, @Completed);",
+            new { match.NeedId, match.ResourceId, Declined = MatchStatuses.Declined, Cancelled = MatchStatuses.Cancelled, Completed = MatchStatuses.Completed }, transaction))
             throw new MatchAvailabilityException("Denne kombinasjonen er allerede matchet.");
 
         const string sql = """
-            INSERT INTO `Match` (NeedId, ResourceId, ProposedByUserId, Status, MatchedAt, Notes, AssignedQuantity)
-            VALUES (@NeedId, @ResourceId, @ProposedByUserId, @Status, @MatchedAt, @Notes, @AssignedQuantity);
+            INSERT INTO `Match` (NeedId, ResourceId, ProposedByUserId, Status, MatchedAt, Notes, AssignedQuantity, AssignedUnit, DeliveryAt, DeliveryLocation, DeliveryContact, RequestNeedTitle, RequestResourceTitle)
+            VALUES (@NeedId, @ResourceId, @ProposedByUserId, @Status, @MatchedAt, @Notes, @AssignedQuantity, @AssignedUnit, @DeliveryAt, @DeliveryLocation, @DeliveryContact, @RequestNeedTitle, @RequestResourceTitle);
             SELECT LAST_INSERT_ID();
             """;
 
@@ -221,21 +230,25 @@ public class MatchRepository : IMatchRepository
             return false;
 
         var approving = expectedStatus == MatchStatuses.Proposed && status == MatchStatuses.Approved;
-        var completing = expectedStatus == MatchStatuses.Approved && status == MatchStatuses.Completed;
-        var declining = expectedStatus == MatchStatuses.Proposed && status == MatchStatuses.Declined;
-        if (!approving && !completing && !declining) return false;
+        var completing = expectedStatus == MatchStatuses.Delivered && status == MatchStatuses.Completed;
+        var delivering = expectedStatus == MatchStatuses.Approved && status == MatchStatuses.Delivered;
+        if (!MatchFlow.IsTransition(expectedStatus, status)) return false;
 
         if (approving || completing)
         {
+            if (approving && match.DeliveryAt.HasValue &&
+                ((resource.AvailableFrom.HasValue && match.DeliveryAt < resource.AvailableFrom) ||
+                 (resource.AvailableTo.HasValue && match.DeliveryAt > resource.AvailableTo)))
+                throw new MatchAvailabilityException("Ressursens tilgjengelighet er endret. Avklar et nytt tidspunkt før godkjenning.");
             var reservations = await ReadReservationsAsync(connection, transaction, id);
             var quantity = MatchAvailability.Allocate(
                 need, resource, reservations, match.AssignedQuantity, completing);
-            if (completing && !string.IsNullOrWhiteSpace(match.AssignedUnit) &&
+            if (!string.IsNullOrWhiteSpace(match.AssignedUnit) &&
                 ((!string.IsNullOrWhiteSpace(need.Unit) &&
                   !string.Equals(match.AssignedUnit, need.Unit.Trim(), StringComparison.OrdinalIgnoreCase)) ||
                  (!string.IsNullOrWhiteSpace(resource.Unit) &&
                   !string.Equals(match.AssignedUnit, resource.Unit.Trim(), StringComparison.OrdinalIgnoreCase))))
-                throw new MatchAvailabilityException("Mengdeenheten er endret etter godkjenning. Kontroller registreringene før levering.");
+                throw new MatchAvailabilityException("Mengdeenheten er endret siden forespørselen. Kontroller registreringene før levering.");
 
             match.AssignedQuantity = quantity;
             match.AssignedUnit ??= need.Unit?.Trim() ?? resource.Unit?.Trim();
@@ -280,6 +293,7 @@ public class MatchRepository : IMatchRepository
             """
             UPDATE `Match`
             SET Status = @Status, ResolvedAt = @ResolvedAt,
+                DeliveredAt = CASE WHEN @Delivering THEN UTC_TIMESTAMP() ELSE DeliveredAt END,
                 AssignedQuantity = @AssignedQuantity, AssignedUnit = @AssignedUnit
             WHERE MatchId = @MatchId;
             """,
@@ -289,7 +303,8 @@ public class MatchRepository : IMatchRepository
                 Status = status,
                 ResolvedAt = resolvedAt,
                 match.AssignedQuantity,
-                match.AssignedUnit
+                match.AssignedUnit,
+                Delivering = delivering
             }, transaction);
 
         transaction.Commit();

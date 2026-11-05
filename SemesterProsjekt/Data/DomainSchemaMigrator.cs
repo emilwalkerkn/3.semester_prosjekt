@@ -157,6 +157,23 @@ public static class DomainSchemaMigrator
             await connection.ExecuteAsync(
                 "ALTER TABLE `Match` ADD COLUMN AssignedUnit VARCHAR(50) NULL;");
         }
+
+        // Nye felt er nullable: eldre matcher beholder historikken sin.
+        var deliveryColumns = new Dictionary<string, string>
+        {
+            ["DeliveryAt"] = "DATETIME NULL", ["DeliveredAt"] = "DATETIME NULL",
+            ["DeliveryLocation"] = "VARCHAR(255) NULL", ["DeliveryContact"] = "VARCHAR(255) NULL",
+            ["RequestNeedTitle"] = "VARCHAR(160) NULL", ["RequestResourceTitle"] = "VARCHAR(160) NULL"
+        };
+        foreach (var column in deliveryColumns)
+            if (!await ColumnExistsAsync(connection, "Match", column.Key))
+                await connection.ExecuteAsync($"ALTER TABLE `Match` ADD COLUMN `{column.Key}` {column.Value};");
+
+        // Avslåtte/avbrutte forespørsler kan sendes på nytt. Aktive duplikater
+        // hindres inne i repositoryets transaksjon med lås på behov og ressurs.
+        await connection.ExecuteAsync("CREATE INDEX IF NOT EXISTS IX_Match_Need_Resource ON `Match` (NeedId, ResourceId);");
+        if (await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Match' AND INDEX_NAME = 'UQ_Match_Need_Resource';") > 0)
+            await connection.ExecuteAsync("ALTER TABLE `Match` DROP INDEX UQ_Match_Need_Resource;");
     }
 
    

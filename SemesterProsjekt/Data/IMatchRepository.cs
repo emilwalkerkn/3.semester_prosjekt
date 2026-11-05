@@ -10,12 +10,12 @@ namespace SemesterProsjekt.Data;
 public interface IMatchRepository
 {
 
-    /// Henter åpne matchforslag til administratorens oversikt.
+    /// Henter aktive forespørsler, avtalte leveranser og leveranser som venter på mottak.
 
     Task<IEnumerable<MatchListItemViewModel>> GetActiveAsync();
 
 
-    /// Henter godkjente, fullførte og avslåtte matcher til administratorens historikk.
+    /// Henter fullførte, avslåtte og avbrutte avtaler til administratorens historikk.
 
     Task<IEnumerable<MatchListItemViewModel>> GetHistoryAsync();
 
@@ -38,7 +38,7 @@ public interface IMatchRepository
     Task<IEnumerable<MatchReservation>> GetReservationsAsync();
 
 
-    /// Undersøker om kombinasjonen allerede finnes, uavhengig av status.
+    /// Undersøker om kombinasjonen allerede har en aktiv forespørsel eller avtale.
 
     Task<bool> ExistsAsync(int needId, int resourceId);
 

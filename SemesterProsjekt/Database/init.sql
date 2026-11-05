@@ -103,6 +103,12 @@ CREATE TABLE IF NOT EXISTS `Match` (
     -- Reserveres ved godkjenning og leveres ved fullføring.
     AssignedQuantity DECIMAL(10,2),
     AssignedUnit VARCHAR(50),
+    DeliveryAt DATETIME,
+    DeliveredAt DATETIME,
+    DeliveryLocation VARCHAR(255),
+    DeliveryContact VARCHAR(255),
+    RequestNeedTitle VARCHAR(160),
+    RequestResourceTitle VARCHAR(160),
 
     -- Nye matcher får status Foreslått dersom status ikke oppgis.
                                        Status VARCHAR(20) NOT NULL DEFAULT 'Foreslått',
@@ -127,9 +133,8 @@ CREATE TABLE IF NOT EXISTS `Match` (
     FOREIGN KEY (ResourceId) REFERENCES Resources(ResourceId)
     ON DELETE CASCADE,
 
-    -- Samme kombinasjon av behov og ressurs kan bare registreres én gang.
-    CONSTRAINT UQ_Match_Need_Resource
-    UNIQUE (NeedId, ResourceId)
+    -- Aktive duplikater kontrolleres under radlås i MatchRepository.
+    INDEX IX_Match_Need_Resource (NeedId, ResourceId)
     );
 
 
