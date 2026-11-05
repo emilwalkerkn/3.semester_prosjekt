@@ -12,21 +12,21 @@ public static class PortalTypeIcons
     // "_" er standardtilfellet for ukjente ID-er.
     public static PortalTypeIcon ForNeed(int needTypeId) => needTypeId switch
     {
-        1 => new("🍽️", "Mat og drikke"),
-        2 => new("🚐", "Transport"),
-        3 => new("🩺", "Medisinsk utstyr"),
-        4 => new("👥", "Mannskap"),
-        5 => new("🛏️", "Overnatting"),
-        _ => new("📌", "Annet behov")
+        1 => new("/images/types/food.svg", "Mat og drikke"),
+        2 => new("/images/types/transport.svg", "Transport"),
+        3 => new("/images/types/medical.svg", "Medisinsk utstyr"),
+        4 => new("/images/types/people.svg", "Mannskap"),
+        5 => new("/images/types/bed.svg", "Overnatting"),
+        _ => new("/images/types/other.svg", "Annet behov")
     };
 
     // Samme som over, men for ressurstyper (ResourceType-tabellen).
     public static PortalTypeIcon ForResource(int resourceTypeId) => resourceTypeId switch
     {
-        1 => new("🚐", "Kjøretøy"),
-        2 => new("🩺", "Medisinsk utstyr"),
-        3 => new("🍽️", "Matforsyning"),
-        4 => new("👥", "Mannskap"),
-        _ => new("📦", "Annen ressurs")
+        1 => new("/images/types/transport.svg", "Kjøretøy"),
+        2 => new("/images/types/medical.svg", "Medisinsk utstyr"),
+        3 => new("/images/types/food.svg", "Matforsyning"),
+        4 => new("/images/types/people.svg", "Mannskap"),
+        _ => new("/images/types/other.svg", "Annen ressurs")
     };
 }

@@ -45,7 +45,7 @@ public class NeedController : Controller
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        var model = new NeedViewModel();
+        var model = new NeedViewModel { NeededFrom = DateTime.Now };
         await LoadNeedTypesAsync(model);
         return View(model);
     }
@@ -66,6 +66,8 @@ public class NeedController : Controller
             return View(model);
         }
 
+        model.NeededFrom ??= DateTime.Now;
+        model.Deadline = null;
         var need = MapNewNeed(model);
         var id = await _needRepository.CreateAsync(need);
         return RedirectToAction(nameof(Result), new { id });
