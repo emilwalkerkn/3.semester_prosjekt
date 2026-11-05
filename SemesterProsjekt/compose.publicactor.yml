@@ -26,6 +26,9 @@ services:
     environment:
       ConnectionStrings__DefaultConnection: "Server=mariadb;Port=3306;Database=semesterprosjekt;User=appuser;Password=${DEV_DB_PASSWORD:?Set DEV_DB_PASSWORD};"
       LocalDemo__Enabled: "false"
+      ASPNETCORE_ENVIRONMENT: Development
+      #skrur av automatisk tildeling av administratorrettigheter
+      OrganizationAdminTestSeeder__Enabled: "false"
     depends_on:
       mariadb:
         condition: service_healthy

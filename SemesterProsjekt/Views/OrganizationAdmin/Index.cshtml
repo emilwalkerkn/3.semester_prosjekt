@@ -1,0 +1,71 @@
+@using SemesterProsjekt.Models
+@model List<SemesterProsjekt.Models.ApplicationUser>
+
+@{
+    ViewData["Title"] = "Administrer ansatte";
+}
+
+<div class="container mt-4">
+    <h1>Administrer ansatte</h1>
+
+    <p>
+        Her kan du se brukerne som tilhører
+        din organisasjon.
+    </p>
+
+   
+    @{
+        var employeeRoles =
+            (Dictionary<string, IList<string>>)ViewBag.EmployeeRoles;
+    }
+
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Navn</th>
+            <th>E-post</th>
+            <th>Roller</th>
+            <th>Handlinger</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        @foreach (var employee in Model)
+        {
+            <tr>
+                <td>
+                    @employee.FirstName @employee.LastName
+                </td>
+                <td>@employee.Email</td>
+                <td>
+                    @string.Join(", ", employeeRoles[employee.Id])
+                </td>
+                
+                <td>
+                    @if (employeeRoles[employee.Id]
+                         .Contains(AppRoles.NeedsActor))
+                    {
+                        <form asp-controller="OrganizationAdmin"
+                              asp-action="RemoveNeedsActorRole"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <input type="hidden"
+                                   name="userId"
+                                   value="@employee.Id" />
+
+                            <button type="submit"
+                                    class="btn btn-sm remove-role-btn"
+                                    onclick="return confirm('Vil du fjerne behovsaktørrollen fra denne brukeren?');">
+                                Fjern behovsaktørrolle
+                            </button>
+                        </form>
+                    }
+                </td>
+
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

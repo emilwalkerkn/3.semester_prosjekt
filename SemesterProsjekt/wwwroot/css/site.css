@@ -826,4 +826,16 @@ html.dark-mode .need-form textarea::placeholder {
     padding: 1.5rem;
   }
 }
+/* Rød knapp for å fjerne behovsaktørrollen */
+.remove-role-btn {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+  color: white !important;
+}
+
+.remove-role-btn:hover {
+  background-color: #bb2d3b !important;
+  border-color: #b02a37 !important;
+  color: white !important;
+}
 
