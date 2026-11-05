@@ -281,6 +281,10 @@
                             *@
                             @if (canManage)
                             {
+                                @if (need.Status != NeedStatuses.Resolved)
+                                {
+                                    <a asp-controller="Match" asp-action="FindResources" asp-route-needId="@need.NeedId" class="portal-button">Finn ressurser</a>
+                                }
                                 <a asp-action="Edit"
                                    asp-route-id="@need.NeedId"
                                    class="portal-button secondary">

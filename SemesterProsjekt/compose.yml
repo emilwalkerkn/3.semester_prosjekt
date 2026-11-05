@@ -6,6 +6,7 @@ services:
     ports:
       - "8080:8080"
     environment:
+      TZ: Europe/Oslo
       ConnectionStrings__DefaultConnection: "Server=mariadb;Port=3306;Database=semesterprosjekt;User=appuser;Password=apppassword;"
       LocalDemo__Enabled: "true"
       LocalDemo__Password: "DemoPass123"

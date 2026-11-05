@@ -17,6 +17,7 @@ public class HomeController : Controller
 {
     private readonly IResourceRepository _resourceRepository;
     private readonly INeedRepository _needRepository;
+    private readonly IMatchRepository? _matchRepository;
 
   
     /// Mottar repositoryene gjennom dependency injection.
@@ -25,10 +26,12 @@ public class HomeController : Controller
    
     public HomeController(
         IResourceRepository resourceRepository,
-        INeedRepository needRepository)
+        INeedRepository needRepository,
+        IMatchRepository? matchRepository = null)
     {
         _resourceRepository = resourceRepository;
         _needRepository = needRepository;
+        _matchRepository = matchRepository;
     }
 
   
@@ -56,6 +59,16 @@ public class HomeController : Controller
                 .Take(3)
         };
 
+        if (_matchRepository is not null)
+        {
+            var matches = User.IsInRole(AppRoles.Admin)
+                ? await _matchRepository.GetActiveAsync()
+                : await _matchRepository.GetActiveForUserAsync(CurrentUserId);
+            var actions = matches.ToList();
+            foreach (var item in actions) MatchFlow.Prepare(User, item);
+            model.DeliveryActions = actions.Where(item => item.CanRespond || item.CanDeliver || item.CanComplete)
+                .OrderByDescending(item => item.MatchedAt).Take(5).ToList();
+        }
         return View(model);
     }
     

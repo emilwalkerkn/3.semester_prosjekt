@@ -155,7 +155,7 @@
                         <a asp-controller="Match"
                            asp-action="Overview"
                            class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "Match" ? "active" : "")">
-                            Matcher
+                            @(ResourceVisibility.CanBrowseAll(User) ? "Mine avtaler" : "Forespørsler til meg")
                         </a>
                     }
 

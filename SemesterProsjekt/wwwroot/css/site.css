@@ -331,6 +331,29 @@ body { margin-bottom:0; }
 .home-overview h2 { margin:0 0 8px; font-size:28px; }.home-overview > div > p:last-child { margin:0; }
 .home-stat-grid { margin:0; grid-template-columns:repeat(3, minmax(0, 1fr)); }
 .home-latest { margin-top:0; }
+.delivery-page { max-width:1100px; margin:0 auto; }
+.delivery-summary { padding:24px; min-width:0; }
+.delivery-summary h2 { font-size:24px; margin:0 0 10px; }
+.delivery-summary p { line-height:1.55; }
+.delivery-candidates { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr)); gap:20px; }
+.delivery-facts { display:grid; gap:0; margin:18px 0; }
+.delivery-facts > div { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px 20px; padding:10px 0; border-bottom:1px solid var(--portal-border); }
+.delivery-facts dt { font-weight:500; }
+.delivery-facts dd { font-weight:700; margin:0; overflow-wrap:anywhere; }
+.delivery-status { display:inline-block; padding:6px 10px; border-radius:6px; font-weight:700; }
+.delivery-status-pending { color:#674400; background:#fff0c2; }
+.delivery-status-approved, .delivery-status-completed { color:#155334; background:#dff5e7; }
+.delivery-status-closed { color:#71332f; background:#fbe4e2; }
+.delivery-next { padding:12px 0; margin-bottom:0; }
+.delivery-request-form { max-width:800px; }
+.delivery-request-form label { font-size:17px; }
+.delivery-feedback { padding:16px; border-radius:8px; background:#dff5e7; color:#155334; font-size:17px; }
+.delivery-home-actions { margin-bottom:24px; }
+.delivery-home-actions .summary-list li { grid-template-columns:1fr auto; }
+.delivery-home-actions .summary-list a.portal-button { color:#fff; }
+.delivery-action-filter { display:flex; align-items:center; gap:10px; min-height:48px; font-size:16px; }
+.delivery-action-filter input { width:20px; min-height:20px; margin:0; accent-color:var(--portal-blue); }
+@media(max-width:600px) { .delivery-home-actions .summary-list li { grid-template-columns:1fr; } .delivery-summary { padding:18px; } }
 .home-latest-groups { display:grid; gap:28px; }
 .home-latest-group { min-width:0; }
 .home-latest-group h3 { margin:6px 0 8px; font-size:21px; color:var(--portal-ink); }
