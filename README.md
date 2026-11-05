@@ -1,6 +1,13 @@
 
 # IS-202 Programmeringsprosjekt
 
+# Brukere og passord til innlogging / testing:
+Brukere:admin@kriseportal.local
+behov@kriseportal.local
+ressurs@kriseportal.local
+
+Passord: DemoPass123
+
  
 ## Om prosjektet
 Dette prosjektet er en ASP.NET Core MVC-applikasjon basert på caset om en ressurs- og behovsportal for Totalforsvaret. Formålet med løsningen er å støtte registreringen og delingen av informasjon om behov og ressurser under krise og større hendelser.
