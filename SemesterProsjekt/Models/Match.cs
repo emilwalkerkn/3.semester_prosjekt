@@ -39,4 +39,10 @@ public class Match
 
     // Valgfri merknad til matchen.
     public string? Notes { get; set; }
+    public DateTime? DeliveryAt { get; set; }
+    public DateTime? DeliveredAt { get; set; }
+    public string? DeliveryLocation { get; set; }
+    public string? DeliveryContact { get; set; }
+    public string? RequestNeedTitle { get; set; }
+    public string? RequestResourceTitle { get; set; }
 }

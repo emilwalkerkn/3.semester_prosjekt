@@ -13,7 +13,7 @@ namespace SemesterProsjekt.Controllers;
 /// Endringer krever riktig rolle og at brukeren eier behovet eller er administrator.
 
 
-[Authorize]
+[Authorize(Roles = AppRoles.NeedsActor + "," + AppRoles.Admin)]
 public class NeedController : Controller
 {
     private readonly INeedRepository _needRepository;
@@ -31,10 +31,18 @@ public class NeedController : Controller
     /// Henter behov med valgt sortering og sender dem til oversiktsvisningen.
     /// Valgt sortering sendes også til viewet slik at valget kan vises i grensesnittet.
 
-    public async Task<IActionResult> Overview(string sortBy = "newest")
+    public async Task<IActionResult> Overview(string sortBy = "newest", string? search = null, int? needTypeId = null, string? status = null, string? priority = null)
     {
+        var needs = (await _needRepository.GetAllAsync(sortBy)).ToList();
         ViewData["SortBy"] = sortBy;
-        return View(await _needRepository.GetAllAsync(sortBy));
+        ViewData["Search"] = search;
+        ViewData["NeedTypeId"] = needTypeId;
+        ViewData["Status"] = status;
+        ViewData["Priority"] = priority;
+        ViewData["NeedTypes"] = (await _needRepository.GetNeedTypesAsync())
+            .Select(type => new SelectListItem(type.Name, type.NeedTypeId.ToString(), type.NeedTypeId == needTypeId))
+            .OrderBy(item => item.Value == CategoryCatalog.OtherId.ToString()).ThenBy(item => item.Text).ToList();
+        return View(NeedSearch.Apply(needs, search, needTypeId, status, priority).ToList());
     }
     
     
@@ -45,7 +53,7 @@ public class NeedController : Controller
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        var model = new NeedViewModel();
+        var model = new NeedViewModel { NeededFrom = DateTime.Now };
         await LoadNeedTypesAsync(model);
         return View(model);
     }
@@ -66,6 +74,8 @@ public class NeedController : Controller
             return View(model);
         }
 
+        model.NeededFrom ??= DateTime.Now;
+        model.Deadline = null;
         var need = MapNewNeed(model);
         var id = await _needRepository.CreateAsync(need);
         return RedirectToAction(nameof(Result), new { id });
@@ -115,6 +125,10 @@ public class NeedController : Controller
         // Tilgangen kontrolleres også ved innsending, ikke bare når skjemaet åpnes.
         if (!CanManage(need.UserId)) return Forbid();
 
+        // Status og eldre frist endres ikke gjennom registreringsfeltene.
+        model.Status = need.Status;
+        model.Deadline = need.Deadline;
+        model.NeededFrom ??= need.NeededFrom;
         if (!ModelState.IsValid)
         {
             await LoadNeedTypesAsync(model);

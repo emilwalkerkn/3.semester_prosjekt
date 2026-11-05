@@ -1,157 +1,50 @@
-@*
-    Dette er siden for å opprette en match.
-
-    Her kan brukeren:
-    - Velge et behov
-    - Velge en ressurs
-    - Skrive et valgfritt notat
-    - Opprette et matchforslag
-*@
-
 @model SemesterProsjekt.Models.ViewModels.CreateMatchViewModel
 
 @{
-    // Angir tittelen til siden.
-    ViewData["Title"] = "Foreslå match";
+    ViewData["Title"] = "Velg behov";
 }
 
-<section class="overview-page match-page">
+@* Viser en side der brukeren kan velge hvilket behov som skal dekkes. *@
+<section class="overview-page delivery-page">
 
-    @* Overskriften og introduksjonen til siden. *@
-    <header class="overview-heading">
-        <div>
-            <p class="eyebrow">Koordinering</p>
-            <h1>Foreslå match</h1>
-
-            <p class="page-intro">
-                Velg behovet og ressursen som skal kobles sammen.
-                Motparten kan deretter godkjenne eller avslå forslaget.
-                Løste behov og ressurser uten ledig mengde vises ikke.
-            </p>
-        </div>
-
-        @* Sender brukeren tilbake til oversikten over matcher. *@
-        <a asp-action="Overview"
-           class="portal-button secondary">
-            Tilbake til matcher
-        </a>
+    @* Overskrift og forklaring på hva brukeren skal gjøre. *@
+    <header>
+        <h1>Hvilket behov skal dekkes?</h1>
+        <p>Velg et av dine aktive behov. Deretter finner du passende ressurser.</p>
     </header>
 
-    @*
-        Skjemaet sender valgene til Create-handlingen
-        når brukeren trykker på knappen.
-    *@
-    <form asp-action="Create"
-          method="post"
-          class="portal-card match-form">
+    @* Sender valgt behov til FindResources-metoden i MatchController. *@
+    <form asp-action="FindResources"
+          method="get"
+          class="portal-card delivery-summary">
 
-        @* Viser vanlige feilmeldinger fra skjemaet. *@
-        <div asp-validation-summary="ModelOnly"
-             class="validation-summary-errors">
+        @* Viser eventuelle valideringsfeil. *@
+        <div asp-validation-summary="All"
+             class="validation-summary-errors"
+             role="alert">
         </div>
 
-        <div class="form-grid">
+        @* Nedtrekksmeny med brukerens tilgjengelige behov. *@
+        <div class="form-field">
+            <label for="needId">Behov</label>
 
-            @* Nedtrekksliste for å velge et behov. *@
-            <div class="form-field full">
-                <label asp-for="NeedId">
-                    Behov
-                </label>
-
-                @*
-                    Model.Needs inneholder behovene
-                    som brukeren kan velge mellom.
-                *@
-                <select asp-for="NeedId"
-                        asp-items="Model.Needs"
-                        class="form-control">
-
-                    <option value="">
-                        Velg behov
-                    </option>
-                </select>
-
-                @* Viser en feil hvis et behov ikke er valgt. *@
-                <span asp-validation-for="NeedId"
-                      class="field-validation-error">
-                </span>
-            </div>
-
-            @* Nedtrekksliste for å velge en ressurs. *@
-            <div class="form-field full">
-                <label asp-for="ResourceId">
-                    Ressurs
-                </label>
-
-                @*
-                    Model.Resources inneholder ressursene
-                    som brukeren kan velge mellom.
-                *@
-                <select asp-for="ResourceId"
-                        asp-items="Model.Resources"
-                        class="form-control">
-
-                    <option value="">
-                        Velg ressurs
-                    </option>
-                </select>
-
-                @* Viser en feil hvis en ressurs ikke er valgt. *@
-                <span asp-validation-for="ResourceId"
-                      class="field-validation-error">
-                </span>
-            </div>
-
-            <div class="form-field full">
-                <label asp-for="AssignedQuantity">Mengde som skal leveres <span>(valgfritt)</span></label>
-                <input asp-for="AssignedQuantity" type="number" min="0.01" max="99999999.99"
-                       step="0.01" class="form-control" aria-describedby="match-quantity-help" />
-                <p id="match-quantity-help">
-                    La feltet stå tomt for å bruke resterende behov, begrenset til ledig ressursmengde
-                    ved godkjenning. Begge registreringer må bruke samme enhet.
-                    Godkjenning reserverer mengden; fullføring registrerer leveringen.
-                </p>
-                <span asp-validation-for="AssignedQuantity" class="field-validation-error"></span>
-            </div>
-
-            @* Valgfritt felt for ekstra informasjon om matchen. *@
-            <div class="form-field full">
-                <label asp-for="Notes">
-                    Notat til matchen
-                    <span>(valgfritt)</span>
-                </label>
-
-                <textarea asp-for="Notes"
-                          class="form-control"
-                          placeholder="For eksempel kontaktinformasjon eller en kort avtale.">
-                </textarea>
-
-                @* Viser en feil dersom notatet ikke er gyldig. *@
-                <span asp-validation-for="Notes"
-                      class="field-validation-error">
-                </span>
-            </div>
+            <select id="needId"
+                    name="needId"
+                    asp-items="Model.Needs"
+                    required>
+                <option value="">Velg behov</option>
+            </select>
         </div>
 
-        @* Knapper for å opprette eller avbryte matchen. *@
+        @* Starter søket etter passende ressurser eller går tilbake til oversikten. *@
         <div class="record-actions">
-            <button type="submit"
-                    class="portal-button">
-                Opprett matchforslag
+            <button type="submit" class="portal-button">
+                Finn ressurser
             </button>
 
-            <a asp-action="Overview"
-               class="portal-button secondary">
+            <a asp-action="Overview" class="portal-button secondary">
                 Avbryt
             </a>
         </div>
     </form>
 </section>
-
-@section Scripts {
-    @*
-        Henter skript som kan vise feilmeldinger
-        før skjemaet sendes til serveren.
-    *@
-    <partial name="_ValidationScriptsPartial" />
-}

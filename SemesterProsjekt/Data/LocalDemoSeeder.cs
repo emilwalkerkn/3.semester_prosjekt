@@ -287,7 +287,10 @@ public static class LocalDemoSeeder
             var resource = resources.SingleOrDefault(item => item.Title == example.ResourceTitle);
             if (need is null || resource is null) continue;
 
-            if (!await matchRepository.ExistsAsync(need.NeedId, resource.ResourceId))
+            // Demoavtaler gjenopprettes ikke når de er fullført eller avslått.
+            if (!await connection.ExecuteScalarAsync<bool>(
+                "SELECT COUNT(*) > 0 FROM `Match` WHERE NeedId = @NeedId AND ResourceId = @ResourceId;",
+                new { need.NeedId, resource.ResourceId }))
             {
                 var reservations = (await matchRepository.GetReservationsAsync()).ToList();
                 if (!MatchAvailability.CanMatchNeed(need, reservations) ||

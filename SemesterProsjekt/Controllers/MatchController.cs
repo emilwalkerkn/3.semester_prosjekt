@@ -36,31 +36,132 @@ public class MatchController : Controller
 
     /// Viser alle aktive matcher for admin og egne matcher for andre brukere.
 
-    public async Task<IActionResult> Overview()
+    public async Task<IActionResult> Overview(string? search = null, string? status = null, bool requiresAction = false)
     {
         var matches = User.IsInRole(AppRoles.Admin)
             ? await _matchRepository.GetActiveAsync()
             : await _matchRepository.GetActiveForUserAsync(CurrentUserId);
 
-        return View(PrepareMatchItems(matches));
+        return View(FilterMatches(matches, search, status, requiresAction));
     }
 
 
     /// Viser samlet historikk for admin og egen historikk for andre brukere.
 
-    public async Task<IActionResult> History()
+    public async Task<IActionResult> History(string? search = null, string? status = null, bool requiresAction = false)
     {
         var matches = User.IsInRole(AppRoles.Admin)
             ? await _matchRepository.GetHistoryAsync()
             : await _matchRepository.GetHistoryForUserAsync(CurrentUserId);
 
-        return View(PrepareMatchItems(matches));
+        ViewData["IsHistory"] = true;
+        return View(FilterMatches(matches, search, status, requiresAction));
+    }
+
+    private List<MatchListItemViewModel> FilterMatches(IEnumerable<MatchListItemViewModel> matches, string? search, string? status, bool requiresAction)
+    {
+        var items = PrepareMatchItems(matches);
+        ViewData["Search"] = search;
+        ViewData["Status"] = status;
+        ViewData["RequiresAction"] = requiresAction;
+        ViewData["TotalMatches"] = items.Count;
+        return MatchSearch.Apply(items, search, status, requiresAction).ToList();
+    }
+
+    [HttpGet]
+    [Authorize(Roles = AppRoles.NeedsActor + "," + AppRoles.Admin)]
+    public async Task<IActionResult> FindResources(int needId)
+    {
+        var need = await _needRepository.GetByIdAsync(needId);
+        if (need is null) return NotFound();
+        if (!MatchFlow.CanRequest(User, need)) return Forbid();
+        var reservations = (await _matchRepository.GetReservationsAsync()).ToList();
+        var model = new FindResourcesViewModel { Need = need };
+        if (MatchAvailability.CanMatchNeed(need, reservations))
+            foreach (var resource in await _resourceRepository.GetAllAsync())
+                if (resource.UserId != need.UserId && ResourceSuitability.IsSuitable(need, resource, reservations) &&
+                    !await _matchRepository.ExistsAsync(needId, resource.ResourceId))
+                    model.Candidates.Add(new(resource, MatchAvailability.AvailableResource(resource, reservations)));
+        return View(model);
+    }
+
+    [HttpGet]
+    [Authorize(Roles = AppRoles.NeedsActor + "," + AppRoles.Admin)]
+    public async Task<IActionResult> DeliveryRequest(int needId, int resourceId)
+    {
+        var need = await _needRepository.GetByIdAsync(needId);
+        if (need is null) return NotFound();
+        if (!MatchFlow.CanRequest(User, need)) return Forbid();
+        var resource = await _resourceRepository.GetByIdAsync(resourceId);
+        if (resource is null) return NotFound();
+        var reservations = (await _matchRepository.GetReservationsAsync()).ToList();
+        if (resource.UserId == need.UserId || !ResourceSuitability.IsSuitable(need, resource, reservations))
+            return BadRequest("Ressursen kan ikke dekke dette behovet. Gå tilbake og velg en annen ressurs.");
+        var model = new DeliveryRequestViewModel
+        {
+            NeedId = needId, ResourceId = resourceId,
+            AssignedQuantity = MatchAvailability.Allocate(need, resource, reservations, null),
+            DeliveryAt = need.NeededFrom > DateTime.Now ? need.NeededFrom : DateTime.Now,
+            DeliveryContact = need.ContactPoint ?? ""
+        };
+        PopulateRequest(model, need, resource, reservations);
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    [Authorize(Roles = AppRoles.NeedsActor + "," + AppRoles.Admin)]
+    public async Task<IActionResult> DeliveryRequest(DeliveryRequestViewModel model)
+    {
+        var need = await _needRepository.GetByIdAsync(model.NeedId);
+        if (need is null) return NotFound();
+        if (!MatchFlow.CanRequest(User, need)) return Forbid();
+        var resource = await _resourceRepository.GetByIdAsync(model.ResourceId);
+        if (resource is null) return NotFound();
+        var reservations = (await _matchRepository.GetReservationsAsync()).ToList();
+        PopulateRequest(model, need, resource, reservations);
+        if (resource.UserId == need.UserId) ModelState.AddModelError("", "Du kan ikke sende en forespørsel til egen konto.");
+        if (ResourceSuitability.ResourceTypeFor(need.NeedTypeId) != resource.ResourceTypeId)
+            ModelState.AddModelError("", "Ressurstypen passer ikke til behovet. Velg en ny ressurs.");
+        if (model.DeliveryAt < DateTime.Now.AddMinutes(-5)) ModelState.AddModelError(nameof(model.DeliveryAt), "Velg et leveringstidspunkt nå eller frem i tid.");
+        if ((resource.AvailableFrom.HasValue && model.DeliveryAt < resource.AvailableFrom) ||
+            (resource.AvailableTo.HasValue && model.DeliveryAt > resource.AvailableTo))
+            ModelState.AddModelError(nameof(model.DeliveryAt), "Tidspunktet må være innenfor ressursens tilgjengelighet.");
+        if (await _matchRepository.ExistsAsync(model.NeedId, model.ResourceId)) ModelState.AddModelError("", "Det finnes allerede en aktiv forespørsel for denne kombinasjonen.");
+        try
+        {
+            var quantity = MatchAvailability.Allocate(need, resource, reservations, model.AssignedQuantity);
+            if (ModelState.IsValid)
+            {
+                await _matchRepository.CreateAsync(new Match
+                {
+                    NeedId = need.NeedId, ResourceId = resource.ResourceId, AssignedQuantity = quantity,
+                    ProposedByUserId = CurrentUserId, Status = MatchStatuses.Proposed, MatchedAt = DateTime.UtcNow,
+                    DeliveryAt = model.DeliveryAt, DeliveryLocation = model.DeliveryLocation.Trim(),
+                    DeliveryContact = model.DeliveryContact.Trim(), Notes = model.Notes
+                });
+                TempData["DeliverySuccess"] = "Forespørselen er sendt. Venter på svar fra ressurseier.";
+                return RedirectToAction(nameof(Overview));
+            }
+        }
+        catch (MatchAvailabilityException error) { ModelState.AddModelError("", error.Message); }
+        return View(model);
+    }
+
+    private static void PopulateRequest(DeliveryRequestViewModel model, Need need, Resource resource, IEnumerable<MatchReservation> reservations)
+    {
+        model.NeedTitle = need.Title;
+        model.ResourceTitle = resource.Title;
+        model.Unit = need.Unit ?? resource.Unit;
+        model.SupplierContact = resource.ContactPoint;
+        model.AvailableQuantity = MatchAvailability.AvailableResource(resource, reservations);
     }
 
 
     /// Viser skjemaet for matchforslag med valg tilpasset brukerens rolle.
 
     [HttpGet]
+    [Authorize(Roles = AppRoles.NeedsActor + "," + AppRoles.Admin)]
     public async Task<IActionResult> Create()
     {
         var model = new CreateMatchViewModel();
@@ -73,6 +174,7 @@ public class MatchController : Controller
     /// Nye matcher får status Foreslått.
 
     [HttpPost]
+    [Authorize(Roles = AppRoles.NeedsActor + "," + AppRoles.Admin)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CreateMatchViewModel model)
     {
@@ -127,33 +229,12 @@ public class MatchController : Controller
             return View(model);
         }
 
-        try
-        {
-            await _matchRepository.CreateAsync(new Match
-            {
-                NeedId = model.NeedId,
-                ResourceId = model.ResourceId,
-                AssignedQuantity = model.AssignedQuantity,
-                // Opphavspersonen hentes fra innloggingen og kan ikke velges i skjemaet.
-                ProposedByUserId = CurrentUserId,
-                Status = MatchStatuses.Proposed,
-                MatchedAt = DateTime.UtcNow,
-                Notes = model.Notes
-            });
-        }
-        catch (MatchAvailabilityException error)
-        {
-            // Tilgjengeligheten kan endres mellom visning og innsending.
-            ModelState.AddModelError(string.Empty, error.Message);
-            await LoadOptionsAsync(model);
-            return View(model);
-        }
-
-        return RedirectToAction(nameof(Overview));
+        // Eldre skjemaer må også gjennomgå den konkrete leveringsavtalen.
+        return RedirectToAction(nameof(DeliveryRequest), new { needId = model.NeedId, resourceId = model.ResourceId });
     }
 
 
-    /// Motparten kan godkjenne eller avslå. Begge deltakere kan fullføre en godkjent match.
+    /// Ressurseier melder levert; offentlig aktør bekrefter deretter mottaket.
     /// Eierskap, rolle og forslagsstiller kontrolleres på serveren ved hvert svar.
 
     [HttpPost]
@@ -172,17 +253,17 @@ public class MatchController : Controller
         var isResponse = status == MatchStatuses.Approved || status == MatchStatuses.Declined;
         var canUpdate = isResponse
             ? CanRespondToProposal(match.ProposedByUserId, need.UserId, resource.UserId)
-            : status == MatchStatuses.Completed && CanCompleteMatch(need.UserId, resource.UserId);
+            : status switch
+            {
+                MatchStatuses.Delivered => MatchFlow.CanDeliver(User, resource.UserId),
+                MatchStatuses.Completed => MatchFlow.CanReceive(User, need.UserId),
+                MatchStatuses.Cancelled => MatchFlow.CanCancel(User, need.UserId, resource.UserId),
+                _ => false
+            };
 
         if (!canUpdate) return Forbid();
 
-        var validTransition =
-            (match.Status == MatchStatuses.Proposed &&
-                (status == MatchStatuses.Approved ||
-                 status == MatchStatuses.Declined)) ||
-            (match.Status == MatchStatuses.Approved &&
-                status == MatchStatuses.Completed) ||
-            match.Status == status;
+        var validTransition = MatchFlow.IsTransition(match.Status, status) || match.Status == status;
 
         if (!validTransition)
         {
@@ -191,7 +272,7 @@ public class MatchController : Controller
 
         var isClosed =
             status == MatchStatuses.Completed ||
-            status == MatchStatuses.Declined;
+            status == MatchStatuses.Declined || status == MatchStatuses.Cancelled;
 
         DateTime? resolvedAt = isClosed ? DateTime.UtcNow : null;
 
@@ -209,8 +290,15 @@ public class MatchController : Controller
             return Conflict(error.Message);
         }
 
-        // Et behandlet forslag hører til historikken, også når det bare er godkjent.
-        return RedirectToAction(nameof(History));
+        TempData["DeliverySuccess"] = status switch
+        {
+            MatchStatuses.Approved => "Levering er bekreftet. Mengden er reservert.",
+            MatchStatuses.Delivered => "Leveransen er markert som levert. Venter på mottaksbekreftelse.",
+            MatchStatuses.Completed => "Mottaket er bekreftet. Leveransen er fullført.",
+            MatchStatuses.Cancelled => "Forespørselen er avbrutt. Eventuell reservasjon er frigitt.",
+            _ => "Forespørselen er avslått."
+        };
+        return RedirectToAction(isClosed ? nameof(History) : nameof(Overview));
     }
 
     
@@ -223,10 +311,7 @@ public class MatchController : Controller
         var items = matches.ToList();
         foreach (var item in items)
         {
-            item.CanRespond = item.Status == MatchStatuses.Proposed &&
-                CanRespondToProposal(item.ProposedByUserId, item.NeedUserId, item.ResourceUserId);
-            item.CanComplete = item.Status == MatchStatuses.Approved &&
-                CanCompleteMatch(item.NeedUserId, item.ResourceUserId);
+            MatchFlow.Prepare(User, item);
         }
 
         return items;
@@ -239,7 +324,7 @@ public class MatchController : Controller
     private async Task LoadOptionsAsync(CreateMatchViewModel model)
     {
         var needs = await _needRepository.GetAllAsync();
-        var resources = await _resourceRepository.GetAllAsync();
+        var resources = ResourceVisibility.Filter(User, await _resourceRepository.GetAllAsync());
         var reservations = (await _matchRepository.GetReservationsAsync()).ToList();
         needs = needs.Where(need => MatchAvailability.CanMatchNeed(need, reservations));
         resources = resources.Where(resource => MatchAvailability.CanMatchResource(resource, reservations));
@@ -247,20 +332,7 @@ public class MatchController : Controller
         if (!User.IsInRole(AppRoles.Admin))
         {
             var userId = CurrentUserId;
-            var isNeedsActor = User.IsInRole(AppRoles.NeedsActor);
-            var isResourceOwner = User.IsInRole(AppRoles.ResourceOwner);
-
-            if (isNeedsActor && !isResourceOwner)
-            {
-                needs = needs.Where(need => need.UserId == userId);
-            }
-            else if (isResourceOwner && !isNeedsActor)
-            {
-                resources = resources.Where(resource => resource.UserId == userId);
-            }
-
-            // Brukere med begge roller får begge listene.
-            // Ved innsending kreves fortsatt eierskap til minst én side.
+            needs = needs.Where(need => need.UserId == userId);
         }
 
         model.Needs = needs
@@ -280,21 +352,11 @@ public class MatchController : Controller
         quantity.HasValue ? $"{title} – {quantity:0.##} {unit} ledig" : title;
 
 
-    /// Admin kan foreslå alle kombinasjoner.
-    /// Andre må eie behovet som behovsaktør eller ressursen som ressurseier.
+    /// Offentlig aktør må eie behovet. Admin kan hjelpe på vegne av behovseieren.
 
     private bool CanProposeMatch(Need need, Resource resource)
     {
-        if (User.IsInRole(AppRoles.Admin))
-        {
-            return true;
-        }
-
-        var userId = CurrentUserId;
-
-        return
-            (User.IsInRole(AppRoles.NeedsActor) && need.UserId == userId) ||
-            (User.IsInRole(AppRoles.ResourceOwner) && resource.UserId == userId);
+        return MatchFlow.CanRequest(User, need);
     }
 
   
@@ -325,15 +387,6 @@ public class MatchController : Controller
     }
 
    
-    /// Begge parter kan markere en godkjent match som fullført.
-    /// Admin har samme mulighet, men trengs ikke i den vanlige arbeidsflyten.
-  
-    private bool CanCompleteMatch(string needUserId, string resourceUserId) =>
-        User.IsInRole(AppRoles.Admin) ||
-        (User.IsInRole(AppRoles.NeedsActor) && needUserId == CurrentUserId) ||
-        (User.IsInRole(AppRoles.ResourceOwner) && resourceUserId == CurrentUserId);
-
-
     /// Henter bruker-ID fra den aktive innloggingen.
 
     private string CurrentUserId =>

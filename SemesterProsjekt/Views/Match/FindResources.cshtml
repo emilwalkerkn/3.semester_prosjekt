@@ -1,0 +1,146 @@
+@model SemesterProsjekt.Models.ViewModels.FindResourcesViewModel
+
+@{
+    ViewData["Title"] = "Finn ressurser";
+}
+
+@* Viser tilgjengelige ressurser som kan dekke det valgte behovet. *@
+<section class="overview-page delivery-page">
+
+    @* Viser informasjon om behovet og en lenke tilbake til behovssiden. *@
+    <header class="overview-heading">
+        <div>
+            <p class="eyebrow">1 · Velg ressurs</p>
+            <h1>Finn ressurser til behovet</h1>
+            <p class="page-intro">@Model.Need.Title</p>
+        </div>
+
+        <a asp-controller="Need"
+           asp-action="Details"
+           asp-route-id="@Model.Need.NeedId"
+           class="portal-button secondary">
+            Tilbake til behovet
+        </a>
+    </header>
+
+    @* Oppsummerer behovet og forklarer hvordan ressursene er filtrert. *@
+    <div class="portal-card delivery-summary">
+        <strong>
+            Behov:
+            @(Model.Need.Quantity.HasValue
+                ? $"{Model.Need.Quantity:0.##} {Model.Need.Unit}"
+                : "Mengde ikke oppgitt")
+        </strong>
+
+        <p>
+            Ønsket tidspunkt:
+            @(Model.Need.NeededFrom?.ToString("dd.MM.yyyy HH:mm") ?? "Nå")
+        </p>
+
+        <p>
+            Forslagene er filtrert på kategori, enhet, tilgjengelighet og ledig mengde.
+            Kontroller at ressursen passer før du sender forespørselen.
+        </p>
+
+        @* Viser en ekstra forklaring dersom behovet har kategorien Annet. *@
+        @if (Model.Need.NeedTypeId == CategoryCatalog.OtherId)
+        {
+            <p>
+                <strong>Annet:</strong>
+                Denne kategorien kan inneholde ulike ting.
+                Les beskrivelsen av ressursen og avklar med ressurseieren
+                at den faktisk dekker behovet.
+            </p>
+        }
+    </div>
+
+    @* Viser en melding dersom ingen ressurser passer til behovet. *@
+    @if (!Model.Candidates.Any())
+    {
+        <div class="portal-card empty-state">
+            <h2>Ingen passende ressurser akkurat nå</h2>
+
+            <p>
+                Behovet kan allerede være reservert eller dekket,
+                eller ressursene kan mangle ledig kapasitet for tidspunktet.
+                Eksisterende forespørsler vises under Mine avtaler.
+            </p>
+
+            <a asp-action="Overview" class="portal-button secondary">
+                Se mine avtaler
+            </a>
+        </div>
+    }
+
+    @* Går gjennom alle ressursene som passer til det valgte behovet. *@
+    <div class="delivery-candidates">
+
+        @foreach (var candidate in Model.Candidates)
+        {
+            var resource = candidate.Resource;
+
+            // Henter riktig ikon basert på ressursens kategori.
+            var icon = PortalTypeIcons.ForResource(resource.ResourceTypeId);
+
+            @* Viser informasjon om en tilgjengelig ressurs. *@
+            <article class="portal-card delivery-summary">
+
+                <div class="record-title-with-icon">
+                    <span class="type-icon">
+                        <img src="@icon.Symbol" alt="" />
+                    </span>
+
+                    <div>
+                        <p class="record-type">@icon.Label</p>
+                        <h2>@resource.Title</h2>
+                    </div>
+                </div>
+
+                <span class="delivery-status delivery-status-approved">
+                    Tilgjengelig
+                </span>
+
+                @* Viser ledig mengde, kontaktinformasjon og tilgjengelighet. *@
+                <dl class="delivery-facts">
+                    <div>
+                        <dt>Ledig mengde</dt>
+                        <dd>
+                            @(candidate.AvailableQuantity.HasValue
+                                ? $"{candidate.AvailableQuantity:0.##} {resource.Unit}"
+                                : "Etter avtale")
+                        </dd>
+                    </div>
+
+                    <div>
+                        <dt>Kontakt</dt>
+                        <dd>@(resource.ContactPoint ?? "Ikke oppgitt")</dd>
+                    </div>
+
+                    <div>
+                        <dt>Tilgjengelig fra</dt>
+                        <dd>
+                            @(resource.AvailableFrom?.ToString("dd.MM.yyyy HH:mm") ?? "Nå")
+                        </dd>
+                    </div>
+                </dl>
+
+                @* Lar brukeren velge ressursen eller se mer informasjon om den. *@
+                <div class="record-actions">
+                    <a asp-action="DeliveryRequest"
+                       asp-route-needId="@Model.Need.NeedId"
+                       asp-route-resourceId="@resource.ResourceId"
+                       class="portal-button">
+                        Velg ressurs
+                    </a>
+
+                    <a asp-controller="Resource"
+                       asp-action="Details"
+                       asp-route-id="@resource.ResourceId"
+                       class="portal-button secondary">
+                        Se ressursen
+                    </a>
+                </div>
+            </article>
+        }
+    </div>
+</section>

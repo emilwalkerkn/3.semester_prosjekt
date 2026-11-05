@@ -1,32 +1,29 @@
 namespace SemesterProsjekt.Models;
 
-// Et ikon (emoji) og en tekst som beskriver en kategori.
-// "record" gir en enkel, uforanderlig dataklasse på én linje.
+/// Representerer et ikon og en beskrivelse som brukes i portalen.
 public record PortalTypeIcon(string Symbol, string Label);
 
-// Ett felles oppslag gjør at samme kategori får samme ikon overalt i portalen.
+/// Henter riktige ikoner og navn til forskjellige behov og ressurser.
 public static class PortalTypeIcons
 {
-    // Finner ikon for en behovstype ut fra ID-en.
-    // ID-ene samsvarer med radene som legges inn i NeedType-tabellen i init.sql.
-    // "_" er standardtilfellet for ukjente ID-er.
-    public static PortalTypeIcon ForNeed(int needTypeId) => needTypeId switch
-    {
-        1 => new("🍽️", "Mat og drikke"),
-        2 => new("🚐", "Transport"),
-        3 => new("🩺", "Medisinsk utstyr"),
-        4 => new("👥", "Mannskap"),
-        5 => new("🛏️", "Overnatting"),
-        _ => new("📌", "Annet behov")
-    };
+    // Finner riktig ikon og navn basert på behovets kategori.
+    public static PortalTypeIcon ForNeed(int id) =>
+        ForCategory(
+            CategoryCatalog.Needs.FirstOrDefault(c => c.Id == id),
+            "Annet behov");
 
-    // Samme som over, men for ressurstyper (ResourceType-tabellen).
-    public static PortalTypeIcon ForResource(int resourceTypeId) => resourceTypeId switch
-    {
-        1 => new("🚐", "Kjøretøy"),
-        2 => new("🩺", "Medisinsk utstyr"),
-        3 => new("🍽️", "Matforsyning"),
-        4 => new("👥", "Mannskap"),
-        _ => new("📦", "Annen ressurs")
-    };
+    // Finner riktig ikon og navn basert på ressursens kategori.
+    public static PortalTypeIcon ForResource(int id) =>
+        ForCategory(
+            CategoryCatalog.Resources.FirstOrDefault(c => c.Id == id),
+            "Annen ressurs");
+
+    // Lager en ikonbane og et kategorinavn.
+    // Bruker standardikon og standardnavn dersom kategorien ikke finnes.
+    private static PortalTypeIcon ForCategory(
+        PortalCategory? category,
+        string fallback) =>
+        new(
+            $"/images/types/{category?.Icon ?? "other"}.svg",
+            category?.Name ?? fallback);
 }

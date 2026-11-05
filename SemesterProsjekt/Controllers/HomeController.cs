@@ -17,6 +17,7 @@ public class HomeController : Controller
 {
     private readonly IResourceRepository _resourceRepository;
     private readonly INeedRepository _needRepository;
+    private readonly IMatchRepository? _matchRepository;
 
   
     /// Mottar repositoryene gjennom dependency injection.
@@ -25,10 +26,12 @@ public class HomeController : Controller
    
     public HomeController(
         IResourceRepository resourceRepository,
-        INeedRepository needRepository)
+        INeedRepository needRepository,
+        IMatchRepository? matchRepository = null)
     {
         _resourceRepository = resourceRepository;
         _needRepository = needRepository;
+        _matchRepository = matchRepository;
     }
 
   
@@ -37,8 +40,10 @@ public class HomeController : Controller
    
     public async Task<IActionResult> Index()
     {
-        var needs = (await _needRepository.GetAllAsync()).ToList();
-        var resources = (await _resourceRepository.GetAllAsync()).ToList();
+        var needs = ResourceVisibility.CanBrowseAll(User)
+            ? (await _needRepository.GetAllAsync()).ToList()
+            : new List<Need>();
+        var resources = ResourceVisibility.Filter(User, await _resourceRepository.GetAllAsync()).ToList();
 
         var model = new DashboardViewModel
         {
@@ -54,6 +59,16 @@ public class HomeController : Controller
                 .Take(3)
         };
 
+        if (_matchRepository is not null)
+        {
+            var matches = User.IsInRole(AppRoles.Admin)
+                ? await _matchRepository.GetActiveAsync()
+                : await _matchRepository.GetActiveForUserAsync(CurrentUserId);
+            var actions = matches.ToList();
+            foreach (var item in actions) MatchFlow.Prepare(User, item);
+            model.DeliveryActions = actions.Where(item => item.CanRespond || item.CanDeliver || item.CanComplete)
+                .OrderByDescending(item => item.MatchedAt).Take(5).ToList();
+        }
         return View(model);
     }
     
@@ -61,6 +76,7 @@ public class HomeController : Controller
     /// Henter og viser ett behov.
     /// Returnerer HTTP 404 dersom behovet ikke finnes.
    
+    [Authorize(Roles = AppRoles.NeedsActor + "," + AppRoles.Admin)]
     public async Task<IActionResult> NeedDetails(int id)
     {
         var need = await _needRepository.GetByIdAsync(id);
@@ -86,6 +102,7 @@ public class HomeController : Controller
             return NotFound();
         }
 
+        if (!ResourceVisibility.CanView(User, resource)) return Forbid();
         return View(resource);
     }
 
@@ -195,13 +212,14 @@ public class HomeController : Controller
    
     public async Task<IActionResult> ResourceOverview()
     {
-        var resources = await _resourceRepository.GetAllAsync();
+        var resources = ResourceVisibility.Filter(User, await _resourceRepository.GetAllAsync()).ToList();
         return View(resources);
     }
 
   
     /// Henter alle behov og sender dem til behovsoversikten.
    
+    [Authorize(Roles = AppRoles.NeedsActor + "," + AppRoles.Admin)]
     public async Task<IActionResult> NeedOverview()
     {
         var needs = await _needRepository.GetAllAsync();

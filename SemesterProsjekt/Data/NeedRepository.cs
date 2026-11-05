@@ -37,6 +37,7 @@ public class NeedRepository : INeedRepository
         {
             // Tidligste frist først. Behov uten frist plasseres sist.
             "deadline" => "n.Deadline IS NULL, n.Deadline ASC",
+            "neededFrom" => "n.NeededFrom IS NULL, n.NeededFrom ASC",
 
             // FIELD angir en bestemt rekkefølge for de kjente prioritetene.
             "priority" => "FIELD(n.Priority, 'Critical', 'High', 'Normal', 'Low')",
@@ -121,7 +122,7 @@ public class NeedRepository : INeedRepository
         const string sql = """
             SELECT NeedTypeId, Name
             FROM NeedType
-            ORDER BY Name;
+            ORDER BY CASE WHEN NeedTypeId = 99 THEN 1 ELSE 0 END, Name;
             """;
 
         using var connection = _connectionFactory.CreateConnection();

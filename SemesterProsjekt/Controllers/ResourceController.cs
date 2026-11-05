@@ -26,14 +26,23 @@ public class ResourceController : Controller
     }
 
   
-    /// Henter alle ressurser og viser dem i en utskriftsvennlig visning.
-    public async Task<IActionResult> Print() =>
-        View(await _resourceRepository.GetAllAsync());
+    /// Viser bare ressursene brukeren har lesetilgang til i utskriften.
+    public async Task<IActionResult> Print(string? search = null, int? resourceTypeId = null, string? status = null) =>
+        View(ResourceSearch.Apply(ResourceVisibility.Filter(User, await _resourceRepository.GetAllAsync()), search, resourceTypeId, status).ToList());
 
   
-    /// Henter alle ressurser og sender dem til ressursoversikten.
-    public async Task<IActionResult> Overview() =>
-        View(await _resourceRepository.GetAllAsync());
+    /// Kart og liste bygges fra ressursene brukeren har lesetilgang til.
+    public async Task<IActionResult> Overview(string? search = null, int? resourceTypeId = null, string? status = null)
+    {
+        var visible = ResourceVisibility.Filter(User, await _resourceRepository.GetAllAsync()).ToList();
+        ViewData["Search"] = search;
+        ViewData["ResourceTypeId"] = resourceTypeId;
+        ViewData["Status"] = status;
+        ViewData["ResourceTypes"] = (await _resourceRepository.GetResourceTypesAsync())
+            .Select(type => new SelectListItem(type.Name, type.ResourceTypeId.ToString(), type.ResourceTypeId == resourceTypeId))
+            .OrderBy(item => item.Value == CategoryCatalog.OtherId.ToString()).ThenBy(item => item.Text).ToList();
+        return View(ResourceSearch.Apply(visible, search, resourceTypeId, status).ToList());
+    }
 
   
     /// Viser et tomt registreringsskjema med ressurstyper hentet fra databasen.
@@ -42,7 +51,7 @@ public class ResourceController : Controller
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        var model = new ResourceViewModel();
+        var model = new ResourceViewModel { AvailableFrom = DateTime.Now };
         await LoadResourceTypesAsync(model);
         return View(model);
     }
@@ -56,6 +65,7 @@ public class ResourceController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(ResourceViewModel model)
     {
+        model.AvailableTo = null;
         ValidateDates(model);
 
         if (!ModelState.IsValid)
@@ -65,6 +75,7 @@ public class ResourceController : Controller
             return View(model);
         }
 
+        model.AvailableFrom ??= DateTime.Now;
         var resource = MapNewResource(model);
         var id = await _resourceRepository.CreateAsync(resource);
         return RedirectToAction(nameof(Result), new { id });
@@ -113,6 +124,10 @@ public class ResourceController : Controller
         // Tilgangen kontrolleres også ved innsending, ikke bare når skjemaet åpnes.
         if (!CanManage(resource.UserId)) return Forbid();
 
+        // Redigeringssiden har samme ene tidspunkt som registreringen.
+        // Eventuell eldre sluttdato bevares i databasen.
+        model.AvailableTo = resource.AvailableTo;
+        model.AvailableFrom ??= resource.AvailableFrom;
         ValidateDates(model);
 
         if (!ModelState.IsValid)
@@ -160,7 +175,9 @@ public class ResourceController : Controller
     private async Task<IActionResult> ShowResourceAsync(int id, string viewName)
     {
         var resource = await _resourceRepository.GetByIdAsync(id);
-        return resource is null ? NotFound() : View(viewName, resource);
+        if (resource is null) return NotFound();
+        if (!ResourceVisibility.CanView(User, resource)) return Forbid();
+        return View(viewName, resource);
     }
 
   
@@ -181,8 +198,8 @@ public class ResourceController : Controller
             model.AvailableTo < model.AvailableFrom)
         {
             ModelState.AddModelError(
-                nameof(model.AvailableTo),
-                "Tilgjengelig til kan ikke være før tilgjengelig fra.");
+                nameof(model.AvailableFrom),
+                $"Starttidspunktet kan ikke være etter registrert sluttdato ({model.AvailableTo:dd.MM.yyyy HH:mm}).");
         }
     }
 

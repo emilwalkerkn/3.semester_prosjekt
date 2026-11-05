@@ -147,7 +147,7 @@ public class ResourceRepository : IResourceRepository
         using var connection = _connectionFactory.CreateConnection();
 
         return await connection.QueryAsync<ResourceType>(
-            "SELECT ResourceTypeId, Name FROM ResourceType ORDER BY Name;");
+            "SELECT ResourceTypeId, Name FROM ResourceType ORDER BY CASE WHEN ResourceTypeId = 99 THEN 1 ELSE 0 END, Name;");
     }
 
    

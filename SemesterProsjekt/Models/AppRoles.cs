@@ -18,6 +18,10 @@ public static class AppRoles
     // Aktør som registrerer behov den trenger hjelp til.
     public const string NeedsActor = "Behovsaktør";
 
+    // Eksisterende Identity-rollenavn beholdes så kontoene beholder tilgangen.
+    public const string PublicActorDisplayName = "Offentlig aktør";
+    public static string DisplayName(string role) => role == NeedsActor ? PublicActorDisplayName : role;
+
     // Rollene en bruker selv kan velge ved registrering.
     // Admin er bevisst utelatt, så ingen kan gjøre seg selv til administrator.
     public static readonly string[] SelfServiceRoles =

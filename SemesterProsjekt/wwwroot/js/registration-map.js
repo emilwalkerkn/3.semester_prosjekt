@@ -57,5 +57,20 @@
             status.textContent = "Ingen plassering valgt ennå.";
             status.classList.remove("is-selected");
         });
+        if (geometryData.value) {
+            try {
+                L.geoJSON(JSON.parse(geometryData.value), {
+                    onEachFeature: (_feature, layer) => selectedGeometry.addLayer(layer)
+                });
+                if (selectedGeometry.getLayers().length > 0) {
+                    map.fitBounds(selectedGeometry.getBounds(), { maxZoom: 15, padding: [30, 30] });
+                    status.textContent = "Lagret plassering vises. Du kan redigere eller slette plasseringen i kartet.";
+                    status.classList.add("is-selected");
+                }
+            } catch (_error) {
+                status.textContent = "Plasseringen kunne ikke vises. Velg den på nytt.";
+            }
+        }
+        document.addEventListener("fullscreenchange", () => map.invalidateSize());
     });
 })();

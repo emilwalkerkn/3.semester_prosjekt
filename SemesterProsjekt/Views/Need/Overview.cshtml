@@ -15,6 +15,9 @@
 @{
     // Angir tittelen til siden.
     ViewData["Title"] = "Behov";
+    var search = ViewData["Search"] as string;
+    var statusFilter = ViewData["Status"] as string;
+    var priorityFilter = ViewData["Priority"] as string;
 
     /*
         Behovsaktører og administratorer
@@ -39,7 +42,16 @@
         .Select(need => new
         {
             geometryData = need.GeometryData,
-            title = need.Title
+            title = need.Title,
+            status = need.Status,
+            priority = need.Priority,
+            quantity = need.Quantity,
+            unit = need.Unit,
+            time = need.NeededFrom?.ToString("dd.MM.yyyy HH:mm"),
+            timeLabel = "Behov fra",
+            detailsUrl = Url.Action("Details", "Need", new { id = need.NeedId }),
+            symbol = SemesterProsjekt.Models.PortalTypeIcons.ForNeed(need.NeedTypeId).Symbol,
+            typeLabel = SemesterProsjekt.Models.PortalTypeIcons.ForNeed(need.NeedTypeId).Label
         });
 
     // Gjør statusen lettere å forstå på norsk.
@@ -60,7 +72,7 @@
     };
 }
 
-<section class="overview-page">
+<section class="overview-page split-overview-page">
 
     @* Overskriften og introduksjonen til siden. *@
     <header class="overview-heading">
@@ -69,7 +81,7 @@
             <h1>Behov</h1>
 
             <p class="page-intro">
-                Følg opp registrerte behov, frister og prioritet.
+                Finn og følg opp behov etter type, tidspunkt, status og prioritet.
             </p>
         </div>
 
@@ -86,48 +98,48 @@
         }
     </header>
 
-    @*
-        Skjemaet brukes til å sortere behovene.
-        GET gjør at valget vises i nettadressen.
-    *@
-    <form asp-action="Overview"
-          method="get"
-          class="portal-card overview-toolbar">
-
-        <label for="sortBy">
-            Sorter behov etter
-        </label>
-
-        @*
-            Skjemaet sendes automatisk når brukeren
-            velger en annen sortering.
-        *@
-        <select id="sortBy"
-                name="sortBy"
-                onchange="this.form.submit()">
-
-            <option value="newest"
-                    selected="@(ViewData["SortBy"]?.ToString() == "newest")">
-                Nyeste
-            </option>
-
-            <option value="deadline"
-                    selected="@(ViewData["SortBy"]?.ToString() == "deadline")">
-                Frist
-            </option>
-
-            <option value="priority"
-                    selected="@(ViewData["SortBy"]?.ToString() == "priority")">
-                Prioritet
-            </option>
-
-            <option value="status"
-                    selected="@(ViewData["SortBy"]?.ToString() == "status")">
-                Status
-            </option>
-        </select>
+    <form asp-action="Overview" method="get" class="portal-card resource-search" role="search" aria-label="Søk og filtrer behov">
+        <div class="form-field resource-search-text">
+            <label for="need-search">Søk i behov</label>
+            <input id="need-search" type="search" name="search" value="@search" placeholder="Søk etter tittel, beskrivelse eller type" />
+        </div>
+        <div class="form-field">
+            <label for="need-type-filter">Type behov</label>
+            <select id="need-type-filter" name="needTypeId" asp-items="@(ViewData["NeedTypes"] as IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)"><option value="">Alle typer</option></select>
+        </div>
+        <div class="form-field">
+            <label for="need-status-filter">Status</label>
+            <select id="need-status-filter" name="status">
+                <option value="">Alle statuser</option>
+                <option value="New" selected="@(statusFilter == "New")">Ny</option>
+                <option value="In progress" selected="@(statusFilter == "In progress")">Under behandling</option>
+                <option value="Resolved" selected="@(statusFilter == "Resolved")">Løst</option>
+            </select>
+        </div>
+        <div class="form-field">
+            <label for="need-priority-filter">Prioritet</label>
+            <select id="need-priority-filter" name="priority">
+                <option value="">Alle prioriteter</option>
+                <option value="Low" selected="@(priorityFilter == "Low")">Lav</option>
+                <option value="Normal" selected="@(priorityFilter == "Normal")">Normal</option>
+                <option value="High" selected="@(priorityFilter == "High")">Høy</option>
+                <option value="Critical" selected="@(priorityFilter == "Critical")">Kritisk</option>
+            </select>
+        </div>
+        <div class="form-field">
+            <label for="sortBy">Sorter etter</label>
+            <select id="sortBy" name="sortBy">
+                <option value="newest" selected="@(ViewData["SortBy"]?.ToString() == "newest")">Nyeste</option>
+                <option value="neededFrom" selected="@(ViewData["SortBy"]?.ToString() == "neededFrom")">Tidspunkt</option>
+                <option value="priority" selected="@(ViewData["SortBy"]?.ToString() == "priority")">Prioritet</option>
+                <option value="status" selected="@(ViewData["SortBy"]?.ToString() == "status")">Status</option>
+            </select>
+        </div>
+        <button type="submit" class="portal-button">Søk og filtrer</button>
+        <a asp-action="Overview" class="portal-button secondary">Nullstill</a>
     </form>
-
+    <p class="resource-search-count" role="status">Viser @Model.Count() behov. Kartet viser samme utvalg.</p>
+    <div class="overview-split">
     @* Viser plasseringen til registrerte behov på et kart. *@
     <section class="portal-card overview-map-card"
              aria-labelledby="need-map-heading">
@@ -146,6 +158,7 @@
             </span>
         </div>
 
+        <button type="button" class="portal-button secondary overview-fullscreen" aria-controls="needMap">Vis kart i fullskjerm</button>
         @* JavaScript bruker dette området til å vise kartet. *@
         <div id="needMap"
              class="map-panel"
@@ -161,10 +174,10 @@
         @if (!Model.Any())
         {
             <div class="portal-card empty-state">
-                <h2>Ingen behov ennå</h2>
+                <h2>Ingen behov å vise</h2>
 
                 <p>
-                    Nye behov dukker opp her når de er registrert.
+                    Prøv andre søkeord eller filtre, eller registrer et nytt behov.
                 </p>
 
                 @if (canRegister)
@@ -205,7 +218,7 @@
                             <span class="type-icon"
                                   role="img"
                                   aria-label="@typeIcon.Label">
-                                @typeIcon.Symbol
+                                <img src="@typeIcon.Symbol" alt="" />
                             </span>
 
                             <div>
@@ -226,14 +239,14 @@
                     <div class="overview-meta">
                         <div>
                             <span>Prioritet</span>
-                            <strong>@need.Priority</strong>
+                            <strong>@(need.Priority switch { "Low" => "Lav", "Normal" => "Normal", "High" => "Høy", "Critical" => "Kritisk", _ => need.Priority })</strong>
                         </div>
 
                         <div>
-                            <span>Frist</span>
+                            <span>Når trengs hjelpen?</span>
 
                             <strong>
-                                @(need.Deadline?.ToString("dd.MM.yyyy HH:mm")
+                                @(need.NeededFrom?.ToString("dd.MM.yyyy HH:mm")
                                   ?? "Ikke oppgitt")
                             </strong>
                         </div>
@@ -268,6 +281,10 @@
                             *@
                             @if (canManage)
                             {
+                                @if (need.Status != NeedStatuses.Resolved)
+                                {
+                                    <a asp-controller="Match" asp-action="FindResources" asp-route-needId="@need.NeedId" class="portal-button">Finn ressurser</a>
+                                }
                                 <a asp-action="Edit"
                                    asp-route-id="@need.NeedId"
                                    class="portal-button secondary">
@@ -337,6 +354,7 @@
             }
         }
     </section>
+    </div>
 </section>
 
 @section Scripts {

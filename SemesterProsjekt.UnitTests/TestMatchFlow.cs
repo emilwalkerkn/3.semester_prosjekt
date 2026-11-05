@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Moq;
 using SemesterProsjekt.Controllers;
 using SemesterProsjekt.Data;
@@ -80,7 +81,7 @@ public class TestMatchFlow
         var videresending =
             Assert.IsType<RedirectToActionResult>(resultat);
 
-        Assert.Equal("History", videresending.ActionName);
+        Assert.Equal(status == MatchStatuses.Approved ? "Overview" : "History", videresending.ActionName);
 
         _matcher.Verify(x => x.TryUpdateStatusAsync(
             10, MatchStatuses.Proposed, status,
@@ -127,14 +128,11 @@ public class TestMatchFlow
         Assert.IsType<RedirectToActionResult>(resultat);
     }
 
-    [Theory]
-    [InlineData("behovseier", AppRoles.NeedsActor)]
-    [InlineData("ressurseier", AppRoles.ResourceOwner)]
-    public async Task BeggeParterKanFullforeEnGodkjentMatch(
-        string brukerId, string rolle)
+    [Fact]
+    public async Task BehovseierKanBekrefteMottakEtterAtRessurseierHarLevert()
     {
-        _testmatch.Status = MatchStatuses.Approved;
-        var controller = LagController(brukerId, rolle);
+        _testmatch.Status = MatchStatuses.Delivered;
+        var controller = LagController("behovseier", AppRoles.NeedsActor);
 
         var resultat = await controller.UpdateStatus(
             10, MatchStatuses.Completed);
@@ -142,7 +140,7 @@ public class TestMatchFlow
         Assert.IsType<RedirectToActionResult>(resultat);
 
         _matcher.Verify(x => x.TryUpdateStatusAsync(
-            10, MatchStatuses.Approved, MatchStatuses.Completed,
+            10, MatchStatuses.Delivered, MatchStatuses.Completed,
             It.IsAny<DateTime?>()), Times.Once);
     }
 
@@ -173,7 +171,7 @@ public class TestMatchFlow
     }
 
     [Fact]
-    public async Task NyttForslagFarInnloggetBrukerSomAvsender()
+    public async Task EldreForslagsskjemaSenderTilKontrollForInnsending()
     {
         var controller = LagController(
             "behovseier", AppRoles.NeedsActor);
@@ -186,12 +184,8 @@ public class TestMatchFlow
 
         var resultat = await controller.Create(skjema);
 
-        Assert.IsType<RedirectToActionResult>(resultat);
-
-        _matcher.Verify(x => x.CreateAsync(
-            It.Is<Match>(match =>
-                match.ProposedByUserId == "behovseier")),
-            Times.Once);
+        Assert.Equal("DeliveryRequest", Assert.IsType<RedirectToActionResult>(resultat).ActionName);
+        _matcher.Verify(x => x.CreateAsync(It.IsAny<Match>()), Times.Never);
     }
 
     [Fact]
@@ -251,6 +245,8 @@ public class TestMatchFlow
                 User = new ClaimsPrincipal(identitet)
             }
         };
+
+        controller.TempData = new TempDataDictionary(controller.HttpContext, Mock.Of<ITempDataProvider>());
 
         return controller;
     }
