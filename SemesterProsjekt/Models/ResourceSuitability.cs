@@ -3,7 +3,7 @@ namespace SemesterProsjekt.Models;
 public static class ResourceSuitability
 {
     // Type-ID-ene har forskjellig betydning i behovs- og ressurstabellen.
-    public static int? ResourceTypeFor(int needType) => needType switch { 1 => 3, 2 => 1, 3 => 2, 4 => 4, _ => null };
+    public static int? ResourceTypeFor(int needType) => CategoryCatalog.ResourceTypeFor(needType);
     public static bool IsSuitable(Need need, Resource resource, IEnumerable<MatchReservation> reservations)
     {
         if (ResourceTypeFor(need.NeedTypeId) is not { } type || resource.ResourceTypeId != type) return false;

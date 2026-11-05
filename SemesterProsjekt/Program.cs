@@ -126,6 +126,7 @@ using (var scope = app.Services.CreateScope())
 
 await IdentitySeeder.SeedRolesAsync(app.Services);
 await DomainSchemaMigrator.MigrateAsync(app.Services);
+await CategorySeeder.SeedAsync(app.Services);
 await LocalDemoSeeder.SeedAsync(
     app.Services,
     app.Configuration);

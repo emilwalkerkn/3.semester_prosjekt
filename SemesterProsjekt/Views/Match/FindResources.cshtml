@@ -9,6 +9,10 @@
         <strong>Behov: @(Model.Need.Quantity.HasValue ? $"{Model.Need.Quantity:0.##} {Model.Need.Unit}" : "Mengde ikke oppgitt")</strong>
         <p>Ønsket tidspunkt: @(Model.Need.NeededFrom?.ToString("dd.MM.yyyy HH:mm") ?? "Nå")</p>
         <p>Forslagene er filtrert på kategori, enhet, tilgjengelighet og ledig mengde. Kontroller at ressursen passer før du sender forespørselen.</p>
+        @if (Model.Need.NeedTypeId == CategoryCatalog.OtherId)
+        {
+            <p><strong>Annet:</strong> Denne kategorien kan inneholde ulike ting. Les beskrivelsen av ressursen og avklar med ressurseieren at den faktisk dekker behovet.</p>
+        }
     </div>
     @if (!Model.Candidates.Any())
     {

@@ -38,9 +38,9 @@ public class ResourceController : Controller
         ViewData["Search"] = search;
         ViewData["ResourceTypeId"] = resourceTypeId;
         ViewData["Status"] = status;
-        ViewData["ResourceTypes"] = visible.GroupBy(r => r.ResourceTypeId)
-            .Select(group => new SelectListItem(group.First().ResourceTypeName ?? $"Type {group.Key}", group.Key.ToString(), group.Key == resourceTypeId))
-            .OrderBy(item => item.Text).ToList();
+        ViewData["ResourceTypes"] = (await _resourceRepository.GetResourceTypesAsync())
+            .Select(type => new SelectListItem(type.Name, type.ResourceTypeId.ToString(), type.ResourceTypeId == resourceTypeId))
+            .OrderBy(item => item.Value == CategoryCatalog.OtherId.ToString()).ThenBy(item => item.Text).ToList();
         return View(ResourceSearch.Apply(visible, search, resourceTypeId, status).ToList());
     }
 
@@ -124,6 +124,10 @@ public class ResourceController : Controller
         // Tilgangen kontrolleres også ved innsending, ikke bare når skjemaet åpnes.
         if (!CanManage(resource.UserId)) return Forbid();
 
+        // Redigeringssiden har samme ene tidspunkt som registreringen.
+        // Eventuell eldre sluttdato bevares i databasen.
+        model.AvailableTo = resource.AvailableTo;
+        model.AvailableFrom ??= resource.AvailableFrom;
         ValidateDates(model);
 
         if (!ModelState.IsValid)
@@ -194,8 +198,8 @@ public class ResourceController : Controller
             model.AvailableTo < model.AvailableFrom)
         {
             ModelState.AddModelError(
-                nameof(model.AvailableTo),
-                "Tilgjengelig til kan ikke være før tilgjengelig fra.");
+                nameof(model.AvailableFrom),
+                $"Starttidspunktet kan ikke være etter registrert sluttdato ({model.AvailableTo:dd.MM.yyyy HH:mm}).");
         }
     }
 
