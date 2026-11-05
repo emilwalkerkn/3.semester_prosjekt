@@ -1,4 +1,50 @@
 @model SemesterProsjekt.Models.ViewModels.CreateMatchViewModel
-@{ ViewData["Title"] = "Velg behov"; }
-<section class="overview-page delivery-page"><header><h1>Hvilket behov skal dekkes?</h1><p>Velg et av dine aktive behov. Deretter finner du passende ressurser.</p></header>
-<form asp-action="FindResources" method="get" class="portal-card delivery-summary"><div asp-validation-summary="All" class="validation-summary-errors" role="alert"></div><div class="form-field"><label for="needId">Behov</label><select id="needId" name="needId" asp-items="Model.Needs" required><option value="">Velg behov</option></select></div><div class="record-actions"><button type="submit" class="portal-button">Finn ressurser</button><a asp-action="Overview" class="portal-button secondary">Avbryt</a></div></form></section>
+
+@{
+    ViewData["Title"] = "Velg behov";
+}
+
+@* Viser en side der brukeren kan velge hvilket behov som skal dekkes. *@
+<section class="overview-page delivery-page">
+
+    @* Overskrift og forklaring på hva brukeren skal gjøre. *@
+    <header>
+        <h1>Hvilket behov skal dekkes?</h1>
+        <p>Velg et av dine aktive behov. Deretter finner du passende ressurser.</p>
+    </header>
+
+    @* Sender valgt behov til FindResources-metoden i MatchController. *@
+    <form asp-action="FindResources"
+          method="get"
+          class="portal-card delivery-summary">
+
+        @* Viser eventuelle valideringsfeil. *@
+        <div asp-validation-summary="All"
+             class="validation-summary-errors"
+             role="alert">
+        </div>
+
+        @* Nedtrekksmeny med brukerens tilgjengelige behov. *@
+        <div class="form-field">
+            <label for="needId">Behov</label>
+
+            <select id="needId"
+                    name="needId"
+                    asp-items="Model.Needs"
+                    required>
+                <option value="">Velg behov</option>
+            </select>
+        </div>
+
+        @* Starter søket etter passende ressurser eller går tilbake til oversikten. *@
+        <div class="record-actions">
+            <button type="submit" class="portal-button">
+                Finn ressurser
+            </button>
+
+            <a asp-action="Overview" class="portal-button secondary">
+                Avbryt
+            </a>
+        </div>
+    </form>
+</section>

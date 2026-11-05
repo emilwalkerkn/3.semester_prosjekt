@@ -1,19 +1,147 @@
 @model SemesterProsjekt.Models.ViewModels.DeliveryRequestViewModel
-@{ ViewData["Title"] = "Send leveringsforespørsel"; }
+
+@{
+    ViewData["Title"] = "Send leveringsforespørsel";
+}
+
+@* Viser skjemaet for å sende en leveringsforespørsel til ressurseieren. *@
 <section class="overview-page delivery-page">
-    <header class="overview-heading"><div><p class="eyebrow">2 · Kontroller og send</p><h1>Send leveringsforespørsel</h1><p class="page-intro">Kontroller mengde, tidspunkt og leveringssted. Ressurseieren må bekrefte før mengden reserveres.</p></div></header>
-    <form asp-action="DeliveryRequest" method="post" class="portal-card delivery-summary delivery-request-form">
-        <input asp-for="NeedId" type="hidden" /><input asp-for="ResourceId" type="hidden" />
-        <div asp-validation-summary="ModelOnly" role="alert" class="validation-summary-errors"></div>
-        <dl class="delivery-facts"><div><dt>Behov</dt><dd>@Model.NeedTitle</dd></div><div><dt>Ressurs</dt><dd>@Model.ResourceTitle</dd></div><div><dt>Ledig mengde</dt><dd>@(Model.AvailableQuantity.HasValue ? $"{Model.AvailableQuantity:0.##} {Model.Unit}" : "Etter avtale")</dd></div><div><dt>Ressurseiers kontakt</dt><dd>@(Model.SupplierContact ?? "Ikke oppgitt")</dd></div></dl>
-        <div class="form-grid">
-            <div class="form-field"><label asp-for="AssignedQuantity">Forespurt mengde @Model.Unit</label><input asp-for="AssignedQuantity" type="number" min="0.01" step="0.01" /><span asp-validation-for="AssignedQuantity"></span><small>Tomt felt bruker ledig mengde, begrenset til det gjenstående behovet.</small></div>
-            <div class="form-field"><label asp-for="DeliveryAt">Ønsket leveringstidspunkt</label><input asp-for="DeliveryAt" type="datetime-local" /><span asp-validation-for="DeliveryAt"></span></div>
-            <div class="form-field full"><label asp-for="DeliveryLocation">Leveringssted</label><input asp-for="DeliveryLocation" placeholder="Adresse og eventuelt oppmøtested" /><span asp-validation-for="DeliveryLocation"></span></div>
-            <div class="form-field full"><label asp-for="DeliveryContact">Kontaktinformasjon ved levering</label><input asp-for="DeliveryContact" placeholder="Navn, telefonnummer eller e-post" /><span asp-validation-for="DeliveryContact"></span></div>
-            <div class="form-field full"><label asp-for="Notes">Notat til ressurseier (valgfritt)</label><textarea asp-for="Notes" rows="3" placeholder="For eksempel: Leveres ved hovedinngangen."></textarea><span asp-validation-for="Notes"></span></div>
+
+    @* Viser hvilket steg brukeren er på og forklarer leveringsprosessen. *@
+    <header class="overview-heading">
+        <div>
+            <p class="eyebrow">2 · Kontroller og send</p>
+            <h1>Send leveringsforespørsel</h1>
+            <p class="page-intro">
+                Kontroller mengde, tidspunkt og leveringssted.
+                Ressurseieren må bekrefte før mengden reserveres.
+            </p>
         </div>
-        <div class="record-actions"><button type="submit" class="portal-button">Send forespørsel</button><a asp-action="FindResources" asp-route-needId="@Model.NeedId" class="portal-button secondary">Velg en annen ressurs</a></div>
+    </header>
+
+    @* Sender leveringsinformasjonen til DeliveryRequest-metoden i MatchController. *@
+    <form asp-action="DeliveryRequest"
+          method="post"
+          class="portal-card delivery-summary delivery-request-form">
+
+        @* Beholder ID-ene til behovet og ressursen når skjemaet sendes. *@
+        <input asp-for="NeedId" type="hidden" />
+        <input asp-for="ResourceId" type="hidden" />
+
+        @* Viser eventuelle valideringsfeil knyttet til skjemaet. *@
+        <div asp-validation-summary="ModelOnly"
+             role="alert"
+             class="validation-summary-errors">
+        </div>
+
+        @* Viser en oppsummering av behovet og ressursen som er valgt. *@
+        <dl class="delivery-facts">
+            <div>
+                <dt>Behov</dt>
+                <dd>@Model.NeedTitle</dd>
+            </div>
+
+            <div>
+                <dt>Ressurs</dt>
+                <dd>@Model.ResourceTitle</dd>
+            </div>
+
+            <div>
+                <dt>Ledig mengde</dt>
+                <dd>
+                    @(Model.AvailableQuantity.HasValue
+                        ? $"{Model.AvailableQuantity:0.##} {Model.Unit}"
+                        : "Etter avtale")
+                </dd>
+            </div>
+
+            <div>
+                <dt>Ressurseiers kontakt</dt>
+                <dd>@(Model.SupplierContact ?? "Ikke oppgitt")</dd>
+            </div>
+        </dl>
+
+        @* Skjema for å fylle inn mengde og informasjon om leveringen. *@
+        <div class="form-grid">
+
+            @* Lar brukeren velge hvor stor mengde som skal forespørres. *@
+            <div class="form-field">
+                <label asp-for="AssignedQuantity">
+                    Forespurt mengde @Model.Unit
+                </label>
+
+                <input asp-for="AssignedQuantity"
+                       type="number"
+                       min="0.01"
+                       step="0.01" />
+
+                <span asp-validation-for="AssignedQuantity"></span>
+
+                <small>
+                    Tomt felt bruker ledig mengde, begrenset til det gjenstående behovet.
+                </small>
+            </div>
+
+            @* Lar brukeren velge ønsket tidspunkt for levering. *@
+            <div class="form-field">
+                <label asp-for="DeliveryAt">Ønsket leveringstidspunkt</label>
+
+                <input asp-for="DeliveryAt" type="datetime-local" />
+
+                <span asp-validation-for="DeliveryAt"></span>
+            </div>
+
+            @* Registrerer hvor ressursen skal leveres. *@
+            <div class="form-field full">
+                <label asp-for="DeliveryLocation">Leveringssted</label>
+
+                <input asp-for="DeliveryLocation"
+                       placeholder="Adresse og eventuelt oppmøtested" />
+
+                <span asp-validation-for="DeliveryLocation"></span>
+            </div>
+
+            @* Registrerer hvem ressurseieren skal kontakte ved levering. *@
+            <div class="form-field full">
+                <label asp-for="DeliveryContact">
+                    Kontaktinformasjon ved levering
+                </label>
+
+                <input asp-for="DeliveryContact"
+                       placeholder="Navn, telefonnummer eller e-post" />
+
+                <span asp-validation-for="DeliveryContact"></span>
+            </div>
+
+            @* Gir brukeren mulighet til å legge til ekstra informasjon. *@
+            <div class="form-field full">
+                <label asp-for="Notes">Notat til ressurseier (valgfritt)</label>
+
+                <textarea asp-for="Notes"
+                          rows="3"
+                          placeholder="For eksempel: Leveres ved hovedinngangen.">
+                </textarea>
+
+                <span asp-validation-for="Notes"></span>
+            </div>
+        </div>
+
+        @* Sender forespørselen eller lar brukeren velge en annen ressurs. *@
+        <div class="record-actions">
+            <button type="submit" class="portal-button">
+                Send forespørsel
+            </button>
+
+            <a asp-action="FindResources"
+               asp-route-needId="@Model.NeedId"
+               class="portal-button secondary">
+                Velg en annen ressurs
+            </a>
+        </div>
     </form>
 </section>
-@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+
+@* Laster inn JavaScript for validering av skjemaet i nettleseren. *@
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

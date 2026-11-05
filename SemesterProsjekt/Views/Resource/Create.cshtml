@@ -1,8 +1,22 @@
 @model SemesterProsjekt.Models.ResourceViewModel
-@{ ViewData["Title"] = "Registrer ressurs"; }
+
+@{
+    ViewData["Title"] = "Registrer ressurs";
+}
+
+@* Henter registreringsskjemaet fra _Form.cshtml og sender med ressursmodellen. *@
 <partial name="_Form" model="Model" />
+
 @section Scripts {
+
+    @* Laster inn JavaScript for validering av skjemafeltene. *@
     <partial name="_ValidationScriptsPartial" />
-    <script src="~/js/registration-map.js" asp-append-version="true"></script>
-    <script src="~/js/need-registration.js" asp-append-version="true"></script>
+
+    @* Håndterer Leaflet-kartet og registrering av geografiske data. *@
+    <script src="~/js/registration-map.js"
+            asp-append-version="true"></script>
+
+    @* Håndterer JavaScript-funksjonalitet knyttet til registreringsskjemaet. *@
+    <script src="~/js/need-registration.js"
+            asp-append-version="true"></script>
 }

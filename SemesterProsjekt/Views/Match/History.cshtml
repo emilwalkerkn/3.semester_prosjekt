@@ -1,10 +1,58 @@
 @model IEnumerable<SemesterProsjekt.Models.ViewModels.MatchListItemViewModel>
-@{ ViewData["Title"] = "Leveringshistorikk"; }
+
+@{
+    ViewData["Title"] = "Leveringshistorikk";
+}
+
+@* Viser historikken over fullførte, avslåtte og avbrutte avtaler. *@
 <section class="overview-page delivery-page">
-    <header class="overview-heading"><div><p class="eyebrow">Historikk</p><h1>Leveringshistorikk</h1><p class="page-intro">Fullførte, avslåtte og avbrutte forespørsler. Avtalte og leverte bestillinger ligger under Mine avtaler frem til de er fullført.</p></div><a asp-action="Overview" class="portal-button secondary">Til mine avtaler</a></header>
-    @if (TempData["DeliverySuccess"] is string success) { <p class="delivery-feedback" role="status">@success</p> }
+
+    @* Viser sidens overskrift og en lenke tilbake til aktive avtaler. *@
+    <header class="overview-heading">
+        <div>
+            <p class="eyebrow">Historikk</p>
+            <h1>Leveringshistorikk</h1>
+            <p class="page-intro">
+                Fullførte, avslåtte og avbrutte forespørsler.
+                Avtalte og leverte bestillinger ligger under Mine avtaler
+                frem til de er fullført.
+            </p>
+        </div>
+
+        <a asp-action="Overview" class="portal-button secondary">
+            Til mine avtaler
+        </a>
+    </header>
+
+    @* Viser en bekreftelse dersom en leveringshandling er gjennomført. *@
+    @if (TempData["DeliverySuccess"] is string success)
+    {
+        <p class="delivery-feedback" role="status">
+            @success
+        </p>
+    }
+
+    @* Laster inn søke- og filtreringsskjemaet fra _Filters.cshtml. *@
     <partial name="_Filters" />
-    <p role="status">Viser @Model.Count() av @ViewData["TotalMatches"] avsluttede forespørsler og avtaler.</p>
-    @if (!Model.Any()) { <div class="portal-card empty-state"><h2>Ingen avsluttede avtaler å vise</h2><p>Prøv andre filtre eller nullstill søket.</p></div> }
-    @foreach (var item in Model) { <partial name="_DeliveryCard" model="item" /> }
+
+    @* Viser hvor mange avsluttede avtaler som passer med filtrene. *@
+    <p role="status">
+        Viser @Model.Count() av @ViewData["TotalMatches"] avsluttede forespørsler og avtaler.
+    </p>
+
+    @* Viser en melding dersom ingen avtaler passer med søket. *@
+    @if (!Model.Any())
+    {
+        <div class="portal-card empty-state">
+            <h2>Ingen avsluttede avtaler å vise</h2>
+            <p>Prøv andre filtre eller nullstill søket.</p>
+        </div>
+    }
+
+    @* Går gjennom avtalene og viser hver avtale med _DeliveryCard.cshtml. *@
+    @foreach (var item in Model)
+    {
+        <partial name="_DeliveryCard" model="item" />
+    }
+
 </section>

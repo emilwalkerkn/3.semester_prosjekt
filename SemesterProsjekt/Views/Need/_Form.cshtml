@@ -1,69 +1,202 @@
 @model SemesterProsjekt.Models.NeedViewModel
+
 @{
+    // Sjekker om brukeren skal redigere et eksisterende behov eller opprette et nytt.
     var editing = Model.NeedId > 0;
     var heading = editing ? "Rediger behov" : "Registrer behov";
 }
 
+@* Viser skjemaet for registrering eller redigering av behov. *@
 <section class="registration-page need-registration">
+
     <header class="registration-heading">
         <p class="home-eyebrow">@AppRoles.PublicActorDisplayName</p>
         <h1>@heading</h1>
         <p>Beskriv hva dere trenger, når det trengs og hvor hjelpen skal leveres.</p>
     </header>
 
-    <form asp-controller="Need" asp-action="@(editing ? "Edit" : "Create")" asp-route-id="@(editing ? Model.NeedId : (int?)null)" method="post" class="need-registration-layout">
+    @* Sender informasjonen til riktig metode i NeedController. *@
+    <form asp-controller="Need"
+          asp-action="@(editing ? "Edit" : "Create")"
+          asp-route-id="@(editing ? Model.NeedId : (int?)null)"
+          method="post"
+          class="need-registration-layout">
+
         <input asp-for="NeedId" type="hidden" />
+
         <div class="portal-card registration-card">
+
+            @* Viser nåværende status dersom brukeren redigerer et behov. *@
             @if (editing)
             {
-                <p><strong>Status:</strong> @(Model.Status switch { "New" => "Ny", "In progress" => "Under behandling", "Resolved" => "Løst", _ => Model.Status })</p>
+                <p>
+                    <strong>Status:</strong>
+                    @(Model.Status switch
+                    {
+                        "New" => "Ny",
+                        "In progress" => "Under behandling",
+                        "Resolved" => "Løst",
+                        _ => Model.Status
+                    })
+                </p>
             }
-            <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+
+            @* Viser eventuelle valideringsfeil fra skjemaet. *@
+            <div asp-validation-summary="ModelOnly"
+                 class="validation-summary"
+                 role="alert">
+            </div>
+
             <div class="form-grid">
+
+                @* Lar brukeren velge kategori og prioritet for behovet. *@
                 <div class="form-field">
                     <label asp-for="NeedTypeId"></label>
-                    <select asp-for="NeedTypeId" asp-items="Model.NeedTypes"><option value="">Velg type behov</option></select>
+
+                    <select asp-for="NeedTypeId" asp-items="Model.NeedTypes">
+                        <option value="">Velg type behov</option>
+                    </select>
+
                     <span asp-validation-for="NeedTypeId"></span>
                 </div>
+
                 <div class="form-field">
                     <label asp-for="Priority">Prioritet</label>
-                    <select asp-for="Priority"><option value="Low">Lav</option><option value="Normal">Normal</option><option value="High">Høy</option><option value="Critical">Kritisk</option></select>
+
+                    <select asp-for="Priority">
+                        <option value="Low">Lav</option>
+                        <option value="Normal">Normal</option>
+                        <option value="High">Høy</option>
+                        <option value="Critical">Kritisk</option>
+                    </select>
+
                     <span asp-validation-for="Priority"></span>
                 </div>
+
+                @* Registrerer tittel og beskrivelse av behovet. *@
                 <div class="form-field full">
                     <label asp-for="Title">Tittel</label>
-                    <input asp-for="Title" placeholder="For eksempel: Drikkevann til evakueringssenter" />
+
+                    <input asp-for="Title"
+                           placeholder="For eksempel: Drikkevann til evakueringssenter" />
+
                     <span asp-validation-for="Title"></span>
                 </div>
+
                 <div class="form-field full">
                     <label asp-for="Description">Beskrivelse</label>
-                    <textarea asp-for="Description" rows="5" placeholder="Beskriv hva som trengs og annen viktig informasjon."></textarea>
+
+                    <textarea asp-for="Description"
+                              rows="5"
+                              placeholder="Beskriv hva som trengs og annen viktig informasjon."></textarea>
+
                     <span asp-validation-for="Description"></span>
                 </div>
-                <div class="form-field"><label asp-for="Quantity">Mengde</label><input asp-for="Quantity" type="number" min="0" step="0.01" placeholder="10" /><span asp-validation-for="Quantity"></span></div>
-                <div class="form-field"><label asp-for="Unit">Enhet</label><input asp-for="Unit" placeholder="liter eller stk" /><span asp-validation-for="Unit"></span></div>
+
+                @* Lar brukeren oppgi hvor mye som trengs og hvilken enhet som brukes. *@
+                <div class="form-field">
+                    <label asp-for="Quantity">Mengde</label>
+
+                    <input asp-for="Quantity"
+                           type="number"
+                           min="0"
+                           step="0.01"
+                           placeholder="10" />
+
+                    <span asp-validation-for="Quantity"></span>
+                </div>
+
+                <div class="form-field">
+                    <label asp-for="Unit">Enhet</label>
+
+                    <input asp-for="Unit"
+                           placeholder="liter eller stk" />
+
+                    <span asp-validation-for="Unit"></span>
+                </div>
+
+                @* Registrerer tidspunktet behovet gjelder fra.
+                   Ved ny registrering foreslås nåværende tidspunkt. *@
                 <div class="form-field full">
                     <label asp-for="NeededFrom">Når trengs hjelpen?</label>
-                    <input asp-for="NeededFrom" type="datetime-local" data-use-local-now="@(!editing && Context.Request.Method == "GET" ? "true" : "false")" />
-                    <small>@(editing ? "Lagret tidspunkt vises. Endre dato og klokkeslett hvis behovet har endret seg." : "Foreslått tidspunkt er nå. Endre dato og klokkeslett dersom behovet gjelder senere.")</small>
+
+                    <input asp-for="NeededFrom"
+                           type="datetime-local"
+                           data-use-local-now="@(!editing && Context.Request.Method == "GET" ? "true" : "false")" />
+
+                    <small>
+                        @(editing
+                            ? "Lagret tidspunkt vises. Endre dato og klokkeslett hvis behovet har endret seg."
+                            : "Foreslått tidspunkt er nå. Endre dato og klokkeslett dersom behovet gjelder senere.")
+                    </small>
+
                     <span asp-validation-for="NeededFrom"></span>
                 </div>
+
+                @* Registrerer kontaktinformasjon til personen som har opprettet behovet. *@
                 <div class="form-field full">
                     <label asp-for="ContactPoint">Kontaktinformasjon</label>
-                    <input asp-for="ContactPoint" placeholder="Navn, telefonnummer eller e-postadresse" />
+
+                    <input asp-for="ContactPoint"
+                           placeholder="Navn, telefonnummer eller e-postadresse" />
+
                     <span asp-validation-for="ContactPoint"></span>
                 </div>
             </div>
+
+            @* Beholder statusen når skjemaet sendes til controlleren. *@
             <input asp-for="Status" type="hidden" />
-            <div class="registration-actions"><a asp-action="Overview" class="portal-button secondary">Avbryt</a><button type="submit" class="portal-button">@(editing ? "Lagre endringer" : "Registrer behov")</button></div>
+
+            @* Lar brukeren lagre behovet eller avbryte registreringen. *@
+            <div class="registration-actions">
+                <a asp-action="Overview" class="portal-button secondary">
+                    Avbryt
+                </a>
+
+                <button type="submit" class="portal-button">
+                    @(editing ? "Lagre endringer" : "Registrer behov")
+                </button>
+            </div>
         </div>
+
+        @* Viser Leaflet-kartet der brukeren må velge geografisk plassering. *@
         <aside class="portal-card need-map-panel" id="need-map-panel">
-            <div class="registration-map-heading"><div><h2>Plassering på kartet</h2><p>Velg markør for et punkt eller tegn en linje. Plassering er påkrevd.</p></div></div>
-            <button type="button" class="portal-button secondary need-fullscreen" aria-controls="need-map-panel">Vis kart i fullskjerm</button>
-            <div id="NeedMap" class="registration-map" data-registration-map data-geometry-type-id="GeometryType" data-geometry-data-id="GeometryData" data-map-status-id="NeedMapStatus"></div>
-            <input asp-for="GeometryType" type="hidden" id="GeometryType" /><input asp-for="GeometryData" type="hidden" id="GeometryData" />
-            <p id="NeedMapStatus" class="registration-map-status" aria-live="polite">Ingen plassering valgt ennå.</p>
-            <span asp-validation-for="GeometryType"></span><span asp-validation-for="GeometryData"></span>
+
+            <div class="registration-map-heading">
+                <div>
+                    <h2>Plassering på kartet</h2>
+                    <p>Velg markør for et punkt eller tegn en linje. Plassering er påkrevd.</p>
+                </div>
+            </div>
+
+            @* Lar brukeren utvide kartet til fullskjerm. *@
+            <button type="button"
+                    class="portal-button secondary need-fullscreen"
+                    aria-controls="need-map-panel">
+                Vis kart i fullskjerm
+            </button>
+
+            @* Kartet henter og lagrer geografiske data gjennom skjulte skjemafelter. *@
+            <div id="NeedMap"
+                 class="registration-map"
+                 data-registration-map
+                 data-geometry-type-id="GeometryType"
+                 data-geometry-data-id="GeometryData"
+                 data-map-status-id="NeedMapStatus">
+            </div>
+
+            <input asp-for="GeometryType" type="hidden" id="GeometryType" />
+            <input asp-for="GeometryData" type="hidden" id="GeometryData" />
+
+            @* Viser om brukeren har valgt en plassering på kartet. *@
+            <p id="NeedMapStatus"
+               class="registration-map-status"
+               aria-live="polite">
+                Ingen plassering valgt ennå.
+            </p>
+
+            <span asp-validation-for="GeometryType"></span>
+            <span asp-validation-for="GeometryData"></span>
         </aside>
     </form>
 </section>

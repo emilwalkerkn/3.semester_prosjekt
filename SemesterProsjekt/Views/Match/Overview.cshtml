@@ -1,14 +1,92 @@
 @model IEnumerable<SemesterProsjekt.Models.ViewModels.MatchListItemViewModel>
+
 @{
     ViewData["Title"] = "Mine avtaler";
+
+    // Sjekker om brukeren har tilgang som offentlig aktør.
     var publicActor = ResourceVisibility.CanBrowseAll(User);
-    var items = Model.OrderByDescending(m => m.CanRespond || m.CanComplete || m.CanDeliver).ThenByDescending(m => m.MatchedAt).ToList();
+
+    // Sorterer avtalene slik at de som krever handling vises først.
+    // Deretter sorteres avtalene etter dato, med de nyeste øverst.
+    var items = Model
+        .OrderByDescending(m => m.CanRespond || m.CanComplete || m.CanDeliver)
+        .ThenByDescending(m => m.MatchedAt)
+        .ToList();
 }
+
+@* Viser en oversikt over brukerens aktive forespørsler og avtaler. *@
 <section class="overview-page delivery-page">
-    <header class="overview-heading"><div><p class="eyebrow">Koordinering</p><h1>@(publicActor ? "Mine forespørsler og avtaler" : "Forespørsler til meg")</h1><p class="page-intro">@(publicActor ? "Følg forespørselen fra bekreftet levering til mottak." : "Svar på forespørsler om dine ressurser og følg opp avtalte leveranser.")</p></div><div class="record-actions"><a asp-action="History" class="portal-button secondary">Historikk</a>@if (publicActor) { <a asp-controller="Need" asp-action="Overview" class="portal-button">Finn et behov</a> }</div></header>
-    @if (TempData["DeliverySuccess"] is string success) { <p class="delivery-feedback" role="status">@success</p> }
+
+    @* Tilpasser overskrift og beskrivelse etter brukerens rolle. *@
+    <header class="overview-heading">
+        <div>
+            <p class="eyebrow">Koordinering</p>
+
+            <h1>
+                @(publicActor
+                    ? "Mine forespørsler og avtaler"
+                    : "Forespørsler til meg")
+            </h1>
+
+            <p class="page-intro">
+                @(publicActor
+                    ? "Følg forespørselen fra bekreftet levering til mottak."
+                    : "Svar på forespørsler om dine ressurser og følg opp avtalte leveranser.")
+            </p>
+        </div>
+
+        @* Viser historikk og gir offentlige aktører tilgang til behovsoversikten. *@
+        <div class="record-actions">
+            <a asp-action="History" class="portal-button secondary">
+                Historikk
+            </a>
+
+            @if (publicActor)
+            {
+                <a asp-controller="Need"
+                   asp-action="Overview"
+                   class="portal-button">
+                    Finn et behov
+                </a>
+            }
+        </div>
+    </header>
+
+    @* Viser en bekreftelse dersom en handling er gjennomført. *@
+    @if (TempData["DeliverySuccess"] is string success)
+    {
+        <p class="delivery-feedback" role="status">
+            @success
+        </p>
+    }
+
+    @* Laster inn skjemaet for søk og filtrering av avtaler. *@
     <partial name="_Filters" />
-    <p role="status">Viser @items.Count av @ViewData["TotalMatches"] aktive forespørsler og avtaler.</p>
-    @if (!items.Any()) { <div class="portal-card empty-state"><h2>Ingen forespørsler eller avtaler å vise</h2><p>Prøv andre filtre eller nullstill søket. @(publicActor ? "Du kan sende en forespørsel fra Finn ressurser på et av dine behov." : "Nye forespørsler vises her når noen velger en av dine ressurser.")</p></div> }
-    @foreach (var item in items) { <partial name="_DeliveryCard" model="item" /> }
+
+    @* Viser hvor mange aktive avtaler som passer med filtrene. *@
+    <p role="status">
+        Viser @items.Count av @ViewData["TotalMatches"] aktive forespørsler og avtaler.
+    </p>
+
+    @* Viser en melding dersom ingen avtaler passer med søket. *@
+    @if (!items.Any())
+    {
+        <div class="portal-card empty-state">
+            <h2>Ingen forespørsler eller avtaler å vise</h2>
+
+            <p>
+                Prøv andre filtre eller nullstill søket.
+                @(publicActor
+                    ? "Du kan sende en forespørsel fra Finn ressurser på et av dine behov."
+                    : "Nye forespørsler vises her når noen velger en av dine ressurser.")
+            </p>
+        </div>
+    }
+
+    @* Går gjennom avtalene og viser hver avtale med _DeliveryCard.cshtml. *@
+    @foreach (var item in items)
+    {
+        <partial name="_DeliveryCard" model="item" />
+    }
+
 </section>
