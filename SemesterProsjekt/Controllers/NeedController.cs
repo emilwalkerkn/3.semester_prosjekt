@@ -39,9 +39,9 @@ public class NeedController : Controller
         ViewData["NeedTypeId"] = needTypeId;
         ViewData["Status"] = status;
         ViewData["Priority"] = priority;
-        ViewData["NeedTypes"] = needs.GroupBy(n => n.NeedTypeId)
-            .Select(group => new SelectListItem(group.First().NeedTypeName ?? $"Type {group.Key}", group.Key.ToString(), group.Key == needTypeId))
-            .OrderBy(item => item.Text).ToList();
+        ViewData["NeedTypes"] = (await _needRepository.GetNeedTypesAsync())
+            .Select(type => new SelectListItem(type.Name, type.NeedTypeId.ToString(), type.NeedTypeId == needTypeId))
+            .OrderBy(item => item.Value == CategoryCatalog.OtherId.ToString()).ThenBy(item => item.Text).ToList();
         return View(NeedSearch.Apply(needs, search, needTypeId, status, priority).ToList());
     }
     

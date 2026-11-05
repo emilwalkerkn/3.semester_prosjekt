@@ -122,7 +122,7 @@ public class NeedRepository : INeedRepository
         const string sql = """
             SELECT NeedTypeId, Name
             FROM NeedType
-            ORDER BY Name;
+            ORDER BY CASE WHEN NeedTypeId = 99 THEN 1 ELSE 0 END, Name;
             """;
 
         using var connection = _connectionFactory.CreateConnection();

@@ -143,15 +143,28 @@ CREATE TABLE IF NOT EXISTS `Match` (
 -- primærnøkler eller unike typenavn. Eksisterende rader oppdateres ikke.
 INSERT IGNORE INTO NeedType (NeedTypeId, Name) VALUES
     (1, 'Mat og drikke'),
-    (2, 'Transport'),
+    (2, 'Kjøretøy'),
     (3, 'Medisinsk utstyr'),
     (4, 'Mannskap'),
-    (5, 'Overnatting');
+    (5, 'Overnatting'),
+    (6, 'Strøm og belysning'),
+    (7, 'Varme og bekledning'),
+    (8, 'Kommunikasjon'),
+    (9, 'Hygiene og sanitær'),
+    (10, 'Verktøy og maskiner'),
+    (99, 'Annet');
 
 
 -- Legger inn faste ressurstyper som brukes i registreringsskjemaet.
 INSERT IGNORE INTO ResourceType (ResourceTypeId, Name) VALUES
     (1, 'Kjøretøy'),
     (2, 'Medisinsk utstyr'),
-    (3, 'Matforsyning'),
-    (4, 'Mannskap');
+    (3, 'Mat og drikke'),
+    (4, 'Mannskap'),
+    (5, 'Overnatting'),
+    (6, 'Strøm og belysning'),
+    (7, 'Varme og bekledning'),
+    (8, 'Kommunikasjon'),
+    (9, 'Hygiene og sanitær'),
+    (10, 'Verktøy og maskiner'),
+    (99, 'Annet');
