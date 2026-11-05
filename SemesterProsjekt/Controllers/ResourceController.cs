@@ -26,14 +26,23 @@ public class ResourceController : Controller
     }
 
   
-    /// Henter alle ressurser og viser dem i en utskriftsvennlig visning.
-    public async Task<IActionResult> Print() =>
-        View(await _resourceRepository.GetAllAsync());
+    /// Viser bare ressursene brukeren har lesetilgang til i utskriften.
+    public async Task<IActionResult> Print(string? search = null, int? resourceTypeId = null, string? status = null) =>
+        View(ResourceSearch.Apply(ResourceVisibility.Filter(User, await _resourceRepository.GetAllAsync()), search, resourceTypeId, status).ToList());
 
   
-    /// Henter alle ressurser og sender dem til ressursoversikten.
-    public async Task<IActionResult> Overview() =>
-        View(await _resourceRepository.GetAllAsync());
+    /// Kart og liste bygges fra ressursene brukeren har lesetilgang til.
+    public async Task<IActionResult> Overview(string? search = null, int? resourceTypeId = null, string? status = null)
+    {
+        var visible = ResourceVisibility.Filter(User, await _resourceRepository.GetAllAsync()).ToList();
+        ViewData["Search"] = search;
+        ViewData["ResourceTypeId"] = resourceTypeId;
+        ViewData["Status"] = status;
+        ViewData["ResourceTypes"] = visible.GroupBy(r => r.ResourceTypeId)
+            .Select(group => new SelectListItem(group.First().ResourceTypeName ?? $"Type {group.Key}", group.Key.ToString(), group.Key == resourceTypeId))
+            .OrderBy(item => item.Text).ToList();
+        return View(ResourceSearch.Apply(visible, search, resourceTypeId, status).ToList());
+    }
 
   
     /// Viser et tomt registreringsskjema med ressurstyper hentet fra databasen.
@@ -162,7 +171,9 @@ public class ResourceController : Controller
     private async Task<IActionResult> ShowResourceAsync(int id, string viewName)
     {
         var resource = await _resourceRepository.GetByIdAsync(id);
-        return resource is null ? NotFound() : View(viewName, resource);
+        if (resource is null) return NotFound();
+        if (!ResourceVisibility.CanView(User, resource)) return Forbid();
+        return View(viewName, resource);
     }
 
   

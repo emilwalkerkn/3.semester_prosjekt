@@ -22,10 +22,9 @@
     // Rollen avgjør hvilke tekster og handlinger som vises.
     var isAdmin = User.IsInRole(AppRoles.Admin);
 
-    // Begge aktørtypene og admin kan foreslå matcher.
+    // Bare offentlig aktør og admin kan velge behov for et nytt forslag.
     var canPropose = isAdmin ||
-                     User.IsInRole(AppRoles.NeedsActor) ||
-                     User.IsInRole(AppRoles.ResourceOwner);
+                     User.IsInRole(AppRoles.NeedsActor);
 
     // Controlleren sender bare matcher brukeren har tilgang til.
     var matches = Model.ToList();

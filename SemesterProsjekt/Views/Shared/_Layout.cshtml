@@ -18,9 +18,9 @@
         ? "Ikke innlogget"
         : User.IsInRole("Admin")
             ? "Administrator"
-            : User.IsInRole("Ressurseier")
-                ? "Ressurseier"
-                : "Behovsaktør";
+            : User.IsInRole(AppRoles.NeedsActor)
+                ? AppRoles.PublicActorDisplayName
+                : User.IsInRole(AppRoles.ResourceOwner) ? "Ressurseier" : "Bruker";
 }
 
 <!DOCTYPE html>
@@ -122,6 +122,8 @@
                         Lenke til behovsoversikten.
                         Opprettingssiden markeres med en annen lenke.
                     *@
+                    @if (ResourceVisibility.CanBrowseAll(User))
+                    {
                     <a asp-controller="Need"
                        asp-action="Overview"
                        class="@((ViewContext.RouteData.Values["controller"]?.ToString() == "Need" &&
@@ -130,6 +132,7 @@
                                     : "")">
                         Behov
                     </a>
+                    }
 
                     @* Lenke til oversikten over ressurser. *@
                     <a asp-controller="Resource"
@@ -138,7 +141,7 @@
                                  ViewContext.RouteData.Values["action"]?.ToString() != "Create")
                                     ? "active"
                                     : "")">
-                        Tilgjengelige ressurser
+                        @ResourceVisibility.OverviewTitle(User)
                     </a>
 
                     @*

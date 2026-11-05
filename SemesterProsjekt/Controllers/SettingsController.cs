@@ -134,7 +134,7 @@ public class SettingsController : Controller
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email ?? "",
-                Role = roles.FirstOrDefault() ?? "Bruker"
+                Role = AppRoles.DisplayName(roles.FirstOrDefault() ?? "Bruker")
             },
             Password = password ?? new PasswordSettingsViewModel()
         };

@@ -61,6 +61,7 @@ public class MatchController : Controller
     /// Viser skjemaet for matchforslag med valg tilpasset brukerens rolle.
 
     [HttpGet]
+    [Authorize(Roles = AppRoles.NeedsActor + "," + AppRoles.Admin)]
     public async Task<IActionResult> Create()
     {
         var model = new CreateMatchViewModel();
@@ -73,6 +74,7 @@ public class MatchController : Controller
     /// Nye matcher får status Foreslått.
 
     [HttpPost]
+    [Authorize(Roles = AppRoles.NeedsActor + "," + AppRoles.Admin)]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CreateMatchViewModel model)
     {
@@ -239,7 +241,7 @@ public class MatchController : Controller
     private async Task LoadOptionsAsync(CreateMatchViewModel model)
     {
         var needs = await _needRepository.GetAllAsync();
-        var resources = await _resourceRepository.GetAllAsync();
+        var resources = ResourceVisibility.Filter(User, await _resourceRepository.GetAllAsync());
         var reservations = (await _matchRepository.GetReservationsAsync()).ToList();
         needs = needs.Where(need => MatchAvailability.CanMatchNeed(need, reservations));
         resources = resources.Where(resource => MatchAvailability.CanMatchResource(resource, reservations));
