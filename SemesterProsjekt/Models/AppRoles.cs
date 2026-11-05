@@ -19,7 +19,6 @@ public static class AppRoles
     // Admin er bevisst utelatt, så ingen kan gjøre seg selv til administrator.
     public static readonly string[] SelfServiceRoles =
     [
-        ResourceOwner,
-        NeedsActor
+        ResourceOwner
     ];
 }
