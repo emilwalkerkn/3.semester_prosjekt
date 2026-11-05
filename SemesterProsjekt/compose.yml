@@ -37,3 +37,4 @@ services:
 volumes:
   mariadb_data:
   dataprotection_keys:
+
