@@ -57,5 +57,15 @@
             status.textContent = "Ingen plassering valgt ennå.";
             status.classList.remove("is-selected");
         });
+        if (geometryData.value) {
+            try {
+                L.geoJSON(JSON.parse(geometryData.value), {
+                    onEachFeature: (_feature, layer) => saveGeometry(layer)
+                });
+            } catch (_error) {
+                status.textContent = "Plasseringen kunne ikke vises. Velg den på nytt.";
+            }
+        }
+        document.addEventListener("fullscreenchange", () => map.invalidateSize());
     });
 })();

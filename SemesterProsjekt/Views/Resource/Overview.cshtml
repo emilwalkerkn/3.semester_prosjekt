@@ -39,7 +39,15 @@
         .Select(resource => new
         {
             geometryData = resource.GeometryData,
-            title = resource.Title
+            title = resource.Title,
+            status = resource.Status,
+            quantity = resource.Quantity,
+            unit = resource.Unit,
+            time = resource.AvailableFrom?.ToString("dd.MM.yyyy HH:mm"),
+            timeLabel = "Tilgjengelig fra",
+            detailsUrl = Url.Action("Details", "Resource", new { id = resource.ResourceId }),
+            symbol = SemesterProsjekt.Models.PortalTypeIcons.ForResource(resource.ResourceTypeId).Symbol,
+            typeLabel = SemesterProsjekt.Models.PortalTypeIcons.ForResource(resource.ResourceTypeId).Label
         });
 }
 
@@ -98,6 +106,7 @@
             </span>
         </div>
 
+        <button type="button" class="portal-button secondary overview-fullscreen" aria-controls="resourceMap">Vis kart i fullskjerm</button>
         @* JavaScript bruker dette området til å vise kartet. *@
         <div id="resourceMap"
              class="map-panel"
@@ -159,7 +168,7 @@
                             <span class="type-icon"
                                   role="img"
                                   aria-label="@typeIcon.Label">
-                                @typeIcon.Symbol
+                                <img src="@typeIcon.Symbol" alt="" />
                             </span>
 
                             <div>

@@ -1,287 +1,52 @@
-@*
-    Dette er siden for å registrere en ny ressurs.
-
-    Her kan brukeren:
-    - Velge type ressurs og status
-    - Beskrive ressursen
-    - Skrive inn mengde og enhet
-    - Velge når ressursen er tilgjengelig
-    - Legge inn kontaktinformasjon
-    - Velge plassering på kartet
-*@
-
 @model SemesterProsjekt.Models.ResourceViewModel
+@{ ViewData["Title"] = "Registrer ressurs"; }
 
-@{
-    // Angir tittelen til siden.
-    ViewData["Title"] = "Registrer ressurs";
-}
-
-<section class="registration-page">
-
-    @* Overskriften og introduksjonen til siden. *@
+<section class="registration-page need-registration">
     <header class="registration-heading">
         <p class="home-eyebrow">Ressurseier</p>
         <h1>Registrer ressurs</h1>
-
-        <p>
-            Legg inn hva dere kan bidra med, når ressursen
-            er tilgjengelig og hvor den befinner seg.
-        </p>
+        <p>Beskriv hva dere kan bidra med, når ressursen er tilgjengelig og hvor den finnes.</p>
     </header>
-
-    @*
-        Skjemaet sender opplysningene til Create-handlingen
-        i ResourceController.
-    *@
-    <form asp-controller="Resource"
-          asp-action="Create"
-          method="post"
-          class="portal-card registration-card">
-
-        @*
-            Viser feilmeldinger som gjelder hele modellen.
-            role="alert" gjør at skjermlesere leser opp feilene.
-        *@
-        <div asp-validation-summary="ModelOnly"
-             class="validation-summary"
-             role="alert">
-        </div>
-
-        <div class="form-grid">
-
-            @* Nedtrekksliste for å velge type ressurs. *@
-            <div class="form-field">
-                <label asp-for="ResourceTypeId">
-                    Ressurstype
-                </label>
-
-                @*
-                    Model.ResourceTypes inneholder typene
-                    som brukeren kan velge mellom.
-                *@
-                <select asp-for="ResourceTypeId"
-                        asp-items="Model.ResourceTypes">
-                    <option value="">
-                        Velg ressurstype
-                    </option>
-                </select>
-
-                <span asp-validation-for="ResourceTypeId"
-                      class="field-validation-error">
-                </span>
-            </div>
-
-            @* Nedtrekksliste for statusen til ressursen. *@
-            <div class="form-field">
-                <label asp-for="Status">
-                    Status
-                </label>
-
-                <select asp-for="Status">
-                    <option value="Available">
-                        Tilgjengelig
-                    </option>
-
-                    <option value="Unavailable">
-                        Ikke tilgjengelig
-                    </option>
-                </select>
-
-                <span asp-validation-for="Status"
-                      class="field-validation-error">
-                </span>
-            </div>
-
-            @* Felt for en kort tittel til ressursen. *@
-            <div class="form-field full">
-                <label asp-for="Title">
-                    Tittel
-                </label>
-
-                <input asp-for="Title"
-                       autocomplete="off"
-                       placeholder="For eksempel: Førstehjelpsutstyr" />
-
-                <span asp-validation-for="Title"
-                      class="field-validation-error">
-                </span>
-            </div>
-
-            @* Felt for en mer detaljert beskrivelse. *@
-            <div class="form-field full">
-                <label asp-for="Description">
-                    Beskrivelse
-                </label>
-
-                <textarea asp-for="Description"
-                          rows="5"
-                          placeholder="Beskriv ressursen, kapasitet og annen viktig informasjon.">
-                </textarea>
-
-                <span asp-validation-for="Description"
-                      class="field-validation-error">
-                </span>
-            </div>
-
-            @* Felt for hvor stor mengde som er tilgjengelig. *@
-            <div class="form-field">
-                <label asp-for="Quantity">
-                    Mengde
-                </label>
-
-                <input asp-for="Quantity"
-                       type="number"
-                       min="0"
-                       step="0.01"
-                       placeholder="For eksempel 10" />
-
-                <span asp-validation-for="Quantity"
-                      class="field-validation-error">
-                </span>
-            </div>
-
-            @* Felt for enheten til mengden. *@
-            <div class="form-field">
-                <label asp-for="Unit">
-                    Enhet
-                </label>
-
-                <input asp-for="Unit"
-                       placeholder="For eksempel stk, kg eller liter" />
-
-                <span asp-validation-for="Unit"
-                      class="field-validation-error">
-                </span>
-            </div>
-
-            @* Velger når ressursen blir tilgjengelig. *@
-            <div class="form-field">
-                <label asp-for="AvailableFrom">
-                    Tilgjengelig fra
-                </label>
-
-                <input asp-for="AvailableFrom"
-                       type="datetime-local" />
-
-                <span asp-validation-for="AvailableFrom"
-                      class="field-validation-error">
-                </span>
-            </div>
-
-            @* Velger hvor lenge ressursen er tilgjengelig. *@
-            <div class="form-field">
-                <label asp-for="AvailableTo">
-                    Tilgjengelig til
-                </label>
-
-                <input asp-for="AvailableTo"
-                       type="datetime-local" />
-
-                <span asp-validation-for="AvailableTo"
-                      class="field-validation-error">
-                </span>
-            </div>
-
-            @* Felt for kontaktinformasjon. *@
-            <div class="form-field full">
-                <label asp-for="ContactPoint">
-                    Kontaktpunkt
-                </label>
-
-                <input asp-for="ContactPoint"
-                       placeholder="Navn, telefonnummer eller e-postadresse" />
-
-                <span asp-validation-for="ContactPoint"
-                      class="field-validation-error">
-                </span>
-            </div>
-
-            @* Kartet brukes til å velge hvor ressursen finnes. *@
-            <div class="form-field full registration-map-field">
-                <div class="registration-map-heading">
-                    <div>
-                        <label for="ResourceMap">
-                            Plassering på kartet
-                        </label>
-
-                        <p>
-                            Velg markør for ett punkt, eller linjeverktøyet
-                            for å tegne en linje med flere punkter.
-                        </p>
-                    </div>
-
-                    <span class="required-label">
-                        Påkrevd
-                    </span>
+    <form asp-controller="Resource" asp-action="Create" method="post" class="need-registration-layout">
+        <div class="portal-card registration-card">
+            <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+            <div class="form-grid">
+                <div class="form-field">
+                    <label asp-for="ResourceTypeId">Ressurstype</label>
+                    <select asp-for="ResourceTypeId" asp-items="Model.ResourceTypes"><option value="">Velg ressurstype</option></select>
+                    <span asp-validation-for="ResourceTypeId"></span>
                 </div>
-
-                @*
-                    JavaScript bruker dette området til å vise kartet.
-                    Data-attributtene peker til feltene hvor
-                    kartinformasjonen blir lagret.
-                *@
-                <div id="ResourceMap"
-                     class="registration-map"
-                     data-registration-map
-                     data-geometry-type-id="GeometryType"
-                     data-geometry-data-id="GeometryData"
-                     data-map-status-id="ResourceMapStatus">
+                <div class="form-field">
+                    <label asp-for="Status">Status</label>
+                    <select asp-for="Status"><option value="Available">Tilgjengelig</option><option value="Unavailable">Ikke tilgjengelig</option></select>
+                    <span asp-validation-for="Status"></span>
                 </div>
-
-                @*
-                    Skjulte felt lagrer typen plassering
-                    og selve kartdataene.
-                *@
-                <input asp-for="GeometryType"
-                       type="hidden"
-                       id="GeometryType" />
-
-                <input asp-for="GeometryData"
-                       type="hidden"
-                       id="GeometryData" />
-
-                @*
-                    Viser om brukeren har valgt en plassering.
-                    aria-live lar skjermlesere lese opp endringer.
-                *@
-                <p id="ResourceMapStatus"
-                   class="registration-map-status"
-                   aria-live="polite">
-                    Ingen plassering valgt ennå.
-                </p>
-
-                <span asp-validation-for="GeometryType"
-                      class="field-validation-error">
-                </span>
-
-                <span asp-validation-for="GeometryData"
-                      class="field-validation-error">
-                </span>
+                <div class="form-field full"><label asp-for="Title">Tittel</label><input asp-for="Title" placeholder="For eksempel: Førstehjelpsutstyr" /><span asp-validation-for="Title"></span></div>
+                <div class="form-field full"><label asp-for="Description">Beskrivelse</label><textarea asp-for="Description" rows="5" placeholder="Beskriv ressursen og annen viktig informasjon."></textarea><span asp-validation-for="Description"></span></div>
+                <div class="form-field"><label asp-for="Quantity">Mengde</label><input asp-for="Quantity" type="number" min="0" step="0.01" placeholder="10" /><span asp-validation-for="Quantity"></span></div>
+                <div class="form-field"><label asp-for="Unit">Enhet</label><input asp-for="Unit" placeholder="liter eller stk" /><span asp-validation-for="Unit"></span></div>
+                <div class="form-field full">
+                    <label asp-for="AvailableFrom">Når er ressursen tilgjengelig?</label>
+                    <input asp-for="AvailableFrom" type="datetime-local" data-use-local-now="@(Context.Request.Method == "GET" ? "true" : "false")" />
+                    <small>Foreslått tidspunkt er nå. Endre dato og klokkeslett dersom ressursen er tilgjengelig senere.</small>
+                    <span asp-validation-for="AvailableFrom"></span>
+                </div>
+                <div class="form-field full"><label asp-for="ContactPoint">Kontaktinformasjon</label><input asp-for="ContactPoint" placeholder="Navn, telefonnummer eller e-postadresse" /><span asp-validation-for="ContactPoint"></span></div>
             </div>
+            <div class="registration-actions"><a asp-action="Overview" class="portal-button secondary">Avbryt</a><button type="submit" class="portal-button">Registrer ressurs</button></div>
         </div>
-
-        @* Knapper for å avbryte eller registrere ressursen. *@
-        <div class="registration-actions">
-            <a asp-action="Overview"
-               class="portal-button secondary">
-                Avbryt
-            </a>
-
-            <button type="submit"
-                    class="portal-button">
-                Registrer ressurs
-            </button>
-        </div>
+        <aside class="portal-card need-map-panel" id="need-map-panel">
+            <div class="registration-map-heading"><div><h2>Plassering på kartet</h2><p>Velg markør for et punkt eller tegn en linje. Plassering er påkrevd.</p></div></div>
+            <button type="button" class="portal-button secondary need-fullscreen" aria-controls="need-map-panel">Vis kart i fullskjerm</button>
+            <div id="ResourceMap" class="registration-map" data-registration-map data-geometry-type-id="GeometryType" data-geometry-data-id="GeometryData" data-map-status-id="ResourceMapStatus"></div>
+            <input asp-for="GeometryType" type="hidden" id="GeometryType" /><input asp-for="GeometryData" type="hidden" id="GeometryData" />
+            <p id="ResourceMapStatus" class="registration-map-status" aria-live="polite">Ingen plassering valgt ennå.</p>
+            <span asp-validation-for="GeometryType"></span><span asp-validation-for="GeometryData"></span>
+        </aside>
     </form>
 </section>
-
 @section Scripts {
-    @* Henter skript som viser valideringsfeil i nettleseren. *@
     <partial name="_ValidationScriptsPartial" />
-
-    @* Henter JavaScript som viser og styrer kartet. *@
-    <script src="~/js/registration-map.js"
-            asp-append-version="true">
-    </script>
+    <script src="~/js/registration-map.js" asp-append-version="true"></script>
+    <script src="~/js/need-registration.js" asp-append-version="true"></script>
 }

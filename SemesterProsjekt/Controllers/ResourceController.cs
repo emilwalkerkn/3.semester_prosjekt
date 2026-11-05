@@ -42,7 +42,7 @@ public class ResourceController : Controller
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        var model = new ResourceViewModel();
+        var model = new ResourceViewModel { AvailableFrom = DateTime.Now };
         await LoadResourceTypesAsync(model);
         return View(model);
     }
@@ -56,6 +56,7 @@ public class ResourceController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(ResourceViewModel model)
     {
+        model.AvailableTo = null;
         ValidateDates(model);
 
         if (!ModelState.IsValid)
@@ -65,6 +66,7 @@ public class ResourceController : Controller
             return View(model);
         }
 
+        model.AvailableFrom ??= DateTime.Now;
         var resource = MapNewResource(model);
         var id = await _resourceRepository.CreateAsync(resource);
         return RedirectToAction(nameof(Result), new { id });
