@@ -133,14 +133,17 @@
     <div class="stat-grid home-stat-grid">
 
         @* Viser totalt antall registrerte behov. *@
+        @if (ResourceVisibility.CanBrowseAll(User))
+        {
         <article class="portal-card stat-card">
             <p>Registrerte behov</p>
             <strong>@Model.TotalNeeds</strong>
         </article>
+        }
 
         @* Viser totalt antall tilgjengelige ressurser. *@
         <article class="portal-card stat-card">
-            <p>Tilgjengelige ressurser</p>
+            <p>@ResourceVisibility.OverviewTitle(User)</p>
             <strong>@Model.TotalResources</strong>
         </article>
 
@@ -163,19 +166,15 @@
         </div>
     </div>
 
-    @*
-        Hvis listene med behov og ressurser er tomme,
-        vises en melding til brukeren.
-    *@
-    @if (!Model.RecentNeeds.Any() &&
-         !Model.RecentResources.Any())
+    <div class="home-latest-groups">
+    @if (ResourceVisibility.CanBrowseAll(User))
     {
-        <p class="empty-state">
-            Ingen registreringer ennå.
-        </p>
-    }
-    else
-    {
+        <section class="home-latest-group" aria-labelledby="latest-needs-heading">
+        <h3 id="latest-needs-heading">Siste behov</h3>
+        @if (!Model.RecentNeeds.Any())
+        {
+            <p>Ingen behov registrert ennå.</p>
+        }
         <ul class="summary-list">
 
             @*
@@ -208,8 +207,8 @@
                     </a>
 
                     @* Viser statusen til behovet. *@
-                    <span class="status new">
-                        @need.Status
+                    <span class="status @(need.Status == NeedStatuses.Resolved ? "resolved" : "warning")">
+                        @(need.Status switch { NeedStatuses.New => "Ny", NeedStatuses.InProgress => "Under behandling", NeedStatuses.Resolved => "Løst", _ => need.Status })
                     </span>
 
                     <a asp-controller="Need"
@@ -220,6 +219,16 @@
                 </li>
             }
 
+        </ul>
+        </section>
+    }
+        <section class="home-latest-group" aria-labelledby="latest-resources-heading">
+        <h3 id="latest-resources-heading">@(ResourceVisibility.CanBrowseAll(User) ? "Siste ressurser" : "Mine siste ressurser")</h3>
+        @if (!Model.RecentResources.Any())
+        {
+            <p>@(ResourceVisibility.CanBrowseAll(User) ? "Ingen ressurser registrert ennå." : "Du har ikke registrert noen ressurser ennå.")</p>
+        }
+        <ul class="summary-list">
             @*
                 Går gjennom de siste ressursene
                 og lager ett listepunkt for hver ressurs.
@@ -251,8 +260,8 @@
                     </a>
 
                     @* Viser statusen til ressursen. *@
-                    <span class="status available">
-                        @resource.Status
+                    <span class="status @(resource.Status == "Available" ? "available" : "critical")">
+                        @(resource.Status == "Available" ? "Tilgjengelig" : resource.Status == "Unavailable" ? "Ikke tilgjengelig" : resource.Status)
                     </span>
 
                     <a asp-controller="Resource"
@@ -263,5 +272,6 @@
                 </li>
             }
         </ul>
-    }
+        </section>
+    </div>
 </section>

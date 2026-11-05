@@ -331,6 +331,9 @@ body { margin-bottom:0; }
 .home-overview h2 { margin:0 0 8px; font-size:28px; }.home-overview > div > p:last-child { margin:0; }
 .home-stat-grid { margin:0; grid-template-columns:repeat(3, minmax(0, 1fr)); }
 .home-latest { margin-top:0; }
+.home-latest-groups { display:grid; gap:28px; }
+.home-latest-group { min-width:0; }
+.home-latest-group h3 { margin:6px 0 8px; font-size:21px; color:var(--portal-ink); }
 .section-heading-row { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:10px; }
 .section-heading-row h2 { margin:0; padding:0; border:0; }.section-heading-row .home-eyebrow { margin-bottom:6px; }
 .text-link { color:var(--portal-blue-dark); font-weight:750; text-decoration:none; white-space:nowrap; }
@@ -638,6 +641,29 @@ html.dark-mode .need-form textarea::placeholder {
 .overview-list {
   display: grid;
   gap: 16px;
+}
+
+.resource-search { display:flex; flex-wrap:wrap; align-items:end; gap:16px; padding:20px; }
+.resource-search .form-field { flex:1 1 180px; min-width:0; }
+.resource-search .resource-search-text { flex:2 1 260px; }
+.resource-search .form-field label { font-size:16px; }
+.resource-search input, .resource-search select { font-size:16px; min-height:48px; }
+.resource-search-count { margin:0; color:var(--portal-ink); font-size:16px; }
+
+.portal-content:has(.split-overview-page) { max-width:none; }
+.overview-split { display:grid; grid-template-columns:minmax(0, 1fr) minmax(0, 1.15fr); gap:24px; align-items:start; }
+.overview-split > .overview-list { grid-column:1; grid-row:1; min-width:0; }
+.overview-split > .overview-map-card { grid-column:2; grid-row:1; position:sticky; top:20px; min-width:0; }
+.overview-split .map-panel { height:clamp(360px, 65vh, 850px); margin-bottom:0; }
+.overview-split .overview-meta { grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); }
+.overview-split .overview-record-footer { flex-wrap:wrap; }
+.overview-split .record-actions { margin-top:0; }
+.overview-split > .overview-map-card:fullscreen { position:fixed; }
+.overview-split .overview-map-card:fullscreen .map-panel { height:auto; flex:1; }
+@media (max-width:600px) {
+  .overview-split { grid-template-columns:1fr; }
+  .overview-split > .overview-map-card { grid-column:1; grid-row:1; position:static; }
+  .overview-split > .overview-list { grid-row:2; }
 }
 
 .overview-record-main h2 {

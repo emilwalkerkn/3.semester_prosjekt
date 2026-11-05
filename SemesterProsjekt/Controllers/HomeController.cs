@@ -37,8 +37,10 @@ public class HomeController : Controller
    
     public async Task<IActionResult> Index()
     {
-        var needs = (await _needRepository.GetAllAsync()).ToList();
-        var resources = (await _resourceRepository.GetAllAsync()).ToList();
+        var needs = ResourceVisibility.CanBrowseAll(User)
+            ? (await _needRepository.GetAllAsync()).ToList()
+            : new List<Need>();
+        var resources = ResourceVisibility.Filter(User, await _resourceRepository.GetAllAsync()).ToList();
 
         var model = new DashboardViewModel
         {
@@ -61,6 +63,7 @@ public class HomeController : Controller
     /// Henter og viser ett behov.
     /// Returnerer HTTP 404 dersom behovet ikke finnes.
    
+    [Authorize(Roles = AppRoles.NeedsActor + "," + AppRoles.Admin)]
     public async Task<IActionResult> NeedDetails(int id)
     {
         var need = await _needRepository.GetByIdAsync(id);
@@ -86,6 +89,7 @@ public class HomeController : Controller
             return NotFound();
         }
 
+        if (!ResourceVisibility.CanView(User, resource)) return Forbid();
         return View(resource);
     }
 
@@ -195,13 +199,14 @@ public class HomeController : Controller
    
     public async Task<IActionResult> ResourceOverview()
     {
-        var resources = await _resourceRepository.GetAllAsync();
+        var resources = ResourceVisibility.Filter(User, await _resourceRepository.GetAllAsync()).ToList();
         return View(resources);
     }
 
   
     /// Henter alle behov og sender dem til behovsoversikten.
    
+    [Authorize(Roles = AppRoles.NeedsActor + "," + AppRoles.Admin)]
     public async Task<IActionResult> NeedOverview()
     {
         var needs = await _needRepository.GetAllAsync();

@@ -14,7 +14,12 @@
 
 @{
     // Angir tittelen til siden.
-    ViewData["Title"] = "Tilgjengelige ressurser";
+    var ownResourcesOnly = !ResourceVisibility.CanBrowseAll(User);
+    var pageTitle = ResourceVisibility.OverviewTitle(User);
+    ViewData["Title"] = pageTitle;
+    var search = ViewData["Search"] as string;
+    var typeId = ViewData["ResourceTypeId"] as int?;
+    var statusFilter = ViewData["Status"] as string;
 
     /*
         Ressurseiere og administratorer
@@ -51,17 +56,16 @@
         });
 }
 
-<section class="overview-page">
+<section class="overview-page split-overview-page">
 
     @* Overskriften og introduksjonen til siden. *@
     <header class="overview-heading">
         <div>
             <p class="eyebrow">Oversikt</p>
-            <h1>Tilgjengelige ressurser</h1>
+            <h1>@pageTitle</h1>
 
             <p class="page-intro">
-                Finn ressurser som kan brukes for å løse
-                registrerte behov.
+                @(ownResourcesOnly ? "Se og administrer ressursene du selv har registrert." : "Finn ressurser som kan brukes for å løse registrerte behov.")
             </p>
         </div>
 
@@ -69,6 +73,9 @@
 
             @* Sender brukeren til en utskriftsvennlig side. *@
             <a asp-action="Print"
+               asp-route-search="@search"
+               asp-route-resourceTypeId="@typeId"
+               asp-route-status="@statusFilter"
                class="portal-button secondary">
                 Skriv ut liste
             </a>
@@ -87,6 +94,30 @@
         </div>
     </header>
 
+    <form asp-action="Overview" method="get" class="portal-card resource-search" role="search" aria-label="Søk og filtrer ressurser">
+        <div class="form-field resource-search-text">
+            <label for="resource-search">Søk i ressurser</label>
+            <input id="resource-search" type="search" name="search" value="@search" placeholder="Søk etter tittel, beskrivelse eller type" />
+        </div>
+        <div class="form-field">
+            <label for="resource-type-filter">Ressurstype</label>
+            <select id="resource-type-filter" name="resourceTypeId" asp-items="@(ViewData["ResourceTypes"] as IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)">
+                <option value="">Alle typer</option>
+            </select>
+        </div>
+        <div class="form-field">
+            <label for="resource-status-filter">Status</label>
+            <select id="resource-status-filter" name="status">
+                <option value="">Alle statuser</option>
+                <option value="Available" selected="@(statusFilter == "Available")">Tilgjengelig</option>
+                <option value="Unavailable" selected="@(statusFilter == "Unavailable")">Ikke tilgjengelig</option>
+            </select>
+        </div>
+        <button type="submit" class="portal-button">Søk og filtrer</button>
+        <a asp-action="Overview" class="portal-button secondary">Nullstill</a>
+    </form>
+    <p class="resource-search-count" role="status">Viser @Model.Count() ressurser. Kartet viser samme utvalg.</p>
+    <div class="overview-split">
     @* Viser plasseringen til ressursene på et kart. *@
     <section class="portal-card overview-map-card"
              aria-labelledby="resource-map-heading">
@@ -96,7 +127,7 @@
                 <p class="eyebrow">Kart</p>
 
                 <h2 id="resource-map-heading">
-                    Registrerte ressurser
+                    @pageTitle
                 </h2>
             </div>
 
@@ -122,10 +153,10 @@
         @if (!Model.Any())
         {
             <div class="portal-card empty-state">
-                <h2>Ingen ressurser ennå</h2>
+                <h2>Ingen ressurser å vise</h2>
 
                 <p>
-                    Nye ressurser dukker opp her når de er registrert.
+                    @(search != null || typeId.HasValue || !string.IsNullOrEmpty(statusFilter) ? "Ingen ressurser samsvarer med søket. Prøv andre filtre eller nullstill søket." : ownResourcesOnly ? "Du har ikke registrert noen ressurser ennå." : "Nye ressurser dukker opp her når de er registrert.")
                 </p>
 
                 @if (canRegister)
@@ -250,6 +281,7 @@
             }
         }
     </section>
+    </div>
 </section>
 
 @section Scripts {

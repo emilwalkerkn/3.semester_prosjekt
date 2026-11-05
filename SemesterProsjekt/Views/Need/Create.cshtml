@@ -1,64 +1,6 @@
 @model SemesterProsjekt.Models.NeedViewModel
 @{ ViewData["Title"] = "Registrer behov"; }
-
-<section class="registration-page need-registration">
-    <header class="registration-heading">
-        <p class="home-eyebrow">Behovsaktør</p>
-        <h1>Registrer behov</h1>
-        <p>Beskriv hva dere trenger, når det trengs og hvor hjelpen skal leveres.</p>
-    </header>
-
-    <form asp-controller="Need" asp-action="Create" method="post" class="need-registration-layout">
-        <div class="portal-card registration-card">
-            <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
-            <div class="form-grid">
-                <div class="form-field">
-                    <label asp-for="NeedTypeId"></label>
-                    <select asp-for="NeedTypeId" asp-items="Model.NeedTypes"><option value="">Velg type behov</option></select>
-                    <span asp-validation-for="NeedTypeId"></span>
-                </div>
-                <div class="form-field">
-                    <label asp-for="Priority">Prioritet</label>
-                    <select asp-for="Priority"><option value="Low">Lav</option><option value="Normal">Normal</option><option value="High">Høy</option><option value="Critical">Kritisk</option></select>
-                    <span asp-validation-for="Priority"></span>
-                </div>
-                <div class="form-field full">
-                    <label asp-for="Title">Tittel</label>
-                    <input asp-for="Title" placeholder="For eksempel: Drikkevann til evakueringssenter" />
-                    <span asp-validation-for="Title"></span>
-                </div>
-                <div class="form-field full">
-                    <label asp-for="Description">Beskrivelse</label>
-                    <textarea asp-for="Description" rows="5" placeholder="Beskriv hva som trengs og annen viktig informasjon."></textarea>
-                    <span asp-validation-for="Description"></span>
-                </div>
-                <div class="form-field"><label asp-for="Quantity">Mengde</label><input asp-for="Quantity" type="number" min="0" step="0.01" placeholder="10" /><span asp-validation-for="Quantity"></span></div>
-                <div class="form-field"><label asp-for="Unit">Enhet</label><input asp-for="Unit" placeholder="liter eller stk" /><span asp-validation-for="Unit"></span></div>
-                <div class="form-field full">
-                    <label asp-for="NeededFrom">Når trengs hjelpen?</label>
-                    <input asp-for="NeededFrom" type="datetime-local" data-use-local-now="@(Context.Request.Method == "GET" ? "true" : "false")" />
-                    <small>Foreslått tidspunkt er nå. Endre dato og klokkeslett dersom behovet gjelder senere.</small>
-                    <span asp-validation-for="NeededFrom"></span>
-                </div>
-                <div class="form-field full">
-                    <label asp-for="ContactPoint">Kontaktinformasjon</label>
-                    <input asp-for="ContactPoint" placeholder="Navn, telefonnummer eller e-postadresse" />
-                    <span asp-validation-for="ContactPoint"></span>
-                </div>
-            </div>
-            <input asp-for="Status" type="hidden" />
-            <div class="registration-actions"><a asp-action="Overview" class="portal-button secondary">Avbryt</a><button type="submit" class="portal-button">Registrer behov</button></div>
-        </div>
-        <aside class="portal-card need-map-panel" id="need-map-panel">
-            <div class="registration-map-heading"><div><h2>Plassering på kartet</h2><p>Velg markør for et punkt eller tegn en linje. Plassering er påkrevd.</p></div></div>
-            <button type="button" class="portal-button secondary need-fullscreen" aria-controls="need-map-panel">Vis kart i fullskjerm</button>
-            <div id="NeedMap" class="registration-map" data-registration-map data-geometry-type-id="GeometryType" data-geometry-data-id="GeometryData" data-map-status-id="NeedMapStatus"></div>
-            <input asp-for="GeometryType" type="hidden" id="GeometryType" /><input asp-for="GeometryData" type="hidden" id="GeometryData" />
-            <p id="NeedMapStatus" class="registration-map-status" aria-live="polite">Ingen plassering valgt ennå.</p>
-            <span asp-validation-for="GeometryType"></span><span asp-validation-for="GeometryData"></span>
-        </aside>
-    </form>
-</section>
+<partial name="_Form" model="Model" />
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/registration-map.js" asp-append-version="true"></script>
