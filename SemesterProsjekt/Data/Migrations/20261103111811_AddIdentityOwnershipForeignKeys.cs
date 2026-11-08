@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace SemesterProsjekt.Migrations
+namespace SemesterProsjekt.Data.Migrations
 {
     /// <inheritdoc />
     public partial class AddIdentityOwnershipForeignKeys : Migration

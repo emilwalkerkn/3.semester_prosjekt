@@ -9,7 +9,7 @@ using SemesterProsjekt.Data;
 
 #nullable disable
 
-namespace SemesterProsjekt.Migrations
+namespace SemesterProsjekt.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20261103111811_AddIdentityOwnershipForeignKeys")]
