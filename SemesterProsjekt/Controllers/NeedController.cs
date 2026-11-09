@@ -28,22 +28,54 @@ public class NeedController : Controller
     }
     
     
-    /// Henter behov med valgt sortering og sender dem til oversiktsvisningen.
-    /// Valgt sortering sendes også til viewet slik at valget kan vises i grensesnittet.
-
-    public async Task<IActionResult> Overview(string sortBy = "newest", string? search = null, int? needTypeId = null, string? status = null, string? priority = null)
+    /// Viser aktive behov eller historikk basert på valgt visning.
+    /// Bruker samme søk, filtrering og kart for begge visningene.
+    public async Task<IActionResult> Overview(
+        string sortBy = "newest",
+        string? search = null,
+        int? needTypeId = null,
+        string? status = null,
+        string? priority = null,
+        bool history = false)
     {
+        // Henter behov fra databasen.
         var needs = (await _needRepository.GetAllAsync(sortBy)).ToList();
+
+        // Viser bare løste behov i historikken og aktive behov ellers.
+        needs = needs
+            .Where(n => history
+                ? n.Status == NeedStatuses.Resolved
+                : n.Status != NeedStatuses.Resolved)
+            .ToList();
+
+        // Beholder valgte filtre i grensesnittet.
+        ViewData["IsHistory"] = history;
         ViewData["SortBy"] = sortBy;
         ViewData["Search"] = search;
         ViewData["NeedTypeId"] = needTypeId;
         ViewData["Status"] = status;
         ViewData["Priority"] = priority;
+
+        // Henter behovstyper til filtreringsmenyen.
         ViewData["NeedTypes"] = (await _needRepository.GetNeedTypesAsync())
-            .Select(type => new SelectListItem(type.Name, type.NeedTypeId.ToString(), type.NeedTypeId == needTypeId))
-            .OrderBy(item => item.Value == CategoryCatalog.OtherId.ToString()).ThenBy(item => item.Text).ToList();
-        return View(NeedSearch.Apply(needs, search, needTypeId, status, priority).ToList());
+            .Select(type => new SelectListItem(
+                type.Name,
+                type.NeedTypeId.ToString(),
+                type.NeedTypeId == needTypeId))
+            .OrderBy(item => item.Value == CategoryCatalog.OtherId.ToString())
+            .ThenBy(item => item.Text)
+            .ToList();
+
+        // Bruker eksisterende søk og filtrering.
+        return View(NeedSearch.Apply(
+            needs,
+            search,
+            needTypeId,
+            history ? null : status,
+            priority).ToList());
     }
+
+
     
     
     /// Viser et tomt registreringsskjema med behovstyper hentet fra databasen.
@@ -168,26 +200,39 @@ public class NeedController : Controller
         await _needRepository.DeleteAsync(id);
         return RedirectToAction(nameof(Overview));
     }
-
+     
     
-    /// Oppdaterer status dersom verdien er tillatt og brukeren kan administrere behovet.
-
-    
+    /// Oppdaterer statusen til et behov.
+    /// Løste behov kan ikke aktiveres på nytt.
     [Authorize(Roles = AppRoles.NeedsActor + "," + AppRoles.Admin)]
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateStatus(int id, string status)
     {
-        // Avviser statusverdier som ikke er definert av applikasjonen.
-        if (!NeedStatuses.All.Contains(status)) return BadRequest();
+        // Kontrollerer at statusen er gyldig.
+        if (!NeedStatuses.All.Contains(status))
+            return BadRequest();
 
+        // Henter behovet fra databasen.
         var need = await _needRepository.GetByIdAsync(id);
-        if (need is null) return NotFound();
-        if (!CanManage(need.UserId)) return Forbid();
 
+        if (need is null)
+            return NotFound();
+
+        // Kontrollerer at brukeren har lov til å endre behovet.
+        if (!CanManage(need.UserId))
+            return Forbid();
+
+        // Hindrer at avsluttede behov blir aktive igjen.
+        if (need.Status == NeedStatuses.Resolved)
+            return BadRequest("Løste behov kan ikke aktiveres på nytt.");
+
+        // Oppdaterer statusen.
         await _needRepository.UpdateStatusAsync(id, status);
+
         return RedirectToAction(nameof(Overview));
     }
+
 
     
     /// Felles oppslag for detalj- og bekreftelsessidene.

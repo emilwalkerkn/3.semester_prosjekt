@@ -1,44 +1,41 @@
-@*
-    Dette er oversikten over registrerte behov.
 
-    Siden viser:
-    - Alle registrerte behov
-    - Behovenes plassering på et kart
-    - Status, prioritet, frist og mengde
-    - Mulighet for å sortere listen
-    - Knapper for å vise, redigere og slette behov
+@*
+    Viser oversikten over aktive og løste behov.
+
+    Brukeren kan bytte mellom aktive behov og historikk.
+    Begge visningene bruker samme søk, filtrering og kart.
+    Løste behov kan bare vises, ikke redigeres eller gjenåpnes.
 *@
 
 @using System.Text.Json
+@using SemesterProsjekt.Models
 @model IEnumerable<SemesterProsjekt.Models.Need>
 
 @{
-    // Angir tittelen til siden.
-    ViewData["Title"] = "Behov";
+    // Kontrollerer hvilken visning brukeren har valgt.
+    var history = ViewData["IsHistory"] is true;
+
+    // Angir sidens tittel.
+    ViewData["Title"] = history ? "Behovshistorikk" : "Behov";
+
+    // Henter valgte søke- og filtreringsverdier.
     var search = ViewData["Search"] as string;
     var statusFilter = ViewData["Status"] as string;
     var priorityFilter = ViewData["Priority"] as string;
 
-    /*
-        Behovsaktører og administratorer
-        kan registrere nye behov.
-    */
+    // Kontrollerer om brukeren kan registrere behov.
     var canRegister =
-        User.IsInRole("Behovsaktør") ||
-        User.IsInRole("Admin");
+        User.IsInRole(AppRoles.NeedsActor) ||
+        User.IsInRole(AppRoles.Admin);
 
-    // Henter ID-en til brukeren som er logget inn.
+    // Henter ID-en til den innloggede brukeren.
     var currentUserId = User.FindFirst(
         System.Security.Claims.ClaimTypes.NameIdentifier
     )?.Value;
 
-    /*
-        Henter kartinformasjon fra behovene.
-        Behov uten plassering blir ikke tatt med.
-    */
+    // Henter kartinformasjon fra behovene som vises.
     var mapEntries = Model
-        .Where(need =>
-            !string.IsNullOrWhiteSpace(need.GeometryData))
+        .Where(need => !string.IsNullOrWhiteSpace(need.GeometryData))
         .Select(need => new
         {
             geometryData = need.GeometryData,
@@ -50,11 +47,11 @@
             time = need.NeededFrom?.ToString("dd.MM.yyyy HH:mm"),
             timeLabel = "Behov fra",
             detailsUrl = Url.Action("Details", "Need", new { id = need.NeedId }),
-            symbol = SemesterProsjekt.Models.PortalTypeIcons.ForNeed(need.NeedTypeId).Symbol,
-            typeLabel = SemesterProsjekt.Models.PortalTypeIcons.ForNeed(need.NeedTypeId).Label
+            symbol = PortalTypeIcons.ForNeed(need.NeedTypeId).Symbol,
+            typeLabel = PortalTypeIcons.ForNeed(need.NeedTypeId).Label
         });
 
-    // Gjør statusen lettere å forstå på norsk.
+    // Oversetter status til norsk.
     string StatusText(string status) => status switch
     {
         "New" => "Ny",
@@ -74,300 +71,442 @@
 
 <section class="overview-page split-overview-page">
 
-    @* Overskriften og introduksjonen til siden. *@
+    @* Overskrift og registreringsknapp. *@
     <header class="overview-heading">
         <div>
             <p class="eyebrow">Oversikt</p>
+
             <h1>Behov</h1>
 
             <p class="page-intro">
-                Finn og følg opp behov etter type, tidspunkt, status og prioritet.
+                @if (history)
+                {
+                    <text>
+                        Se tidligere behov som er løst og avsluttet.
+                    </text>
+                }
+                else
+                {
+                    <text>
+                        Finn og følg opp aktive behov etter type,
+                        tidspunkt, status og prioritet.
+                    </text>
+                }
             </p>
         </div>
 
-        @*
-            Knappen vises bare for behovsaktører
-            og administratorer.
-        *@
         @if (canRegister)
         {
-            <a asp-action="Create"
-               class="portal-button">
+            <a asp-action="Create" class="portal-button">
                 + Registrer behov
             </a>
         }
     </header>
 
-    <form asp-action="Overview" method="get" class="portal-card resource-search" role="search" aria-label="Søk og filtrer behov">
+    @* Bytter mellom aktive behov og historikk. *@
+    <nav class="need-tabs" aria-label="Behovsoversikt">
+
+        <a asp-action="Overview"
+           class="portal-button @(history ? "secondary" : "")"
+           aria-current="@(!history ? "page" : null)">
+            Aktive behov
+        </a>
+
+        <a asp-action="Overview"
+           asp-route-history="true"
+           class="portal-button @(history ? "" : "secondary")"
+           aria-current="@(history ? "page" : null)">
+            Historikk – løste behov
+        </a>
+
+    </nav>
+
+    @* Søk og filtrering for valgt visning. *@
+    <form asp-action="Overview"
+          method="get"
+          class="portal-card resource-search"
+          role="search"
+          aria-label="Søk og filtrer behov">
+
+        @* Bevarer historikkvalget når brukeren søker. *@
+        <input type="hidden"
+               name="history"
+               value="@history.ToString().ToLowerInvariant()" />
+
         <div class="form-field resource-search-text">
             <label for="need-search">Søk i behov</label>
-            <input id="need-search" type="search" name="search" value="@search" placeholder="Søk etter tittel, beskrivelse eller type" />
+
+            <input id="need-search"
+                   type="search"
+                   name="search"
+                   value="@search"
+                   placeholder="Søk etter tittel, beskrivelse eller type" />
         </div>
+
         <div class="form-field">
             <label for="need-type-filter">Type behov</label>
-            <select id="need-type-filter" name="needTypeId" asp-items="@(ViewData["NeedTypes"] as IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)"><option value="">Alle typer</option></select>
+
+            <select id="need-type-filter"
+                    name="needTypeId"
+                    asp-items="@(ViewData["NeedTypes"] as IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)">
+                <option value="">Alle typer</option>
+            </select>
         </div>
+
+        @* Statusfilteret tilpasses aktive behov eller historikk. *@
         <div class="form-field">
             <label for="need-status-filter">Status</label>
-            <select id="need-status-filter" name="status">
-                <option value="">Alle statuser</option>
-                <option value="New" selected="@(statusFilter == "New")">Ny</option>
-                <option value="In progress" selected="@(statusFilter == "In progress")">Under behandling</option>
-                <option value="Resolved" selected="@(statusFilter == "Resolved")">Løst</option>
-            </select>
+
+            @if (history)
+            {
+                <select id="need-status-filter" disabled>
+                    <option>Løst</option>
+                </select>
+            }
+            else
+            {
+                <select id="need-status-filter" name="status">
+                    <option value="">Alle aktive statuser</option>
+
+                    <option value="New"
+                            selected="@(statusFilter == "New")">
+                        Ny
+                    </option>
+
+                    <option value="In progress"
+                            selected="@(statusFilter == "In progress")">
+                        Under behandling
+                    </option>
+                </select>
+            }
         </div>
+
         <div class="form-field">
             <label for="need-priority-filter">Prioritet</label>
+
             <select id="need-priority-filter" name="priority">
                 <option value="">Alle prioriteter</option>
-                <option value="Low" selected="@(priorityFilter == "Low")">Lav</option>
-                <option value="Normal" selected="@(priorityFilter == "Normal")">Normal</option>
-                <option value="High" selected="@(priorityFilter == "High")">Høy</option>
-                <option value="Critical" selected="@(priorityFilter == "Critical")">Kritisk</option>
+
+                <option value="Low"
+                        selected="@(priorityFilter == "Low")">
+                    Lav
+                </option>
+
+                <option value="Normal"
+                        selected="@(priorityFilter == "Normal")">
+                    Normal
+                </option>
+
+                <option value="High"
+                        selected="@(priorityFilter == "High")">
+                    Høy
+                </option>
+
+                <option value="Critical"
+                        selected="@(priorityFilter == "Critical")">
+                    Kritisk
+                </option>
             </select>
         </div>
+
         <div class="form-field">
             <label for="sortBy">Sorter etter</label>
+
             <select id="sortBy" name="sortBy">
-                <option value="newest" selected="@(ViewData["SortBy"]?.ToString() == "newest")">Nyeste</option>
-                <option value="neededFrom" selected="@(ViewData["SortBy"]?.ToString() == "neededFrom")">Tidspunkt</option>
-                <option value="priority" selected="@(ViewData["SortBy"]?.ToString() == "priority")">Prioritet</option>
-                <option value="status" selected="@(ViewData["SortBy"]?.ToString() == "status")">Status</option>
+
+                <option value="newest"
+                        selected="@(ViewData["SortBy"]?.ToString() == "newest")">
+                    Nyeste
+                </option>
+
+                <option value="neededFrom"
+                        selected="@(ViewData["SortBy"]?.ToString() == "neededFrom")">
+                    Tidspunkt
+                </option>
+
+                <option value="priority"
+                        selected="@(ViewData["SortBy"]?.ToString() == "priority")">
+                    Prioritet
+                </option>
+
+                <option value="status"
+                        selected="@(ViewData["SortBy"]?.ToString() == "status")">
+                    Status
+                </option>
+
             </select>
         </div>
-        <button type="submit" class="portal-button">Søk og filtrer</button>
-        <a asp-action="Overview" class="portal-button secondary">Nullstill</a>
+
+        <button type="submit" class="portal-button">
+            Søk og filtrer
+        </button>
+
+        @* Nullstiller filtrene uten å bytte visning. *@
+        <a asp-action="Overview"
+           asp-route-history="@history"
+           class="portal-button secondary">
+            Nullstill
+        </a>
+
     </form>
-    <p class="resource-search-count" role="status">Viser @Model.Count() behov. Kartet viser samme utvalg.</p>
+
+    <p class="resource-search-count" role="status">
+        Viser @Model.Count() @(history ? "løste" : "aktive") behov.
+        Kartet viser samme utvalg.
+    </p>
+
     <div class="overview-split">
-    @* Viser plasseringen til registrerte behov på et kart. *@
-    <section class="portal-card overview-map-card"
-             aria-labelledby="need-map-heading">
 
-        <div class="section-heading">
-            <div>
-                <p class="eyebrow">Kart</p>
-                <h2 id="need-map-heading">
-                    Registrerte behov
-                </h2>
+        @* Kartet viser behovene fra den valgte visningen. *@
+        <section class="portal-card overview-map-card"
+                 aria-labelledby="need-map-heading">
+
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Kart</p>
+
+                    <h2 id="need-map-heading">
+                        @(history ? "Løste behov" : "Registrerte behov")
+                    </h2>
+                </div>
+
+                <span class="overview-count">
+                    @Model.Count() behov
+                </span>
             </div>
 
-            @* Viser hvor mange behov som finnes. *@
-            <span class="overview-count">
-                @Model.Count() behov
-            </span>
-        </div>
+            <button type="button"
+                    class="portal-button secondary overview-fullscreen"
+                    aria-controls="needMap">
+                Vis kart i fullskjerm
+            </button>
 
-        <button type="button" class="portal-button secondary overview-fullscreen" aria-controls="needMap">Vis kart i fullskjerm</button>
-        @* JavaScript bruker dette området til å vise kartet. *@
-        <div id="needMap"
-             class="map-panel"
-             aria-label="Kart med registrerte behov">
-        </div>
-    </section>
-
-    @* Listen over registrerte behov. *@
-    <section class="overview-list"
-             aria-label="Liste over behov">
-
-        @* Viser en melding dersom listen er tom. *@
-        @if (!Model.Any())
-        {
-            <div class="portal-card empty-state">
-                <h2>Ingen behov å vise</h2>
-
-                <p>
-                    Prøv andre søkeord eller filtre, eller registrer et nytt behov.
-                </p>
-
-                @if (canRegister)
-                {
-                    <a asp-action="Create"
-                       class="portal-button">
-                        Registrer behov
-                    </a>
-                }
+            <div id="needMap"
+                 class="map-panel"
+                 aria-label="Kart med registrerte behov">
             </div>
-        }
-        else
-        {
-            @*
-                Går gjennom listen og viser
-                ett kort for hvert behov.
-            *@
-            @foreach (var need in Model)
+
+        </section>
+
+        @* Liste over behovene. *@
+        <section class="overview-list" aria-label="Liste over behov">
+
+            @if (!Model.Any())
             {
-                /*
-                    Sjekker om brukeren kan endre behovet.
-                    Administratoren og eieren får tilgang.
-                */
-                var canManage =
-                    User.IsInRole("Admin") ||
-                    currentUserId == need.UserId;
+                <div class="portal-card empty-state">
 
-                // Finner riktig symbol for typen behov.
-                var typeIcon =
-                    PortalTypeIcons.ForNeed(need.NeedTypeId);
+                    @if (history)
+                    {
+                        <h2>Ingen løste behov å vise</h2>
 
-                <article class="portal-card overview-record">
+                        <p>
+                            Ingen løste behov samsvarer med filtrene,
+                            eller det finnes ingen løste behov ennå.
+                        </p>
+                    }
+                    else
+                    {
+                        <h2>Ingen aktive behov å vise</h2>
 
-                    @* Viser type, symbol, tittel og beskrivelse. *@
-                    <div class="overview-record-main">
-                        <div class="record-title-with-icon">
+                        <p>
+                            Prøv andre søkeord eller filtre,
+                            eller registrer et nytt behov.
+                        </p>
 
-                            <span class="type-icon"
-                                  role="img"
-                                  aria-label="@typeIcon.Label">
-                                <img src="@typeIcon.Symbol" alt="" />
-                            </span>
+                        @if (canRegister)
+                        {
+                            <a asp-action="Create"
+                               class="portal-button">
+                                Registrer behov
+                            </a>
+                        }
+                    }
+
+                </div>
+            }
+            else
+            {
+                @* Viser ett kort for hvert behov. *@
+                @foreach (var need in Model)
+                {
+                    // Administratoren eller eieren kan administrere behovet.
+                    var canManage =
+                        User.IsInRole(AppRoles.Admin) ||
+                        currentUserId == need.UserId;
+
+                    // Henter symbolet som passer til behovstypen.
+                    var typeIcon = PortalTypeIcons.ForNeed(need.NeedTypeId);
+
+                    <article class="portal-card overview-record">
+
+                        @* Type, tittel og beskrivelse. *@
+                        <div class="overview-record-main">
+
+                            <div class="record-title-with-icon">
+
+                                <span class="type-icon"
+                                      role="img"
+                                      aria-label="@typeIcon.Label">
+                                    <img src="@typeIcon.Symbol" alt="" />
+                                </span>
+
+                                <div>
+                                    <p class="record-type">
+                                        @(need.NeedTypeName ?? "Behov")
+                                    </p>
+
+                                    <h2>@need.Title</h2>
+                                </div>
+                            </div>
+
+                            <p class="overview-description">
+                                @need.Description
+                            </p>
+
+                        </div>
+
+                        @* Prioritet, tidspunkt og mengde. *@
+                        <div class="overview-meta">
 
                             <div>
-                                <p class="record-type">
-                                    @(need.NeedTypeName ?? "Behov")
-                                </p>
+                                <span>Prioritet</span>
 
-                                <h2>@need.Title</h2>
+                                <strong>
+                                    @(need.Priority switch
+                                    {
+                                        "Low" => "Lav",
+                                        "Normal" => "Normal",
+                                        "High" => "Høy",
+                                        "Critical" => "Kritisk",
+                                        _ => need.Priority
+                                    })
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Når trengs hjelpen?</span>
+
+                                <strong>
+                                    @(need.NeededFrom?.ToString("dd.MM.yyyy HH:mm")
+                                      ?? "Ikke oppgitt")
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>Mengde</span>
+
+                                <strong>
+                                    @need.Quantity @need.Unit
+                                </strong>
+                            </div>
+
+                        </div>
+
+                        @* Status og tilgjengelige handlinger. *@
+                        <div class="overview-record-footer">
+
+                            <span class="status @StatusClass(need.Status)">
+                                @StatusText(need.Status)
+                            </span>
+
+                            <div class="record-actions">
+
+                                @* Detaljene kan alltid åpnes. *@
+                                <a asp-action="Details"
+                                   asp-route-id="@need.NeedId"
+                                   class="portal-button secondary">
+                                    Se detaljer
+                                </a>
+
+                                @* Endringer tillates bare på aktive behov. *@
+                                @if (canManage && !history)
+                                {
+                                    <a asp-controller="Match"
+                                       asp-action="FindResources"
+                                       asp-route-needId="@need.NeedId"
+                                       class="portal-button">
+                                        Finn ressurser
+                                    </a>
+
+                                    <a asp-action="Edit"
+                                       asp-route-id="@need.NeedId"
+                                       class="portal-button secondary">
+                                        Rediger
+                                    </a>
+
+                                    <a asp-action="Delete"
+                                       asp-route-id="@need.NeedId"
+                                       class="portal-button danger">
+                                        Slett
+                                    </a>
+                                }
+
                             </div>
                         </div>
 
-                        <p class="overview-description">
-                            @need.Description
-                        </p>
-                    </div>
+                        @* Status kan bare endres på aktive behov. *@
+                        @if (canManage && !history)
+                        {
+                            <form asp-action="UpdateStatus"
+                                  method="post"
+                                  class="status-update-form">
 
-                    @* Viser viktige opplysninger om behovet. *@
-                    <div class="overview-meta">
-                        <div>
-                            <span>Prioritet</span>
-                            <strong>@(need.Priority switch { "Low" => "Lav", "Normal" => "Normal", "High" => "Høy", "Critical" => "Kritisk", _ => need.Priority })</strong>
-                        </div>
+                                @Html.AntiForgeryToken()
 
-                        <div>
-                            <span>Når trengs hjelpen?</span>
+                                <input type="hidden"
+                                       name="id"
+                                       value="@need.NeedId" />
 
-                            <strong>
-                                @(need.NeededFrom?.ToString("dd.MM.yyyy HH:mm")
-                                  ?? "Ikke oppgitt")
-                            </strong>
-                        </div>
+                                <label for="status-@need.NeedId">
+                                    Oppdater status
+                                </label>
 
-                        <div>
-                            <span>Mengde</span>
+                                <select id="status-@need.NeedId"
+                                        name="status">
 
-                            <strong>
-                                @need.Quantity @need.Unit
-                            </strong>
-                        </div>
-                    </div>
+                                    <option value="New"
+                                            selected="@(need.Status == NeedStatuses.New)">
+                                        Ny
+                                    </option>
 
-                    @* Viser status og tilgjengelige handlinger. *@
-                    <div class="overview-record-footer">
-                        <span class="status @StatusClass(need.Status)">
-                            @StatusText(need.Status)
-                        </span>
+                                    <option value="In progress"
+                                            selected="@(need.Status == NeedStatuses.InProgress)">
+                                        Under behandling
+                                    </option>
 
-                        <div class="record-actions">
+                                    <option value="Resolved">
+                                        Løst
+                                    </option>
 
-                            @* Alle brukere kan se detaljene. *@
-                            <a asp-action="Details"
-                               asp-route-id="@need.NeedId"
-                               class="portal-button secondary">
-                                Se detaljer
-                            </a>
+                                </select>
 
-                            @*
-                                Rediger og slett vises bare for
-                                administratoren eller eieren.
-                            *@
-                            @if (canManage)
-                            {
-                                @if (need.Status != NeedStatuses.Resolved)
-                                {
-                                    <a asp-controller="Match" asp-action="FindResources" asp-route-needId="@need.NeedId" class="portal-button">Finn ressurser</a>
-                                }
-                                <a asp-action="Edit"
-                                   asp-route-id="@need.NeedId"
-                                   class="portal-button secondary">
-                                    Rediger
-                                </a>
+                                <button type="submit"
+                                        class="portal-button secondary">
+                                    Lagre status
+                                </button>
 
-                                <a asp-action="Delete"
-                                   asp-route-id="@need.NeedId"
-                                   class="portal-button danger">
-                                    Slett
-                                </a>
-                            }
-                        </div>
-                    </div>
+                            </form>
+                        }
 
-                    @*
-                        Administratoren eller eieren kan
-                        oppdatere statusen til behovet.
-                    *@
-                    @if (canManage)
-                    {
-                        <form asp-action="UpdateStatus"
-                              method="post"
-                              class="status-update-form">
-
-                            @*
-                                Beskytter skjemaet mot falske
-                                forespørsler fra andre nettsider.
-                            *@
-                            @Html.AntiForgeryToken()
-
-                            @* Forteller hvilket behov som skal endres. *@
-                            <input type="hidden"
-                                   name="id"
-                                   value="@need.NeedId" />
-
-                            <label for="status-@need.NeedId">
-                                Oppdater status
-                            </label>
-
-                            <select id="status-@need.NeedId"
-                                    name="status">
-
-                                <option value="New"
-                                        selected="@(need.Status == "New")">
-                                    Ny
-                                </option>
-
-                                <option value="In progress"
-                                        selected="@(need.Status == "In progress")">
-                                    Under behandling
-                                </option>
-
-                                <option value="Resolved"
-                                        selected="@(need.Status == "Resolved")">
-                                    Løst
-                                </option>
-                            </select>
-
-                            <button type="submit"
-                                    class="portal-button secondary">
-                                Lagre status
-                            </button>
-                        </form>
-                    }
-                </article>
+                    </article>
+                }
             }
-        }
-    </section>
+
+        </section>
+
     </div>
+
 </section>
 
 @section Scripts {
-    @* Henter JavaScript som viser oversiktskartet. *@
+
+    @* Henter JavaScript som viser kartet. *@
     <script src="~/js/overview-map.js"
             asp-append-version="true">
     </script>
 
     <script>
-        /*
-            Lager kartet og sender inn plasseringene
-            fra modellen som JSON-data.
-        */
+        // Oppretter kartet med behovene fra valgt visning.
         PortalOverviewMap.create(
             "needMap",
             @Html.Raw(JsonSerializer.Serialize(mapEntries))
