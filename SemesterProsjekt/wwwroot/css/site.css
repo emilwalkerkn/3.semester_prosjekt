@@ -838,4 +838,29 @@ html.dark-mode .need-form textarea::placeholder {
   border-color: #b02a37 !important;
   color: white !important;
 }
+/* Grønn godkjenningsknapp */
+.approve-org-btn {
+  background-color: #198754 !important;
+  border-color: #198754 !important;
+  color: white !important;
+}
+
+.approve-org-btn:hover {
+  background-color: #157347 !important;
+  border-color: #146c43 !important;
+  color: white !important;
+}
+
+/* Rød avslagsknapp */
+.reject-org-btn {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+  color: white !important;
+}
+
+.reject-org-btn:hover {
+  background-color: #bb2d3b !important;
+  border-color: #b02a37 !important;
+  color: white !important;
+}
 

@@ -125,6 +125,14 @@ using (var scope = app.Services.CreateScope())
 // og legger inn lokale eksempeldata dersom det er konfigurert.
 
 await IdentitySeeder.SeedRolesAsync(app.Services);
+if (app.Configuration.GetValue<bool>(
+        "ApprovalAdminTestSeeder:Enabled"))
+{
+    if (!app.Environment.IsDevelopment())
+        throw new InvalidOperationException(
+            "Testseederen kan bare kjøre i Development.");
+}
+
 await DomainSchemaMigrator.MigrateAsync(app.Services);
 await CategorySeeder.SeedAsync(app.Services);
 await LocalDemoSeeder.SeedAsync(
