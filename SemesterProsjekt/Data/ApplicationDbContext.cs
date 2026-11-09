@@ -27,6 +27,9 @@ public class ApplicationDbContext
     public DbSet<Organization> Organizations { get; set; }
         = null!;
     
+    public DbSet<OrganizationInvitation> OrganizationInvitations
+    { get; set; } = null!;
+    
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -43,6 +46,31 @@ public class ApplicationDbContext
             entity.HasIndex(o => o.OrganizationNumber)
                 .IsUnique();
         });
+        
+        builder.Entity<OrganizationInvitation>(entity =>
+        {
+            entity.HasKey(i => i.OrganizationInvitationId);
+
+            entity.HasOne(i => i.Organization)
+                .WithMany()
+                .HasForeignKey(i => i.OrganizationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(i => i.InvitedByUser)
+                .WithMany()
+                .HasForeignKey(i => i.InvitedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(i => i.TokenHash)
+                .IsUnique();
+
+            entity.HasIndex(i => new
+            {
+                i.OrganizationId,
+                i.Email
+            });
+        });
+
     }
 
 

@@ -14,13 +14,18 @@
         Finner rollen til brukeren.
         Teksten vises øverst til høyre på siden.
     */
-    var accountRole = !User.Identity?.IsAuthenticated ?? true
+
+    var accountRole = User.Identity?.IsAuthenticated != true
         ? "Ikke innlogget"
-        : User.IsInRole("Admin")
+        : User.IsInRole(AppRoles.Admin)
             ? "Administrator"
-            : User.IsInRole(AppRoles.NeedsActor)
-                ? AppRoles.PublicActorDisplayName
-                : User.IsInRole(AppRoles.ResourceOwner) ? "Ressurseier" : "Bruker";
+            : User.IsInRole(AppRoles.OrganizationAdmin)
+                ? "Organisasjonsadministrator"
+                : User.IsInRole(AppRoles.NeedsActor)
+                    ? AppRoles.PublicActorDisplayName
+                    : User.IsInRole(AppRoles.ResourceOwner)
+                        ? "Ressurseier"
+                        : "Bruker";
 }
 
 <!DOCTYPE html>
@@ -190,6 +195,40 @@
                                         ? "active"
                                         : "")">
                             Registrer ressurs
+                        </a>
+                    }
+
+                    @* Organisasjonsgodkjenning – kun systemadministrator. *@
+                    @if (User.IsInRole(AppRoles.Admin))
+                    {
+                        <a asp-controller="OrganizationApproval"
+                           asp-action="Index"
+                           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "OrganizationApproval" &&
+                                  ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                            Godkjenn organisasjoner
+                        </a>
+
+                        <a asp-controller="OrganizationApproval"
+                           asp-action="Approved"
+                           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "OrganizationApproval" &&
+                                  ViewContext.RouteData.Values["action"]?.ToString() == "Approved" ? "active" : "")">
+                            Godkjente organisasjoner
+                        </a>
+                    }
+
+                    @* Organisasjonsadministrasjon – kun organisasjonsadministrator. *@
+                    @if (User.IsInRole(AppRoles.OrganizationAdmin))
+                    {
+                        <a asp-controller="OrganizationAdmin"
+                           asp-action="Index"
+                           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "OrganizationAdmin" ? "active" : "")">
+                            Administrer ansatte
+                        </a>
+
+                        <a asp-controller="OrganizationInvitation"
+                           asp-action="Index"
+                           class="@(ViewContext.RouteData.Values["controller"]?.ToString() == "OrganizationInvitation" ? "active" : "")">
+                            Inviter ansatte
                         </a>
                     }
 

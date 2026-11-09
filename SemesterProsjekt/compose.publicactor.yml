@@ -1,5 +1,11 @@
 ﻿
 services:
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "127.0.0.1:8025:8025"
+    expose:
+      - "1025"
   mariadb:
     image: mariadb:10.11
     environment:
@@ -24,6 +30,9 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
+      Smtp__Host: "mailpit"
+      Smtp__Port: "1025"
+      Invitation__BaseUrl: "http://localhost:8081"
       ConnectionStrings__DefaultConnection: "Server=mariadb;Port=3306;Database=semesterprosjekt;User=appuser;Password=${DEV_DB_PASSWORD:?Set DEV_DB_PASSWORD};"
       LocalDemo__Enabled: "false"
       ASPNETCORE_ENVIRONMENT: Development
@@ -36,6 +45,7 @@ services:
       - "8081:8080"
     volumes:
       - publicactor_keys:/keys
+    
 
 volumes:
   mariadb_publicactor_data:

@@ -9,8 +9,8 @@
     <h1>Godkjente organisasjoner</h1>
 
     <p>
-        Her kan Heimevernet utpeke en administrator
-        for hver godkjente organisasjon.
+        Her kan Heimevernet utpeke administratorer
+        og konfigurere godkjente e-postdomener.
     </p>
 
     @if (TempData["Success"] is string success)
@@ -39,6 +39,7 @@
                     <th>Organisasjon</th>
                     <th>Status</th>
                     <th>Utpek administrator</th>
+                    <th>Godkjent e-postdomene</th>
                 </tr>
             </thead>
 
@@ -48,6 +49,7 @@
                     <tr>
                         <td>@organization.Name</td>
                         <td>@organization.Status</td>
+
                         <td>
                             <form asp-controller="OrganizationApproval"
                                   asp-action="AssignOrganizationAdmin"
@@ -66,9 +68,34 @@
                                        required />
 
                                 <button type="submit"
-                                        class="btn btn-primary btn-sm"
-                                        onclick="return confirm('Vil du gi denne brukeren administratorrettigheter?');">
+                                        class="btn btn-primary btn-sm">
                                     Utpek administrator
+                                </button>
+                            </form>
+                        </td>
+
+                        <td>
+                            <form asp-controller="OrganizationApproval"
+                                  asp-action="UpdateEmailDomain"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <input type="hidden"
+                                       name="organizationId"
+                                       value="@organization.OrganizationId" />
+
+                                <input type="text"
+                                       name="allowedEmailDomain"
+                                       value="@organization.AllowedEmailDomain"
+                                       placeholder="politiet.no"
+                                       maxlength="253"
+                                       class="form-control mb-2"
+                                       required />
+
+                                <button type="submit"
+                                        class="btn btn-primary btn-sm">
+                                    Lagre domene
                                 </button>
                             </form>
                         </td>

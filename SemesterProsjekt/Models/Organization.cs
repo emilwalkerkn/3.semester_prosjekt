@@ -22,4 +22,8 @@ public class Organization
 
     public ICollection<ApplicationUser> Users { get; set; }
         = new List<ApplicationUser>();
+    
+    [StringLength(253)]
+    public string? AllowedEmailDomain { get; set; }
+
 }
