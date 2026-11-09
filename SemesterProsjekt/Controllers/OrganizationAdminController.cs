@@ -34,6 +34,13 @@ public class OrganizationAdminController : Controller
         // Administrator må tilhøre en organisasjon.
         if (currentUser.OrganizationId == null)
             return Forbid();
+        
+        //Kontrollerer at organisasjonen faktisk finnes og har status "Approved"
+        var organization = await _context.Organizations
+            .FindAsync(currentUser.OrganizationId.Value);
+
+        if (organization == null || organization.Status != "Approved")
+            return Forbid();
 
         // Henter bare ansatte fra administratorens organisasjon gjennom asp.net core identity.
         var employees = await _context.Users
@@ -53,6 +60,7 @@ public class OrganizationAdminController : Controller
         ViewBag.EmployeeRoles = employeeRoles;
 
         return View(employees);
+        
     }
     
     [HttpPost]
@@ -68,6 +76,7 @@ public class OrganizationAdminController : Controller
         // Administratoren må tilhøre en organisasjon.
         if (currentUser.OrganizationId == null)
             return Forbid();
+        
 
         // Finn brukeren som skal miste rollen.
         var employee = await _userManager.FindByIdAsync(userId);
@@ -78,6 +87,13 @@ public class OrganizationAdminController : Controller
         // Sikkerhetskontroll:
         // Ansatte i andre organisasjoner kan ikke endres selv om korrekt id sendes inn.
         if (employee.OrganizationId != currentUser.OrganizationId)
+            return Forbid();
+        
+        // Kontrollerer at organisasjonen finnes og er godkjent
+        var organization = await _context.Organizations
+            .FindAsync(currentUser.OrganizationId.Value);
+
+        if (organization == null || organization.Status != "Approved")
             return Forbid();
 
         // Sjekk at brukeren faktisk har rollen.

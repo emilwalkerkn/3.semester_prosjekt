@@ -1,0 +1,108 @@
+
+@model List<SemesterProsjekt.Models.Organization>
+
+@{
+    ViewData["Title"] = "Godkjenning av organisasjoner";
+}
+
+<div class="container mt-4">
+
+    <h1>Godkjenning av organisasjoner</h1>
+
+    <p>
+        Her vises organisasjoner som venter på godkjenning.
+    </p>
+
+    @if (TempData["Success"] is string success)
+    {
+        <div class="alert alert-success">
+            @success
+        </div>
+    }
+
+    @if (TempData["Error"] is string error)
+    {
+        <div class="alert alert-danger">
+            @error
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <p>Ingen organisasjoner venter på godkjenning.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Organisasjon</th>
+                    <th>Organisasjonsnummer</th>
+                    <th>Opprettet</th>
+                    <th>Status</th>
+                    <th>Handlinger</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var organization in Model)
+                {
+                    <tr>
+                        <td>@organization.Name</td>
+
+                        <td>
+                            @(organization.OrganizationNumber ?? "Ikke oppgitt")
+                        </td>
+
+                        <td>
+                            @organization.CreatedAt.ToString("dd.MM.yyyy")
+                        </td>
+
+                        <td>@organization.Status</td>
+
+                        <td>
+                            <div class="d-flex gap-2">
+
+                                <form asp-controller="OrganizationApproval"
+                                      asp-action="Approve"
+                                      method="post">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <input type="hidden"
+                                           name="organizationId"
+                                           value="@organization.OrganizationId" />
+
+                                    <button type="submit"
+                                            class="btn btn-sm approve-org-btn"
+                                            onclick="return confirm('Vil du godkjenne denne organisasjonen?');">
+                                        Godkjenn
+                                    </button>
+                                </form>
+
+                                <form asp-controller="OrganizationApproval"
+                                      asp-action="Reject"
+                                      method="post">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <input type="hidden"
+                                           name="organizationId"
+                                           value="@organization.OrganizationId" />
+
+                                    <button type="submit"
+                                            class="btn btn-sm reject-org-btn"
+                                            onclick="return confirm('Vil du avslå denne organisasjonen?');">
+                                        Avslå
+                                    </button>
+                                </form>
+
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+</div>
