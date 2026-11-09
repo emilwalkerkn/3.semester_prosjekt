@@ -1,0 +1,138 @@
+
+@model List<SemesterProsjekt.Models.OrganizationInvitation>
+
+@{
+    ViewData["Title"] = "Invitasjoner";
+    var now = DateTime.UtcNow;
+}
+
+<div class="container mt-4">
+
+    <h1>Invitasjoner</h1>
+
+    <p>
+        Organisasjon: <strong>@ViewBag.OrganizationName</strong>
+    </p>
+
+    <p>
+        Her kan du se invitasjonene som tilhører din organisasjon.
+    </p>
+
+    <h2>Inviter ansatt</h2>
+
+    <form asp-controller="OrganizationInvitation"
+          asp-action="Invite"
+          method="post"
+          class="mb-4">
+
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label for="email" class="form-label">
+                Ansattens e-postadresse
+            </label>
+
+            <input type="email"
+                   id="email"
+                   name="email"
+                   class="form-control"
+                   maxlength="256"
+                   required />
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Opprett invitasjon
+        </button>
+    </form>
+
+    @if (TempData["Success"] is string success)
+    {
+        <div class="alert alert-success">@success</div>
+    }
+
+    @if (TempData["Error"] is string error)
+    {
+        <div class="alert alert-danger">@error</div>
+    }
+
+    @if (!Model.Any())
+    {
+        <p>Ingen invitasjoner er opprettet ennå.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>E-post</th>
+                    <th>Opprettet</th>
+                    <th>Utløper</th>
+                    <th>Status</th>
+                    <th>Handling</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var invitation in Model)
+                {
+                    <tr>
+                        <td>@invitation.Email</td>
+                        <td>
+                            @invitation.CreatedAt.ToString("dd.MM.yyyy")
+                        </td>
+                        <td>
+                            @invitation.ExpiresAt.ToString("dd.MM.yyyy")
+                        </td>
+                        <td>
+                            @if (invitation.AcceptedAt != null)
+                            {
+                                <span>Godtatt</span>
+                            }
+                            else if (invitation.RevokedAt != null)
+                            {
+                                <span>Trukket tilbake</span>
+                            }
+                            else if (invitation.ExpiresAt <= now)
+                            {
+                                <span>Utløpt</span>
+                            }
+                            else
+                            {
+                                <span>Venter</span>
+                            }
+                        </td>
+                        
+                        <td>
+                            @if (invitation.AcceptedAt == null &&
+                                 invitation.RevokedAt == null &&
+                                 invitation.ExpiresAt > now)
+                            {
+                                <form asp-controller="OrganizationInvitation"
+                                      asp-action="Revoke"
+                                      method="post">
+
+                                    @Html.AntiForgeryToken()
+
+                                    <input type="hidden"
+                                           name="invitationId"
+                                           value="@invitation.OrganizationInvitationId" />
+
+                                    <button type="submit"
+                                            class="btn btn-danger btn-sm">
+                                        Trekk tilbake
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="text-muted">—</span>
+                            }
+                        </td>
+
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+</div>

@@ -146,6 +146,50 @@ public class OrganizationApprovalController : Controller
         TempData["Success"] = "Organisasjonsadministrator ble tildelt.";
         return RedirectToAction(nameof(Approved));
     }
+    
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateEmailDomain(
+        int organizationId,
+        string? allowedEmailDomain)
+    {
+        var organization = await _context.Organizations
+            .FindAsync(organizationId);
+
+        if (organization == null)
+            return NotFound();
+
+        // Bare godkjente organisasjoner kan få e-postdomene.
+        if (organization.Status != "Approved")
+            return Forbid();
+
+        var domain = (allowedEmailDomain ?? "")
+            .Trim()
+            .TrimStart('@')
+            .ToLowerInvariant();
+
+        // Enkelt formatkrav for domenenavn.
+        if (domain.Length > 253 ||
+            !System.Text.RegularExpressions.Regex.IsMatch(
+                domain,
+                @"^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$"))
+        {
+            TempData["Error"] =
+                "Oppgi et gyldig e-postdomene, for eksempel politiet.no.";
+
+            return RedirectToAction(nameof(Approved));
+        }
+
+        organization.AllowedEmailDomain = domain;
+
+        await _context.SaveChangesAsync();
+
+        TempData["Success"] =
+            $"E-postdomenet for {organization.Name} er oppdatert.";
+
+        return RedirectToAction(nameof(Approved));
+    }
+
 
 
 }

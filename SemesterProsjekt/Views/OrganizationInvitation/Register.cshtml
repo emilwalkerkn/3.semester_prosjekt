@@ -1,0 +1,92 @@
+
+@model SemesterProsjekt.ViewModels.InvitedEmployeeRegisterViewModel
+
+@{
+    ViewData["Title"] = "Opprett ansattkonto";
+}
+
+<div class="container mt-4">
+
+    <h1>Opprett ansattkonto</h1>
+
+    <p>
+        Du er invitert til
+        <strong>@ViewBag.OrganizationName</strong>.
+    </p>
+
+    <div class="mb-3">
+        <label class="form-label">Jobb-e-postadresse</label>
+
+        <input type="email"
+               class="form-control"
+               value="@ViewBag.InvitedEmail"
+               readonly />
+
+        <small class="text-muted">
+            E-postadressen er bestemt av invitasjonen
+            og kan ikke endres.
+        </small>
+    </div>
+
+    <form asp-controller="OrganizationInvitation"
+          asp-action="Register"
+          method="post">
+
+        @Html.AntiForgeryToken()
+
+        <input type="hidden"
+               name="token"
+               value="@ViewBag.InvitationToken" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger"></div>
+
+        <div class="mb-3">
+            <label asp-for="FirstName"
+                   class="form-label">Fornavn</label>
+            <input asp-for="FirstName"
+                   class="form-control" />
+            <span asp-validation-for="FirstName"
+                  class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="LastName"
+                   class="form-label">Etternavn</label>
+            <input asp-for="LastName"
+                   class="form-control" />
+            <span asp-validation-for="LastName"
+                  class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Password"
+                   class="form-label">Passord</label>
+            <input asp-for="Password"
+                   class="form-control" />
+            <span asp-validation-for="Password"
+                  class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="ConfirmPassword"
+                   class="form-label">Bekreft passord</label>
+            <input asp-for="ConfirmPassword"
+                   class="form-control" />
+            <span asp-validation-for="ConfirmPassword"
+                  class="text-danger"></span>
+        </div>
+
+        <button type="submit"
+                class="btn btn-primary">
+            Opprett konto
+        </button>
+
+        <p class="text-muted mt-2">
+            Registreringen aktiveres når
+            sikkerhetskontrollene er ferdige.
+        </p>
+
+    </form>
+
+</div>

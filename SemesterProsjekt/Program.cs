@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
 using Microsoft.AspNetCore.DataProtection;
+using SemesterProsjekt.Services;
 
 
 // Oppretter en builder som brukes til å konfigurere
@@ -90,8 +91,9 @@ builder.Services.AddScoped<
     MatchRepository>();
 
 
-// I produksjonsmiljøet lagres nøklene for databeskyttelse
-// i en egen mappe, slik at de bevares ved omstart.
+// I produksjonsmiljøet lagres nøklene for databeskyttelse i en egen mappe, slik at de bevares ved omstart.
+
+builder.Services.AddScoped<InvitationEmailSender>();
 
 if (!builder.Environment.IsDevelopment())
 {
@@ -99,8 +101,11 @@ if (!builder.Environment.IsDevelopment())
         .AddDataProtection()
         .PersistKeysToFileSystem(
             new DirectoryInfo("/keys"))
-        .SetApplicationName("SemesterProsjekt");
+        .SetApplicationName("SemesterProsjekt"); 
 }
+
+builder.Services.AddScoped<InvitationEmailSender>();
+
 
 
 // Bygger applikasjonen med tjenestene
