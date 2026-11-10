@@ -1,6 +1,15 @@
 
 # IS-202 Programmeringsprosjekt
 
+# Brukere og passord til innlogging / testing:
+
+Brukere:
+admin@kriseportal.local
+behov@kriseportal.local
+ressurs@kriseportal.local
+
+Passord: DemoPass123
+
  
 ## Om prosjektet
 Dette prosjektet er en ASP.NET Core MVC-applikasjon basert på caset om en ressurs- og behovsportal for Totalforsvaret. Formålet med løsningen er å støtte registreringen og delingen av informasjon om behov og ressurser under krise og større hendelser.
@@ -307,11 +316,33 @@ Vi bruker korte kommentarer på sentrale klasser og metoder for å forklare hva 
 ## Bruk av KI i prosjektet
 I dette prosjektet har vi hovedsakelig brukt KI-verktøyet ChatGPT som et hjelpemiddel i utviklingen. KI har i hovedsak blitt brukt til korreksjon av syntaksfeil, rydde opp i og forkorte unødvendig kode, og gi forslag til hvordan koden kan bli bedre strukturert. I tillegg har vi brukt KI for å få bedre forståelse av enkelte konsepter underveis. Løsninger og faglige vurderinger i prosjektet er våre egne.
 
-### Eksempler på prompts
+### Eksempler på prompts før første innlevering
 - "Kan dette sammenlignes med OOP i C#? Om det går, forklar i mens du sammenligner"
 - "Forklar hvordan Model, View og Controller fungerer i MVC, og hvordan de henger sammen"
 - "Kan du forklare GitHub-workflows? Steg for steg slik vi jobber mest mulig effektivt og unngår konflikt"
 - "Kan du vise hvordan jeg kan konvertere tabellene fra google docs dokumentet slik det ser riktig ut i README-filen?"
 - "Hva er feil her? Hvorfor er det grå farge i teksten på Rider?"
 - "Skal enhetstestene ligge i samme fil som applikasjonen? Eller i samme prosjekt-mappe som applikasjonen?"
+
+### Bruk av KI fra første til andre innlevering
+
+I denne perioden har vi brukt KI som støtte til å forstå hvordan vi kan anvende fagstoff fra forelesningene i prosjektet. Vi har fått veiledning om aktuelle NuGet-pakker for ASP.NET Core Identity, hvordan Identity kan implementeres i applikasjonen, og hvordan migrasjoner brukes til å opprette og oppdatere databasetabellene for brukerhåndtering.
+
+Vi har også brukt KI til å forstå hvordan `[Authorize]` kan brukes på controllere og enkelte metoder for å styre tilgangen til funksjonalitet. Dette omfattet innlogging og rollebasert tilgangskontroll.
+
+Vi har brukt KI til veiledning og hjelp til å utvikle fungerende Razor-views basert på prototypen vi har laget i Figma.
+
+Gjennom perioden har vi fortsatt å bruke KI til å forklare kode og konsepter fra forelesningene, og til å diskutere hvilke funksjoner og tekniske løsninger som var relevante å implementere i prosjektet.
+
+### Eksempler på prompts fra første til andre innlevering, gjengitt med egne ord
+- "Kan du forklare forskjellen mellom autentisering og autorisering?"
+- "Vi har lært om ASP.NET Core Identity i forelesningen. Hvordan kan vi bruke dette til registrering og innlogging i prosjektet vårt?"
+- "Hvilke NuGet-pakker trenger vi for å bruke ASP.NET Core Identity i prosjektet? Hva gjør de ulike pakkene? Og har det noe å si hvilken versjon de er i?"
+- "Vi har laget tabeller med dapper fra før av, kan vi fortsatt bruke Microsoft Asp.Net Core Identity for implementering av roller/brukere?"
+
+
+
+
+
+
 

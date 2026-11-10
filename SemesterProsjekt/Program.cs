@@ -116,6 +116,7 @@ var app = builder.Build();
 
 // Oppretter et eget tjenesteområde og henter databasen.
 // Ventende EF Core-migrasjoner kjøres ved oppstart.
+await DomainSchemaMigrator.MigrateAsync(app.Services);
 
 using (var scope = app.Services.CreateScope())
 {
@@ -138,7 +139,6 @@ if (app.Configuration.GetValue<bool>(
             "Testseederen kan bare kjøre i Development.");
 }
 
-await DomainSchemaMigrator.MigrateAsync(app.Services);
 await CategorySeeder.SeedAsync(app.Services);
 await LocalDemoSeeder.SeedAsync(
     app.Services,
