@@ -1,0 +1,107 @@
+
+@model List<SemesterProsjekt.Models.Organization>
+
+@{
+    ViewData["Title"] = "Godkjente organisasjoner";
+}
+
+<div class="container mt-4">
+    <h1>Godkjente organisasjoner</h1>
+
+    <p>
+        Her kan Heimevernet utpeke administratorer
+        og konfigurere godkjente e-postdomener.
+    </p>
+
+    @if (TempData["Success"] is string success)
+    {
+        <div class="alert alert-success">
+            @success
+        </div>
+    }
+
+    @if (TempData["Error"] is string error)
+    {
+        <div class="alert alert-danger">
+            @error
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <p>Ingen godkjente organisasjoner finnes.</p>
+    }
+    else
+    {
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Organisasjon</th>
+                    <th>Status</th>
+                    <th>Utpek administrator</th>
+                    <th>Godkjent e-postdomene</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var organization in Model)
+                {
+                    <tr>
+                        <td>@organization.Name</td>
+                        <td>@organization.Status</td>
+
+                        <td>
+                            <form asp-controller="OrganizationApproval"
+                                  asp-action="AssignOrganizationAdmin"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <input type="hidden"
+                                       name="organizationId"
+                                       value="@organization.OrganizationId" />
+
+                                <input type="email"
+                                       name="email"
+                                       class="form-control mb-2"
+                                       placeholder="Brukerens e-post"
+                                       required />
+
+                                <button type="submit"
+                                        class="btn btn-primary btn-sm">
+                                    Utpek administrator
+                                </button>
+                            </form>
+                        </td>
+
+                        <td>
+                            <form asp-controller="OrganizationApproval"
+                                  asp-action="UpdateEmailDomain"
+                                  method="post">
+
+                                @Html.AntiForgeryToken()
+
+                                <input type="hidden"
+                                       name="organizationId"
+                                       value="@organization.OrganizationId" />
+
+                                <input type="text"
+                                       name="allowedEmailDomain"
+                                       value="@organization.AllowedEmailDomain"
+                                       placeholder="politiet.no"
+                                       maxlength="253"
+                                       class="form-control mb-2"
+                                       required />
+
+                                <button type="submit"
+                                        class="btn btn-primary btn-sm">
+                                    Lagre domene
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

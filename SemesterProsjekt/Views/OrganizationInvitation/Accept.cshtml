@@ -1,0 +1,53 @@
+@{
+    ViewData["Title"] = "Godta invitasjon";
+}
+
+<div class="container mt-4">
+
+    <h1>Invitasjon til Kriseportalen</h1>
+
+    <p>
+        Du er invitert til
+        <strong>@ViewBag.OrganizationName</strong>.
+    </p>
+
+    @if (ViewBag.InvitationStatus == "LoginRequired")
+    {
+        <div class="alert alert-info">
+            Du må logge inn for å godta invitasjonen.
+            Bruk samme e-postadresse som invitasjonen
+            ble sendt til.
+        </div>
+    }
+    else if (ViewBag.InvitationStatus == "EmailNotConfirmed")
+    {
+        <div class="alert alert-warning">
+            Du må bekrefte e-postadressen din
+            før du kan godta invitasjonen.
+        </div>
+    }
+    else if (ViewBag.InvitationStatus == "WrongEmail")
+    {
+        <div class="alert alert-danger">
+            Denne invitasjonen tilhører en annen
+            e-postadresse.
+        </div>
+    }
+    else if (ViewBag.InvitationStatus == "WrongOrganization")
+    {
+        <div class="alert alert-danger">
+            Kontoen din tilhører allerede
+            en annen organisasjon.
+        </div>
+    }
+    else if (ViewBag.InvitationStatus == "Ready")
+    {
+        <div class="alert alert-success">
+            Identiteten din er kontrollert.
+
+            Du kan godta invitasjonen når vi
+            aktiverer godkjenningsfunksjonen.
+        </div>
+    }
+
+</div>

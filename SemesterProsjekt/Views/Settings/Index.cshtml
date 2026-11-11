@@ -11,6 +11,11 @@
 @model SemesterProsjekt.Models.ViewModels.SettingsPageViewModel
 
 @{
+    var emailLocked = User.IsInRole(
+        SemesterProsjekt.Models.AppRoles.NeedsActor);
+}
+
+@{
     // Angir tittelen til siden.
     ViewData["Title"] = "Kontoinnstillinger";
 }
@@ -91,17 +96,34 @@
                         </span>
                     </div>
 
+                    
                     @* Felt for brukerens e-postadresse. *@
                     <div class="form-field">
                         <label asp-for="Profile.Email"></label>
 
-                        <input asp-for="Profile.Email"
-                               type="email"
-                               autocomplete="email" />
+                        @if (emailLocked)
+                        {
+                            <input asp-for="Profile.Email"
+                                   type="email"
+                                   readonly
+                                   aria-readonly="true"
+                                   autocomplete="email" />
 
-                        <span asp-validation-for="Profile.Email">
-                        </span>
+                            <small class="form-text">
+                                E-postadressen er knyttet til organisasjonen
+                                din og kan ikke endres her.
+                            </small>
+                        }
+                        else
+                        {
+                            <input asp-for="Profile.Email"
+                                   type="email"
+                                   autocomplete="email" />
+                        }
+
+                        <span asp-validation-for="Profile.Email"></span>
                     </div>
+
 
                     @*
                         Viser kontorollen.

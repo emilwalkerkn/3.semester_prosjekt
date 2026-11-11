@@ -48,41 +48,71 @@ public class SettingsController : Controller
     /// Validerer og oppdaterer navn og e-post for den innloggede brukeren.
     /// E-post brukes også som brukernavn ved innlogging.
   
+    
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateProfile(
         [Bind(Prefix = "Profile")] ProfileSettingsViewModel profile)
     {
-        // Prefikset kobler felter som Profile.FirstName til denne modellen.
-        if (!ModelState.IsValid)
+        var user = await GetCurrentUserAsync();
+
+        // Kontroller rollen i Identity, ikke i skjemaet.
+        var isNeedsActor = await _userManager.IsInRoleAsync(
+            user, AppRoles.NeedsActor);
+
+        if (isNeedsActor)
         {
-            return View("Index", await CreatePageModelAsync(profile: profile));
+            // Avvis forsøk på å endre e-post via HTTP.
+            if (!string.Equals(
+                    profile.Email?.Trim(),
+                    user.Email,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                ModelState.AddModelError(
+                    "",
+                    "Behovsaktører kan ikke endre e-postadressen sin.");
+            }
+
+            // Vis alltid den lagrede adressen ved valideringsfeil.
+            profile.Email = user.Email ?? "";
         }
 
-        // Kontoen hentes fra innloggingen fremfor en bruker-ID fra skjemaet.
-        var user = await GetCurrentUserAsync();
+        if (!ModelState.IsValid)
+        {
+            return View(
+                "Index",
+                await CreatePageModelAsync(profile: profile));
+        }
+
         user.FirstName = profile.FirstName.Trim();
         user.LastName = profile.LastName.Trim();
-        user.Email = profile.Email.Trim();
-        user.UserName = profile.Email.Trim();
 
-        // Bare profilfeltene over oppdateres. Innsendt rolle brukes ikke
-        // til å endre brukerens rettigheter.
+        // Bare brukere uten Behovsaktør-rollen
+        // kan endre e-post og brukernavn.
+        if (!isNeedsActor)
+        {
+            user.Email = profile.Email.Trim();
+            user.UserName = profile.Email.Trim();
+        }
+
         var result = await _userManager.UpdateAsync(user);
 
         if (!result.Succeeded)
         {
             AddIdentityErrors(result);
-            return View("Index", await CreatePageModelAsync(profile: profile));
+
+            return View(
+                "Index",
+                await CreatePageModelAsync(profile: profile));
         }
 
-        // Fornyer innloggingen slik at den gjenspeiler de lagrede kontoopplysningene.
         await _signInManager.RefreshSignInAsync(user);
 
-        // TempData gjør meldingen tilgjengelig etter videresendingen.
         TempData["SettingsSuccess"] = "Profilen er lagret.";
+
         return RedirectToAction(nameof(Index));
     }
+
 
     /// Endrer passordet for den innloggede brukeren.
     /// Identity kontrollerer nåværende passord og kravene til det nye passordet.

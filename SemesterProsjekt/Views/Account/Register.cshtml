@@ -136,15 +136,10 @@
                             Jeg registrerer meg som
                         </label>
 
-                        <select asp-for="Role">
-                            <option value="@AppRoles.NeedsActor">
-                                @AppRoles.PublicActorDisplayName
-                            </option>
+                        <input asp-for="Role" type="hidden"
+                               value="@AppRoles.ResourceOwner" />
 
-                            <option value="@AppRoles.ResourceOwner">
-                                Ressurseier
-                            </option>
-                        </select>
+                        <p>Du registrerer deg som ressurseier.</p>
 
                         <span asp-validation-for="Role"></span>
                     </div>

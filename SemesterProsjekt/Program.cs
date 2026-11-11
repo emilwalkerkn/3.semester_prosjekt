@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
 using Microsoft.AspNetCore.DataProtection;
+using SemesterProsjekt.Services;
 
 
 // Oppretter en builder som brukes til å konfigurere
@@ -90,8 +91,9 @@ builder.Services.AddScoped<
     MatchRepository>();
 
 
-// I produksjonsmiljøet lagres nøklene for databeskyttelse
-// i en egen mappe, slik at de bevares ved omstart.
+// I produksjonsmiljøet lagres nøklene for databeskyttelse i en egen mappe, slik at de bevares ved omstart.
+
+builder.Services.AddScoped<InvitationEmailSender>();
 
 if (!builder.Environment.IsDevelopment())
 {
@@ -99,8 +101,11 @@ if (!builder.Environment.IsDevelopment())
         .AddDataProtection()
         .PersistKeysToFileSystem(
             new DirectoryInfo("/keys"))
-        .SetApplicationName("SemesterProsjekt");
+        .SetApplicationName("SemesterProsjekt"); 
 }
+
+builder.Services.AddScoped<InvitationEmailSender>();
+
 
 
 // Bygger applikasjonen med tjenestene
@@ -111,6 +116,7 @@ var app = builder.Build();
 
 // Oppretter et eget tjenesteområde og henter databasen.
 // Ventende EF Core-migrasjoner kjøres ved oppstart.
+await DomainSchemaMigrator.MigrateAsync(app.Services);
 
 using (var scope = app.Services.CreateScope())
 {
@@ -125,7 +131,14 @@ using (var scope = app.Services.CreateScope())
 // og legger inn lokale eksempeldata dersom det er konfigurert.
 
 await IdentitySeeder.SeedRolesAsync(app.Services);
-await DomainSchemaMigrator.MigrateAsync(app.Services);
+if (app.Configuration.GetValue<bool>(
+        "ApprovalAdminTestSeeder:Enabled"))
+{
+    if (!app.Environment.IsDevelopment())
+        throw new InvalidOperationException(
+            "Testseederen kan bare kjøre i Development.");
+}
+
 await CategorySeeder.SeedAsync(app.Services);
 await LocalDemoSeeder.SeedAsync(
     app.Services,

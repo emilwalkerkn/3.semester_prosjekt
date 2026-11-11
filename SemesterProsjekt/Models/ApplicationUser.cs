@@ -15,4 +15,10 @@ public class ApplicationUser : IdentityUser
 
     [MaxLength(100)]
     public string LastName { get; set; } = string.Empty;
+    
+    // OrganizationId og Organization er nullable, fordi ikke alle brukere må tilhøre en organisasjon.
+    public int? OrganizationId { get; set; }
+
+    public Organization? Organization { get; set; }
+
 }

@@ -26,6 +26,7 @@ public static class IdentitySeeder
         string[] roles =
         [
             AppRoles.Admin,
+            AppRoles.OrganizationAdmin,
             AppRoles.ResourceOwner,
             AppRoles.NeedsActor
         ];

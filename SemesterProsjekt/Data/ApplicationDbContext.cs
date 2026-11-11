@@ -23,4 +23,55 @@ public class ApplicationDbContext
         : base(options)
     {
     }
+    //gjør at entity framework core kan håndtere organisasjoner i databasen. Dette er nødvendig for å kunne bruke OrganizationId i ApplicationUser.
+    public DbSet<Organization> Organizations { get; set; }
+        = null!;
+    
+    public DbSet<OrganizationInvitation> OrganizationInvitations
+    { get; set; } = null!;
+    
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+
+        builder.Entity<Organization>(entity =>
+        {
+            entity.HasKey(o => o.OrganizationId);
+
+            entity.HasMany(o => o.Users)
+                .WithOne(u => u.Organization)
+                .HasForeignKey(u => u.OrganizationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(o => o.OrganizationNumber)
+                .IsUnique();
+        });
+        
+        builder.Entity<OrganizationInvitation>(entity =>
+        {
+            entity.HasKey(i => i.OrganizationInvitationId);
+
+            entity.HasOne(i => i.Organization)
+                .WithMany()
+                .HasForeignKey(i => i.OrganizationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(i => i.InvitedByUser)
+                .WithMany()
+                .HasForeignKey(i => i.InvitedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(i => i.TokenHash)
+                .IsUnique();
+
+            entity.HasIndex(i => new
+            {
+                i.OrganizationId,
+                i.Email
+            });
+        });
+
+    }
+
+
 }

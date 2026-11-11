@@ -8,6 +8,9 @@ public static class AppRoles
 {
     // Administrator med full tilgang i portalen.
     public const string Admin = "Admin";
+    
+    // Administrator for én bestemt organisasjon.
+    public const string OrganizationAdmin = "OrganizationAdmin";
 
     // Aktør som registrerer ressurser den kan tilby.
     public const string ResourceOwner = "Ressurseier";
@@ -23,7 +26,6 @@ public static class AppRoles
     // Admin er bevisst utelatt, så ingen kan gjøre seg selv til administrator.
     public static readonly string[] SelfServiceRoles =
     [
-        ResourceOwner,
-        NeedsActor
+        ResourceOwner
     ];
 }
