@@ -1,6 +1,7 @@
 
 using Microsoft.AspNetCore.Identity;
 using SemesterProsjekt.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace SemesterProsjekt.Data;
 
@@ -13,6 +14,9 @@ public static class LocalDemoSeeder
     private const string AdminEmail = "admin@kriseportal.local";
     private const string NeedsActorEmail = "behov@kriseportal.local";
     private const string ResourceOwnerEmail = "ressurs@kriseportal.local";
+    private const string OrganizationAdminEmail = "orgadmin@kriseportal.local";
+    private const string DemoOrganizationName = "Kriseportal Demoorganisasjon";
+    private const string DemoOrganizationDomain = "kriseportal.local";
 
     /// Oppretter testbrukerne dersom LocalDemo er aktivert.
     /// Eksisterende brukere blir ikke opprettet på nytt.
@@ -40,6 +44,79 @@ public static class LocalDemoSeeder
 
         var userManager = scope.ServiceProvider
             .GetRequiredService<UserManager<ApplicationUser>>();
+
+        // En fast organisasjonsadministrator skal bare opprettes i et lokalt utviklingsmiljø.
+var environment = scope.ServiceProvider
+    .GetRequiredService<IWebHostEnvironment>();
+
+if (environment.IsDevelopment())
+{
+    var db = scope.ServiceProvider
+        .GetRequiredService<ApplicationDbContext>();
+
+    var organization = await db.Organizations
+        .SingleOrDefaultAsync(o => o.Name == DemoOrganizationName);
+
+    if (organization is null)
+    {
+        organization = new Organization
+        {
+            Name = DemoOrganizationName,
+            Status = "Approved",
+            AllowedEmailDomain = DemoOrganizationDomain
+        };
+
+        db.Organizations.Add(organization);
+        await db.SaveChangesAsync();
+    }
+    else if (organization.Status != "Approved" ||
+             organization.AllowedEmailDomain != DemoOrganizationDomain)
+    {
+        throw new InvalidOperationException(
+            "Demoorganisasjonen har uventet status eller e-postdomene.");
+    }
+
+    var orgAdmin = await userManager.FindByEmailAsync(
+        OrganizationAdminEmail);
+
+    if (orgAdmin is null)
+    {
+        orgAdmin = new ApplicationUser
+        {
+            UserName = OrganizationAdminEmail,
+            Email = OrganizationAdminEmail,
+            EmailConfirmed = true,
+            FirstName = "Demo",
+            LastName = "Organisasjonsadministrator",
+            OrganizationId = organization.OrganizationId
+        };
+
+        var createResult = await userManager.CreateAsync(
+            orgAdmin, password);
+
+        EnsureSucceeded(
+            createResult,
+            $"opprette demobrukeren {OrganizationAdminEmail}");
+    }
+    else if (orgAdmin.OrganizationId != organization.OrganizationId)
+    {
+        // Ikke gi en eksisterende konto administratorrettigheter uten at den allerede tilhører riktig organisasjon.
+        throw new InvalidOperationException(
+            "E-postadressen til demoorganisasjonsadministratoren er allerede i bruk.");
+    }
+
+    if (!await userManager.IsInRoleAsync(
+            orgAdmin, AppRoles.OrganizationAdmin))
+    {
+        var roleResult = await userManager.AddToRoleAsync(
+            orgAdmin, AppRoles.OrganizationAdmin);
+
+        EnsureSucceeded(
+            roleResult,
+            "tildele OrganizationAdmin til demobrukeren");
+    }
+}
+
 
         // Oppretter eller finner testbrukeren for administrator.
         await GetOrCreateUserAsync(
@@ -96,6 +173,7 @@ public static class LocalDemoSeeder
                 LastName = lastName
             };
 
+
             // Identity oppretter brukeren og lagrer passordet sikkert.
             var createResult = await userManager.CreateAsync(user, password);
 
@@ -114,8 +192,10 @@ public static class LocalDemoSeeder
                 $"gi rollen {role} til {email}");
         }
 
+
         return user;
     }
+
 
     /// Kontrollerer om en Identity-operasjon ble gjennomført.
     /// Kaster en feilmelding dersom opprettelse eller rolletildeling mislykkes.
@@ -136,4 +216,5 @@ public static class LocalDemoSeeder
         throw new InvalidOperationException(
             $"Kunne ikke {operation}: {errors}");
     }
+
 }

@@ -5,6 +5,7 @@
 
 Brukere:
 admin@kriseportal.local
+orgadmin@kriseportal.local
 behov@kriseportal.local
 ressurs@kriseportal.local
 
