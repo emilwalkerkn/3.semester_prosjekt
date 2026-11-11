@@ -95,36 +95,39 @@ Behovsaktører kan registrere behov, mens ressurseiere kan registrere ressurser.
 
 Tilgang kontrolleres på serversiden. Det er derfor ikke tilstrekkelig å kjenne URL-en til en funksjon man ikke har rettigheter til å bruke.
 
-### Lokalt utviklingsmiljø for PublicActor
+### Lokalt utviklingsmiljø med Docker Compose
 
-Branchen `NyLøsning/PublicActor` har et eget Docker Compose-oppsett for utvikling og testing. Dette gjør det mulig å arbeide med organisasjonsfunksjonene uten å bruke den vanlige databasen til prosjektet.
+Prosjektet bruker én felles Docker Compose-fil, `SemesterProsjekt/compose.yml`, for lokal utvikling og testing.
 
-Oppsettet består av ASP.NET Core-applikasjonen, MariaDB og Mailpit.
+Oppsettet starter tre tjenester: ASP.NET Core-applikasjonen, MariaDB og Mailpit. Mailpit brukes til å teste invitasjons-e-poster uten å sende e-post til virkelige mottakere.
 
-Fra mappen `SemesterProsjekt` kan miljøet startes med:
+Fra mappen `SemesterProsjekt` startes løsningen med:
 
 ```bash
-docker compose -p publicactor-dev -f compose.publicactor.yml up --build -d
+docker compose up --build -d
 ```
-
-Før oppstart må miljøvariablene `DEV_DB_PASSWORD` og `DEV_DB_ROOT_PASSWORD` være konfigurert. Disse skal ikke lagres i Git.
 
 Tjenestene er tilgjengelige på:
 
 | Tjeneste | Adresse |
 |---|---|
-| Applikasjon | http://localhost:8081 |
+| Applikasjon | http://localhost:8080 |
 | Mailpit | http://localhost:8025 |
-| MariaDB | localhost:3309 |
+| MariaDB | localhost:3308 |
+
+Demobrukere opprettes når `LocalDemo:Enabled` er aktivert. Dette er kun beregnet for lokal testing.
 
 For å stoppe miljøet uten å slette databasedata:
 
 ```bash
-docker compose -p publicactor-dev -f compose.publicactor.yml down
+docker compose down
 ```
 
-Databasedata lagres i et eget Docker-volum. Kommandoen `down -v` skal ikke brukes dersom testdataene skal beholdes.
+MariaDB-data og applikasjonens Data Protection-nøkler lagres i Docker-volumer. Ikke bruk `docker compose down -v` dersom dataene skal beholdes.
 
+Invitasjonslenker peker til `http://localhost:8080`, og invitasjons-e-poster kan leses i Mailpit på port 8025.
+
+Dette oppsettet er beregnet for lokal utvikling og demonstrasjon, ikke produksjonsdrift.
 ## Systemarkitektur
 
 Applikasjonen bruker ASP.NET Core MVC (Model-View-Controller).
