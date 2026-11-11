@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
 using Microsoft.AspNetCore.Identity;
+using SemesterProsjekt.Services;
 
 namespace SemesterProsjekt.Controllers;
 //passer på at bare brukere med admin rolle kan se siden
@@ -12,14 +13,22 @@ public class OrganizationApprovalController : Controller
 {
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly InvitationEmailSender _emailSender;
+    private readonly IConfiguration _configuration;
+
 
     public OrganizationApprovalController(
         ApplicationDbContext context,
-        UserManager<ApplicationUser> userManager)
+        UserManager<ApplicationUser> userManager,
+        InvitationEmailSender emailSender,
+        IConfiguration configuration)
     {
         _context = context;
         _userManager = userManager;
+        _emailSender = emailSender;
+        _configuration = configuration;
     }
+
 
     [HttpGet]
     public async Task<IActionResult> Index()

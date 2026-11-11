@@ -245,6 +245,14 @@ namespace SemesterProsjekt.Migrations
                         .HasMaxLength(253)
                         .HasColumnType("varchar(253)");
 
+                    b.Property<string>("ContactEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
+                    b.Property<string>("ContactPersonName")
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime(6)");
 
@@ -295,6 +303,9 @@ namespace SemesterProsjekt.Migrations
                     b.Property<string>("InvitedByUserId")
                         .IsRequired()
                         .HasColumnType("varchar(255)");
+
+                    b.Property<bool>("IsOrganizationAdminInvitation")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("OrganizationId")
                         .HasColumnType("int");

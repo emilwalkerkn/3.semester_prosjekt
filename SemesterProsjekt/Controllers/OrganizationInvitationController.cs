@@ -420,6 +420,13 @@ public class OrganizationInvitationController : Controller
         return BadRequest(
             "Invitasjonen er ugyldig eller ikke lenger aktiv.");
     }
+    
+    if (invitation.IsOrganizationAdminInvitation)
+    {
+        return BadRequest(
+            "Administratorinvitasjoner må behandles gjennom egen registreringsflyt.");
+    }
+
     // Kontroller domenet på nytt ved registrering.
     if (!OrganizationEmailDomainService.IsAllowed(
             invitation.Email,

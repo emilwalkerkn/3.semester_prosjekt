@@ -4,7 +4,10 @@ namespace SemesterProsjekt.Models;
 
 public class OrganizationInvitation
 {
+    
     public int OrganizationInvitationId { get; set; }
+    public bool IsOrganizationAdminInvitation { get; set; } = false;
+
 
     // Organisasjonen den ansatte inviteres til.
     public int OrganizationId { get; set; }
