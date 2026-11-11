@@ -55,6 +55,75 @@ Når containeren er startet, er applikasjonen tilgjengelig på http://localhost:
 docker compose down
 ```
 
+## Organisasjoner og brukerroller
+
+Løsningen støtter organisasjonstilknytning for brukere. En organisasjon kan registreres og må godkjennes av en systemadministrator før den kan benyttes til administrasjon av ansatte.
+
+Systemadministrator kan godkjenne organisasjoner, konfigurere tillatt e-postdomene og tildele rollen `OrganizationAdmin` til en bruker i organisasjonen.
+
+Organisasjonsadministrator kan administrere ansatte i egen organisasjon og sende invitasjoner til nye ansatte.
+
+En ansatt som registrerer seg gjennom en gyldig invitasjon, knyttes til riktig organisasjon og får rollen `Behovsaktør`.
+
+### Invitasjoner til ansatte
+
+Invitasjonsfunksjonen brukes til å opprette nye ansatte på en kontrollert måte.
+
+1. Organisasjonsadministrator sender en invitasjon til en e-postadresse.
+2. Systemet kontrollerer at e-postadressen tilhører organisasjonens tillatte e-postdomene.
+3. Invitasjonen sendes på e-post med en unik registreringslenke.
+4. Mottakeren åpner lenken og registrerer en ny brukerkonto.
+5. Kontoen knyttes til organisasjonen og får rollen `Behovsaktør`.
+
+Invitasjoner har begrenset gyldighetstid og kan tilbakekalles av organisasjonsadministrator. En invitasjon som allerede er brukt, utløpt eller tilbakekalt, kan ikke benyttes til registrering.
+
+Invitasjonstoken lagres som en hash i databasen, slik at selve tokenverdien ikke lagres i klartekst.
+
+### E-post og lokal testing
+
+Ved lokal utvikling brukes Mailpit til å motta og kontrollere invitasjons-e-poster uten å sende dem til virkelige mottakere.
+
+I utviklingsmiljøet `publicactor-dev` er Mailpit tilgjengelig på:
+
+`http://localhost:8025`
+
+### Tilgangskontroll
+
+Løsningen bruker ASP.NET Core Identity for autentisering og rollebasert autorisasjon.
+
+Behovsaktører kan registrere behov, mens ressurseiere kan registrere ressurser. Organisasjonsadministratorer kan administrere ansatte og invitasjoner innenfor egen organisasjon.
+
+Tilgang kontrolleres på serversiden. Det er derfor ikke tilstrekkelig å kjenne URL-en til en funksjon man ikke har rettigheter til å bruke.
+
+### Lokalt utviklingsmiljø for PublicActor
+
+Branchen `NyLøsning/PublicActor` har et eget Docker Compose-oppsett for utvikling og testing. Dette gjør det mulig å arbeide med organisasjonsfunksjonene uten å bruke den vanlige databasen til prosjektet.
+
+Oppsettet består av ASP.NET Core-applikasjonen, MariaDB og Mailpit.
+
+Fra mappen `SemesterProsjekt` kan miljøet startes med:
+
+```bash
+docker compose -p publicactor-dev -f compose.publicactor.yml up --build -d
+```
+
+Før oppstart må miljøvariablene `DEV_DB_PASSWORD` og `DEV_DB_ROOT_PASSWORD` være konfigurert. Disse skal ikke lagres i Git.
+
+Tjenestene er tilgjengelige på:
+
+| Tjeneste | Adresse |
+|---|---|
+| Applikasjon | http://localhost:8081 |
+| Mailpit | http://localhost:8025 |
+| MariaDB | localhost:3309 |
+
+For å stoppe miljøet uten å slette databasedata:
+
+```bash
+docker compose -p publicactor-dev -f compose.publicactor.yml down
+```
+
+Databasedata lagres i et eget Docker-volum. Kommandoen `down -v` skal ikke brukes dersom testdataene skal beholdes.
 
 ## Systemarkitektur
 
@@ -265,7 +334,29 @@ dotnet test SemesterProsjekt.UnitTests/SemesterProsjekt.UnitTests.csproj
 Dette krever .NET SDK 10. Testene kan også kjøres gjennom
 testverktøyet i Rider.
 
+### Utvidet testing av organisasjoner og invitasjoner
 
+Ved videreutvikling av `NyLøsning/PublicActor` er testdekningen utvidet med tester for organisasjonstilknytning, invitasjoner, tilgangskontroll og databaseoperasjoner.
+
+**Resultat fra siste automatiserte testkjøring: 67 av 67 tester bestått.**
+
+Testene omfatter både enhetstester og integrasjonstester mot MariaDB, blant annet kontroll av registrering via invitasjoner, rolletildeling og tilbakerulling av databasetransaksjoner ved feil.
+
+I tillegg er følgende funksjoner kontrollert manuelt i Docker-miljøet:
+
+| Test | Forventet resultat | Resultat |
+|---|---|---|
+| Behovsaktør registrerer behov | Behovet lagres og vises i oversikten | Bestått |
+| Ressurseier registrerer ressurs | Ressursen lagres og vises i oversikten | Bestått |
+| Matching | Behov og ressurs kan matches | Bestått |
+| Rollebasert tilgang | Behovsaktør og Ressurseier blokkeres fra hverandres registreringsfunksjoner | Bestått |
+| Invitasjon til ansatt | Organisasjonsadministrator kan sende invitasjon via Mailpit | Bestått |
+| Registrering via invitasjon | Ansatt opprettes i riktig organisasjon med rollen `Behovsaktør` | Bestått |
+| Gjenbruk av invitasjon | En brukt invitasjon avvises | Bestått |
+| Tilbakekalling | En tilbakekalt invitasjon avvises | Bestått |
+| Feil e-postdomene | Invitasjon til en adresse utenfor organisasjonens tillatte domene avvises | Bestått |
+
+Testene ble gjennomført etter at oppdateringer fra `main` ble slått sammen med `NyLøsning/PublicActor`.
 
 ### Manuelle tester
 I tillegg til enhetstestene har vi gjennomført manuelle tester av applikasjonen. Dette gjorde vi for å kontrollere funksjonalitet som brukeren møter i nettleseren. Testene ble gjennomført ved å bruke applikasjonen som en vanlig bruker og sammenligne det forventede resultatet med det faktiske resultatet.
