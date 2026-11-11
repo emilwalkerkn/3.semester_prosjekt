@@ -1,3 +1,4 @@
+
 services:
   semesterprosjekt:
     build:
@@ -7,27 +8,43 @@ services:
       - "8080:8080"
     environment:
       TZ: Europe/Oslo
+      ASPNETCORE_ENVIRONMENT: Development
+
       ConnectionStrings__DefaultConnection: "Server=mariadb;Port=3306;Database=semesterprosjekt;User=appuser;Password=apppassword;"
+
       LocalDemo__Enabled: "true"
       LocalDemo__Password: "DemoPass123"
+
+      OrganizationAdminTestSeeder__Enabled: "false"
+
+      Smtp__Host: "mailpit"
+      Smtp__Port: "1025"
+      Invitation__BaseUrl: "http://localhost:8080"
+
     volumes:
       - dataprotection_keys:/keys
+
     depends_on:
       mariadb:
         condition: service_healthy
+      mailpit:
+        condition: service_started
 
   mariadb:
-    image: mariadb:latest
+    image: mariadb:10.11
     environment:
       MARIADB_ROOT_PASSWORD: rootpassword
       MARIADB_DATABASE: semesterprosjekt
       MARIADB_USER: appuser
       MARIADB_PASSWORD: apppassword
+
     ports:
       - "3308:3306"
+
     volumes:
       - mariadb_data:/var/lib/mysql
-      - ./Database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./Database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 5s
@@ -35,7 +52,13 @@ services:
       retries: 20
       start_period: 10s
 
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "127.0.0.1:8025:8025"
+    expose:
+      - "1025"
+
 volumes:
   mariadb_data:
   dataprotection_keys:
-
