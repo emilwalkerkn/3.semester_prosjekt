@@ -115,6 +115,17 @@ if (environment.IsDevelopment())
             roleResult,
             "tildele OrganizationAdmin til demobrukeren");
     }
+    // Demo-organisasjonsadministratoren skal også kunne registrere behov.
+    if (!await userManager.IsInRoleAsync(
+            orgAdmin, AppRoles.NeedsActor))
+    {
+        var roleResult = await userManager.AddToRoleAsync(
+            orgAdmin, AppRoles.NeedsActor);
+
+        EnsureSucceeded(
+            roleResult,
+            "tildele Behovsaktør til demo-organisasjonsadministratoren");
+    }
 }
 
 
