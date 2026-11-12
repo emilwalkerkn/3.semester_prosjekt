@@ -25,5 +25,14 @@ public class Organization
     
     [StringLength(253)]
     public string? AllowedEmailDomain { get; set; }
+    
+    
+    [StringLength(200)]
+    public string? ContactPersonName { get; set; }
+
+    [EmailAddress]
+    [StringLength(256)]
+    public string? ContactEmail { get; set; }
+
 
 }

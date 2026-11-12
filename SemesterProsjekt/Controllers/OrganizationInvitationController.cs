@@ -420,6 +420,9 @@ public class OrganizationInvitationController : Controller
         return BadRequest(
             "Invitasjonen er ugyldig eller ikke lenger aktiv.");
     }
+    
+
+
     // Kontroller domenet på nytt ved registrering.
     if (!OrganizationEmailDomainService.IsAllowed(
             invitation.Email,
@@ -521,17 +524,27 @@ public class OrganizationInvitationController : Controller
         // Transaction rulles tilbake når den avsluttes.
     }
 
-    var roleResult =
-        await _userManager.AddToRoleAsync(
-            user, AppRoles.NeedsActor);
+    
+    var roles = invitation.IsOrganizationAdminInvitation
+        ? new[] { AppRoles.OrganizationAdmin, AppRoles.NeedsActor }
+        : new[] { AppRoles.NeedsActor };
 
-    if (!roleResult.Succeeded)
+    foreach (var role in roles)
     {
-        foreach (var error in roleResult.Errors)
-            ModelState.AddModelError("", error.Description);
+        var roleResult = await _userManager.AddToRoleAsync(user, role);
 
-        return View(model);
+        if (!roleResult.Succeeded)
+        {
+            foreach (var error in roleResult.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            return View(model);
+        }
     }
+
+
 
     await transaction.CommitAsync();
 
