@@ -67,11 +67,12 @@ builder.Services.ConfigureApplicationCookie(options =>
 // Legger til støtte for MVC-controllere, views og Razor Pages.
 
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddSingleton<CountyFilter>();
 
 // Registrerer databasetilkoblingen og repositoryene.
 // Dapper brukes til å hente og lagre behov,
 // ressurser og matcher i databasen.
+// appen oppretter en felles instans av filteret.
 
 builder.Services.AddSingleton<
     IDbConnectionFactory,

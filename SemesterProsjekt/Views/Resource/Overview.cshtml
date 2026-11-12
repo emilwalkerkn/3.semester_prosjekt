@@ -20,6 +20,15 @@
     var search = ViewData["Search"] as string;
     var typeId = ViewData["ResourceTypeId"] as int?;
     var statusFilter = ViewData["Status"] as string;
+    var countyFilter = Context.Request.Query["county"].ToString();
+
+    var counties = new[]
+    {
+        "Agder", "Akershus", "Buskerud", "Finnmark", "Innlandet",
+        "Møre og Romsdal", "Nordland", "Oslo", "Rogaland",
+        "Telemark", "Troms", "Trøndelag", "Vestfold",
+        "Vestland", "Østfold"
+    };
 
     /*
         Ressurseiere og administratorer
@@ -76,6 +85,7 @@
                asp-route-search="@search"
                asp-route-resourceTypeId="@typeId"
                asp-route-status="@statusFilter"
+               asp-route-county="@countyFilter"
                class="portal-button secondary">
                 Skriv ut liste
             </a>
@@ -111,6 +121,21 @@
                 <option value="">Alle statuser</option>
                 <option value="Available" selected="@(statusFilter == "Available")">Tilgjengelig</option>
                 <option value="Unavailable" selected="@(statusFilter == "Unavailable")">Ikke tilgjengelig</option>
+            </select>
+        </div>
+        
+        <div class="form-field">
+            <label for="resource-county-filter">Fylke</label>
+            <select id="resource-county-filter" name="county">
+                <option value="">Alle fylker</option>
+
+                @foreach (var county in counties)
+                {
+                    <option value="@county"
+                            selected="@(countyFilter == county)">
+                        @county
+                    </option>
+                }
             </select>
         </div>
         <button type="submit" class="portal-button">Søk og filtrer</button>
@@ -156,7 +181,7 @@
                 <h2>Ingen ressurser å vise</h2>
 
                 <p>
-                    @(search != null || typeId.HasValue || !string.IsNullOrEmpty(statusFilter) ? "Ingen ressurser samsvarer med søket. Prøv andre filtre eller nullstill søket." : ownResourcesOnly ? "Du har ikke registrert noen ressurser ennå." : "Nye ressurser dukker opp her når de er registrert.")
+                    @(search != null || typeId.HasValue || !string.IsNullOrEmpty(statusFilter) || !string.IsNullOrEmpty(countyFilter) ? "Ingen ressurser samsvarer med søket. Prøv andre filtre eller nullstill søket." : ownResourcesOnly ? "Du har ikke registrert noen ressurser ennå." : "Nye ressurser dukker opp her når de er registrert.")
                 </p>
 
                 @if (canRegister)

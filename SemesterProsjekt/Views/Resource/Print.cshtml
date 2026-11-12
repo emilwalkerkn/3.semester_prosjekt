@@ -31,79 +31,262 @@
 
     @* Egen CSS for tabellen og utskriften. *@
     <style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        padding: 32px;
+        background: #f2f8fc;
+        color: #194f78;
+        font-family: "Segoe UI", Arial, sans-serif;
+        line-height: 1.5;
+    }
+
+    .print-page {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 28px;
+    }
+
+    .actions button,
+    .actions a {
+        display: inline-block;
+        padding: 12px 20px;
+        border: 1px solid #cfe1ef;
+        border-radius: 10px;
+        font: inherit;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .actions button {
+        background: #2078bc;
+        color: white;
+        border-color: #2078bc;
+    }
+
+    .actions button:hover {
+        background: #185e94;
+    }
+
+    .actions a {
+        background: white;
+        color: #194f78;
+    }
+
+    .actions a:hover {
+        background: #e7f2fa;
+    }
+
+    .actions button:focus-visible,
+    .actions a:focus-visible,
+    .table-wrapper:focus-visible {
+        outline: 3px solid #194f78;
+        outline-offset: 4px;
+    }
+
+    .print-heading {
+        margin-bottom: 24px;
+    }
+
+    .brand {
+        margin: 0 0 8px;
+        color: #2078bc;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    h1 {
+        margin: 0 0 8px;
+        font-size: clamp(26px, 4vw, 36px);
+        line-height: 1.2;
+    }
+
+    .summary,
+    .print-help {
+        margin: 8px 0;
+        color: #526b80;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+        background: white;
+        border: 1px solid #cfe1ef;
+        border-radius: 12px;
+    }
+
+    table {
+        width: 100%;
+        min-width: 900px;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    th,
+    td {
+        padding: 16px;
+        text-align: left;
+        vertical-align: top;
+        overflow-wrap: anywhere;
+        border-bottom: 1px solid #dce8f1;
+    }
+
+    th {
+        background: #e7f2fa;
+        font-weight: 700;
+    }
+
+    td {
+        color: #273d4d;
+    }
+
+    tbody tr:nth-child(even) {
+        background: #f7fafc;
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .empty-state {
+        padding: 32px;
+        background: white;
+        border: 1px solid #cfe1ef;
+        border-radius: 12px;
+    }
+
+    @@media screen and (max-width: 600px) {
         body {
-            font-family: Arial, sans-serif;
-            margin: 30px;
+            padding: 16px;
+        }
+
+        .actions button,
+        .actions a {
+            width: 100%;
+            text-align: center;
+        }
+    }
+
+    @@page {
+        size: A4 landscape;
+        margin: 12mm;
+    }
+
+    @@media print {
+        body {
+            margin: 0;
+            padding: 0;
+            background: white;
+            color: black;
+            font-size: 10pt;
+        }
+
+        .actions,
+        .print-help {
+            display: none;
+        }
+
+        .print-heading {
+            margin-bottom: 6mm;
+        }
+
+        h1 {
+            font-size: 20pt;
+        }
+
+        .brand,
+        .summary {
+            color: black;
+        }
+
+        .table-wrapper {
+            overflow: visible;
+            border: none;
+            border-radius: 0;
         }
 
         table {
-            width: 100%;
-            border-collapse: collapse;
+            min-width: 0;
+            table-layout: fixed;
+            font-size: 9pt;
         }
 
         th,
         td {
+            padding: 3mm;
             border: 1px solid #999;
-            padding: 8px;
-            text-align: left;
-            overflow-wrap: anywhere;
+            color: black;
         }
 
         th {
-            background-color: #eee;
+            background: #eee;
         }
 
-        .actions {
-            margin-bottom: 20px;
+        thead {
+            display: table-header-group;
         }
 
-        /*
-            Disse stilene brukes bare når
-            siden skrives ut.
-        */
-        @@media print {
-            /*
-                Skjuler utskriftsknappen og lenken
-                på det utskrevne arket.
-            */
-            .actions {
-                display: none;
-            }
-
-            body {
-                margin: 0;
-            }
-
-            /*
-                Prøver å hindre at én tabellrad
-                blir delt mellom to sider.
-            */
-            tr {
-                break-inside: avoid;
-            }
+        tr {
+            break-inside: avoid;
         }
-    </style>
+
+        tbody tr:last-child td {
+            border-bottom: 1px solid #999;
+        }
+    }
+</style>
 </head>
-
 <body>
+<main class="print-page">
 
     @* Knapper for utskrift og tilbakeføring. *@
     <div class="actions">
-
-        @* Åpner nettleserens utskriftsvindu. *@
-        <button type="button"
-                onclick="window.print()">
-            Skriv ut
+        <button type="button" onclick="window.print()">
+            Skriv ut / lagre som PDF
         </button>
 
-        @* Sender brukeren tilbake til ressursoversikten. *@
         <a asp-controller="Resource"
-           asp-action="Overview">
+           asp-action="Overview"
+           asp-route-search="@(ViewData["Search"])"
+           asp-route-resourceTypeId="@(ViewData["ResourceTypeId"])"
+           asp-route-status="@(ViewData["Status"])"
+           asp-route-county="@(ViewData["County"])">
             Tilbake til oversikten
         </a>
     </div>
 
-    <h1>@ResourceVisibility.OverviewTitle(User)</h1>
+
+    <header class="print-heading">
+        <p class="brand">Kriseportal · Ressursliste</p>
+
+        <h1>@ResourceVisibility.OverviewTitle(User)</h1>
+
+        <p class="summary">
+            Antall ressurser i utvalget: <strong>@Model.Count()</strong>
+            @if (ViewData["County"] is string county &&
+                 !string.IsNullOrWhiteSpace(county))
+            {
+                <span> · Fylke: <strong>@county</strong></span>
+            }
+        </p>
+
+        <p class="print-help">
+            Listen viser ressursene fra det valgte utvalget.
+            Velg «Lagre som PDF» i utskriftsvinduet hvis du vil lagre en kopi.
+        </p>
+    </header>
 
     @* Viser en melding dersom listen er tom. *@
     @if (!Model.Any())
@@ -113,20 +296,25 @@
     else
     {
         @* Tabellen viser informasjon om alle ressursene. *@
-        <table>
-            <thead>
+        <div class="table-wrapper"
+             role="region"
+             aria-label="Ressursliste"
+             tabindex="0">
+    
+            <table>
+                <thead>
                 <tr>
                     <th>Tittel</th>
-                    <th>Ressurstype-ID</th>
+                    <th>Ressurstype</th>
                     <th>Mengde</th>
                     <th>Kontaktpunkt</th>
                     <th>Status</th>
                     <th>Tilgjengelig fra</th>
                     <th>Tilgjengelig til</th>
                 </tr>
-            </thead>
+                </thead>
 
-            <tbody>
+                <tbody>
 
                 @*
                     Går gjennom listen og lager
@@ -137,7 +325,7 @@
                     <tr>
                         <td>@resource.Title</td>
 
-                        <td>@resource.ResourceTypeId</td>
+                        <td>@(resource.ResourceTypeName ?? "Ikke oppgitt")</td>
 
                         <td>
                             @resource.Quantity @resource.Unit
@@ -152,18 +340,20 @@
                         <td>
                             @(resource.AvailableFrom?
                                 .ToString("dd.MM.yyyy HH:mm")
-                              ?? "Ikke oppgitt")
+                            ?? "Ikke oppgitt")
                         </td>
 
                         <td>
                             @(resource.AvailableTo?
                                 .ToString("dd.MM.yyyy HH:mm")
-                              ?? "Ikke oppgitt")
+                            ?? "Ikke oppgitt")
                         </td>
                     </tr>
                 }
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+            </div>
     }
+</main>
 </body>
 </html>

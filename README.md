@@ -187,6 +187,11 @@ eller tegne en linje. JavaScript overfører geometritypen til
 `GeometryType` og geografien som GeoJSON til `GeometryData`.
 Disse feltene sendes med skjemaet og lagres sammen med registreringen.
 
+Fylkesgrenser: Kartverket, bearbeidet av Robert Hopland.
+Kilde: https://github.com/robhop/fylker-og-kommuner
+Lisens: CC BY 4.0 – https://creativecommons.org/licenses/by/4.0/
+
+
 ### Innlogging og tilgang
 
 Behovs- og ressurscontrollerne krever innlogging. Handlinger som
