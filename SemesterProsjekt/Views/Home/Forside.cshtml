@@ -46,17 +46,22 @@
     <section class="forside-top">
 
         <header class="forside-header">
-            @* Tomt felt til venstre, slik at logoen havner midt på. *@
-            <span aria-hidden="true"></span>
+            
+            <a asp-controller="OrganizationApplication"
+               asp-action="Create"
+               class="forside-login forside-behovsaktor">
+                <span>Bli Behovsaktør</span>
+            </a>
+
 
             @* Logoen lenker tilbake til forsiden. *@
             <a asp-controller="Home" asp-action="Forside"
                class="forside-logo"
                aria-label="Kriseportal – gå til forsiden">
                 <svg width="56" height="64" viewBox="0 0 56 64" aria-hidden="true" focusable="false">
-                    <path d="M28 2 L54 10 V30 C54 46 42 57 28 62 C14 57 2 46 2 30 V10 Z" fill="#15527c" />
-                    <path d="M28 2 L54 10 V30 C54 46 42 57 28 62 Z" fill="#2175b9" />
-                    <path d="M23 18h10v9h9v10h-9v9H23v-9h-9V27h9z" fill="#ffffff" />
+                    <path d="M28 2 L54 10 V30 C54 46 42 57 28 62 C14 57 2 46 2 30 V10 Z" fill="#15527c"/>
+                    <path d="M28 2 L54 10 V30 C54 46 42 57 28 62 Z" fill="#2175b9"/>
+                    <path d="M23 18h10v9h9v10h-9v9H23v-9h-9V27h9z" fill="#ffffff"/>
                 </svg>
             </a>
 
@@ -70,8 +75,8 @@
                 <svg width="22" height="24" viewBox="0 0 22 24" fill="none"
                      stroke="currentColor" stroke-width="1.8"
                      aria-hidden="true" focusable="false">
-                    <circle cx="11" cy="7" r="5" />
-                    <path d="M2 23c0-5 4-9 9-9s9 4 9 9" />
+                    <circle cx="11" cy="7" r="5"/>
+                    <path d="M2 23c0-5 4-9 9-9s9 4 9 9"/>
                 </svg>
             </a>
         </header>

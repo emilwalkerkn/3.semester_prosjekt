@@ -1,0 +1,98 @@
+
+@model SemesterProsjekt.Models.ViewModels.OrganizationApplicationViewModel
+
+@{
+    ViewData["Title"] = "Søk om å bli behovsaktør";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <h1>Søk om å bli behovsaktør</h1>
+
+            <p class="text-muted">
+                Representerer du en organisasjon som ønsker å registrere
+                og følge opp behov i Kriseportal?
+                Fyll ut skjemaet for å sende inn en søknad.
+            </p>
+
+            <form asp-controller="OrganizationApplication"
+                  asp-action="Create"
+                  method="post">
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger"></div>
+
+                <h2 class="h5 mt-4">Organisasjonsinformasjon</h2>
+
+                <div class="mb-3">
+                    <label asp-for="OrganizationName" class="form-label">
+                        Organisasjonsnavn
+                    </label>
+                    <input asp-for="OrganizationName" class="form-control" />
+                    <span asp-validation-for="OrganizationName"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="OrganizationNumber" class="form-label">
+                        Organisasjonsnummer
+                    </label>
+                    <input asp-for="OrganizationNumber"
+                           class="form-control"
+                           inputmode="numeric"
+                           maxlength="9" />
+                    <span asp-validation-for="OrganizationNumber"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="EmailDomain" class="form-label">
+                        Organisasjonens e-postdomene
+                    </label>
+                    <input asp-for="EmailDomain"
+                           class="form-control"
+                           placeholder="eksempel.no" />
+                    <span asp-validation-for="EmailDomain"
+                          class="text-danger"></span>
+                </div>
+
+                <h2 class="h5 mt-4">Kontaktperson</h2>
+
+                <div class="mb-3">
+                    <label asp-for="ContactPersonName" class="form-label">
+                        Navn på kontaktperson
+                    </label>
+                    <input asp-for="ContactPersonName"
+                           class="form-control" />
+                    <span asp-validation-for="ContactPersonName"
+                          class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ContactEmail" class="form-label">
+                        E-post til kontaktperson
+                    </label>
+                    <input asp-for="ContactEmail"
+                           type="email"
+                           class="form-control" />
+                    <span asp-validation-for="ContactEmail"
+                          class="text-danger"></span>
+                </div>
+
+                <p class="text-muted">
+                    Søknaden blir vurdert av en systemadministrator.
+                    Innsending gir ikke automatisk tilgang som behovsaktør.
+                </p>
+
+                <button type="submit" class="btn btn-primary">
+                    Send søknad
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

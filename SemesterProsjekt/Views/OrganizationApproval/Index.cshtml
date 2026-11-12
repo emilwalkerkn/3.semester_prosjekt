@@ -38,6 +38,9 @@
                 <tr>
                     <th>Organisasjon</th>
                     <th>Organisasjonsnummer</th>
+                    <th>Kontaktperson</th>
+                    <th>E-post</th>
+                    <th>E-postdomene</th>
                     <th>Opprettet</th>
                     <th>Status</th>
                     <th>Handlinger</th>
@@ -53,6 +56,19 @@
                         <td>
                             @(organization.OrganizationNumber ?? "Ikke oppgitt")
                         </td>
+                        
+                        <td>
+                            @(organization.ContactPersonName ?? "Ikke oppgitt")
+                        </td>
+
+                        <td>
+                            @(organization.ContactEmail ?? "Ikke oppgitt")
+                        </td>
+
+                        <td>
+                            @(organization.AllowedEmailDomain ?? "Ikke oppgitt")
+                        </td>
+
 
                         <td>
                             @organization.CreatedAt.ToString("dd.MM.yyyy")
