@@ -27,7 +27,7 @@ public class MatchController : Controller
     public MatchController(
         IMatchRepository matchRepository,
         INeedRepository needRepository,
-        IResourceRepository resourceRepository
+        IResourceRepository resourceRepository,
         INotificationRepository notificationRepository)
     {
         _matchRepository = matchRepository;

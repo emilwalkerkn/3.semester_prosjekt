@@ -42,7 +42,7 @@ public class NotificationRepository : INotificationRepository
     {
         using var connection = _connectionFactory.CreateConnection();
         return await connection.ExecuteScalarAsync<int>(
-            "SELECT COUNT (*) FROM Notifications WHERE UserId = @UserId AND IsRead = FALSE;",
+            "SELECT COUNT(*) FROM Notifications WHERE UserId = @UserId AND IsRead = FALSE;",
             new {UserId = userId });
     }
 

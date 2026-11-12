@@ -19,9 +19,9 @@ public class NotificationController : Controller
 
     /// Markerer varseelet som lest og sender brukeren til riktig side
     [HttpGet]
-    public async Task<IActionResult> Opent(int id)
+    public async Task<IActionResult> Open(int id)
     {
-        var link = await _notifications.MarkAllAsReadAsync(id, CurrentUserId);
+        var link = await _notifications.MarkAsReadAsync(id, CurrentUserId);
 
         // IsLocalUrl hindrer at en lenke kan sende brukeren til ekstern nettside
         return link is not null && Url.IsLocalUrl(link)
