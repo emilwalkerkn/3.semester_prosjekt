@@ -175,11 +175,12 @@ app.MapStaticAssets();
 
 
 // Setter opp standardruten i applikasjonen.
-// Innloggingssiden åpnes dersom ingen annen rute er oppgitt.
+// Forsiden åpnes dersom ingen annen rute er oppgitt.
+// Flyten blir da: forside -> logg inn / registrer deg -> portalen.
 
 app.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Account}/{action=Login}/{id?}")
+        pattern: "{controller=Home}/{action=Forside}/{id?}")
     .WithStaticAssets();
 
 

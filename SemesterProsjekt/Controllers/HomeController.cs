@@ -227,6 +227,26 @@ public class HomeController : Controller
     }
 
   
+    /// Viser den offentlige forsiden til Kriseportal.
+    /// Dette er første side besøkende ser. Derfra går de videre til
+    /// innlogging eller registrering, og deretter til selve portalen.
+    /// AllowAnonymous gjør at siden kan vises uten innlogging,
+    /// selv om resten av HomeController krever innlogging.
+
+    [AllowAnonymous]
+    public IActionResult Forside()
+    {
+        // Brukere som allerede er logget inn, trenger ikke forsiden.
+        // De sendes rett til portalens hjemmeside.
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return RedirectToAction(nameof(Index));
+        }
+
+        return View();
+    }
+
+
     /// Viser personvernsiden som tilhører HomeController.
    
     public IActionResult Privacy()
