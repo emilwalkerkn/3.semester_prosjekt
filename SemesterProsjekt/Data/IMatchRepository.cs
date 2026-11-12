@@ -47,13 +47,6 @@ public interface IMatchRepository
 
     Task<int> CreateAsync(Match match);
 
-
-    /// Oppdaterer status og avslutningstidspunkt.
-    /// Controlleren må kontrollere tilgang og tillatt statusovergang.
-
-    Task UpdateStatusAsync(int id, string status, DateTime? resolvedAt);
-
-
     /// Oppdaterer bare dersom statusen fortsatt er den controlleren kontrollerte.
     /// Hindrer at samtidige svar overskriver hverandre.
    

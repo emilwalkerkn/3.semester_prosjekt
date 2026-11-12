@@ -67,7 +67,6 @@ builder.Services.ConfigureApplicationCookie(options =>
 // Legger til støtte for MVC-controllere, views og Razor Pages.
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages();
 
 
 // Registrerer databasetilkoblingen og repositoryene.
@@ -104,8 +103,6 @@ if (!builder.Environment.IsDevelopment())
         .SetApplicationName("SemesterProsjekt"); 
 }
 
-builder.Services.AddScoped<InvitationEmailSender>();
-
 
 
 // Bygger applikasjonen med tjenestene
@@ -131,14 +128,6 @@ using (var scope = app.Services.CreateScope())
 // og legger inn lokale eksempeldata dersom det er konfigurert.
 
 await IdentitySeeder.SeedRolesAsync(app.Services);
-if (app.Configuration.GetValue<bool>(
-        "ApprovalAdminTestSeeder:Enabled"))
-{
-    if (!app.Environment.IsDevelopment())
-        throw new InvalidOperationException(
-            "Testseederen kan bare kjøre i Development.");
-}
-
 await CategorySeeder.SeedAsync(app.Services);
 await LocalDemoSeeder.SeedAsync(
     app.Services,
@@ -182,11 +171,6 @@ app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Forside}/{id?}")
     .WithStaticAssets();
-
-
-// Gjør Razor Pages tilgjengelige i applikasjonen.
-
-app.MapRazorPages();
 
 
 // Starter applikasjonen og begynner å ta imot forespørsler.
