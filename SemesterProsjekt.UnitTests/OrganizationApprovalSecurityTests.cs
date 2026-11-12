@@ -7,6 +7,7 @@ using SemesterProsjekt.Controllers;
 using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Http;
 using Xunit;
 
@@ -53,10 +54,14 @@ public class OrganizationApprovalSecurityTests
                 "testnord@example.com"))
             .ReturnsAsync(employee);
 
+
         var controller = new OrganizationApprovalController(
             db,
-            userManager.Object
+            userManager.Object,
+            null!,
+            new ConfigurationBuilder().Build()
         );
+
 
         // Forsøk å utpeke brukeren i feil organisasjon.
         var result = await controller.AssignOrganizationAdmin(
@@ -102,10 +107,14 @@ public class OrganizationApprovalSecurityTests
             null!, null!, null!, null!
         );
 
+
         var controller = new OrganizationApprovalController(
             db,
-            userManager.Object
+            userManager.Object,
+            null!,
+            new ConfigurationBuilder().Build()
         );
+
 
         var result = await controller.AssignOrganizationAdmin(
             1,
@@ -168,10 +177,14 @@ public class OrganizationApprovalSecurityTests
             .Setup(m => m.IsInRoleAsync(user, AppRoles.Admin))
             .ReturnsAsync(true);
 
+
         var controller = new OrganizationApprovalController(
             db,
-            userManager.Object
+            userManager.Object,
+            null!,
+            new ConfigurationBuilder().Build()
         );
+
 
         // Metoden bruker TempData til feilmeldinger.
         controller.TempData = new Mock<ITempDataDictionary>().Object;

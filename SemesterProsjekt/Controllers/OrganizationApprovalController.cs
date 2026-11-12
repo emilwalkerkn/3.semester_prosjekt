@@ -6,6 +6,8 @@ using SemesterProsjekt.Models;
 using Microsoft.AspNetCore.Identity;
 using SemesterProsjekt.Services;
 
+
+
 namespace SemesterProsjekt.Controllers;
 //passer på at bare brukere med admin rolle kan se siden
 [Authorize(Roles = AppRoles.Admin)]
@@ -67,13 +69,120 @@ public class OrganizationApprovalController : Controller
         if (organization.Status != "Pending")
             return Conflict("Organisasjonen er allerede behandlet.");
 
+        // Kontroller kontaktpersonens e-postdomene.
+        if (string.IsNullOrWhiteSpace(organization.ContactEmail) ||
+            string.IsNullOrWhiteSpace(organization.AllowedEmailDomain) ||
+            !OrganizationEmailDomainService.IsAllowed(
+                organization.ContactEmail,
+                organization.AllowedEmailDomain))
+        {
+            TempData["Error"] =
+                "Organisasjonen kan ikke godkjennes fordi kontaktpersonens " +
+                "e-postadresse ikke samsvarer med organisasjonens e-postdomene.";
+
+            return RedirectToAction(nameof(Index));
+        }
+        
+        var systemAdmin = await _userManager.GetUserAsync(User);
+
+        if (systemAdmin == null ||
+            !await _userManager.IsInRoleAsync(systemAdmin, AppRoles.Admin))
+        {
+            return Forbid();
+        }
+
+        var contactEmail = organization.ContactEmail?.Trim();
+
+        if (string.IsNullOrWhiteSpace(contactEmail))
+        {
+            TempData["Error"] =
+                "Organisasjonen mangler e-postadresse til kontaktpersonen.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        var existingUser = await _userManager.FindByEmailAsync(contactEmail);
+
+        if (existingUser != null)
+        {
+            TempData["Error"] =
+                "Kontaktpersonen har allerede en brukerkonto. " +
+                "Dette må behandles separat.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
+        var token = InvitationTokenService.GenerateToken();
+
+        var now = DateTime.UtcNow;
+
+        var invitation = new OrganizationInvitation
+        {
+            OrganizationId = organization.OrganizationId,
+            Email = contactEmail!,
+            TokenHash = InvitationTokenService.HashToken(token),
+            InvitedByUserId = systemAdmin.Id,
+            CreatedAt = now,
+            ExpiresAt = now.AddHours(24),
+            IsOrganizationAdminInvitation = true
+        };
+
+// Organisasjonsgodkjenning og invitasjon lagres i samme databasetransaksjon.
+        await using var transaction =
+            await _context.Database.BeginTransactionAsync();
+
         organization.Status = "Approved";
+
+        _context.OrganizationInvitations.Add(invitation);
+
 
         await _context.SaveChangesAsync();
 
-        TempData["Success"] = "Organisasjonen ble godkjent.";
+// Bruk den konfigurerte adressen, ikke Host-headeren fra nettleseren.
+        var baseUrl = _configuration["Invitation:BaseUrl"];
+
+        if (!Uri.TryCreate(baseUrl, UriKind.Absolute, out var parsedBaseUrl) ||
+            (parsedBaseUrl.Scheme != Uri.UriSchemeHttp &&
+             parsedBaseUrl.Scheme != Uri.UriSchemeHttps))
+        {
+            TempData["Error"] =
+                "Invitasjonsadressen er ikke konfigurert riktig.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        var invitationLink = new Uri(
+            parsedBaseUrl,
+            $"/OrganizationInvitation/Register?token={Uri.EscapeDataString(token)}"
+        ).ToString();
+
+        try
+        {
+            await _emailSender.SendOrganizationAdminInvitationAsync(
+                contactEmail!,
+                organization.Name,
+                invitationLink);
+        }
+        catch
+        {
+            // Transaksjonen blir rullet tilbake når den avslutte uten CommitAsync().
+            TempData["Error"] =
+                "Organisasjonen kunne ikke godkjennes fordi " +
+                "invitasjonen ikke kunne sendes.";
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        await transaction.CommitAsync();
+
+        TempData["Success"] =
+            "Organisasjonen ble godkjent, og en invitasjon " +
+            "ble sendt til kontaktpersonen.";
 
         return RedirectToAction(nameof(Index));
+
+
     }
 
     [HttpPost]
