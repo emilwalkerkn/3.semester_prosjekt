@@ -5,6 +5,7 @@
     - Logge inn med e-post og passord
     - Velge «Husk meg»
     - Gå til registreringssiden
+    - Gå tilbake til den offentlige forsiden
 *@
 
 @model SemesterProsjekt.Models.ViewModels.LoginViewModel
@@ -34,24 +35,37 @@
           asp-append-version="true" />
 </head>
 
-<body class="login-page">
+<body class="login-page login-page-branded">
 
     @* Hovedinnholdet på siden. *@
     <main class="login-shell">
 
-        @* Informasjon om Kriseportal. *@
-        <section class="login-intro">
-            <div class="portal-brand">
-                <span class="portal-brand-mark">K</span>
-                <span>Kriseportal</span>
+        @* Logo og informasjon vises på portalens vanlige blå bakgrunn. *@
+        <section class="login-intro" aria-labelledby="login-brand-heading">
+            @* En vanlig lenke går til forsiden uavhengig av nettleserhistorikken. *@
+            <a asp-controller="Home" asp-action="Forside" class="login-back-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                     stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M19 12H5m7-7-7 7 7 7" />
+                </svg>
+                <span>Tilbake til forsiden</span>
+            </a>
+
+            <div class="login-brand-content">
+                @* Samme pin-symbol som på forsiden, med lyse farger fra CSS. *@
+                <div class="login-brand">
+                    <partial name="_PortalPin" />
+                    <div class="login-brand-wordmark">
+                        <h1 id="login-brand-heading" class="login-brand-name">Krise<span>portal</span></h1>
+                        <p class="login-brand-tagline">Registrer behov · Del ressurser</p>
+                    </div>
+                </div>
+
+                <p class="login-brand-description">
+                    Logg inn for å se behov, tilby ressurser og følge opp saker.
+                </p>
             </div>
-
-            <h1>Koordiner behov og ressurser med oversikt.</h1>
-
-            <p>
-                Logg inn for å registrere behov, tilby ressurser
-                og følge opp saker.
-            </p>
         </section>
 
         @* Boksen som inneholder innloggingsskjemaet. *@
