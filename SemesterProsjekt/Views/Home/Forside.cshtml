@@ -1,0 +1,139 @@
+@*
+    Dette er den offentlige forsiden til Kriseportal.
+    Det er den første siden en besøkende ser.
+
+    Flyten er:
+    1. Forside (denne siden)
+    2. Logg inn eller registrer deg (AccountController)
+    3. Portalen (Home/Index)
+
+    Siden inneholder:
+    - En topplinje med logo og "Logg inn"-lenke
+    - Slogan og en kort informasjonstekst
+    - En boks med "Registrer nå"-knapp
+    - Eksempler på behov og ressurser
+
+    Stilene ligger i wwwroot/css/forside.css.
+*@
+
+@{
+    // Tittelen som vises i nettleserfanen.
+    ViewData["Title"] = "Forside";
+
+    /*
+        Eksemplene samles i en liste.
+        Da lager én foreach-løkke lenger ned HTML-en for alle kortene,
+        og vi slipper å kopiere den samme koden fire ganger.
+        IsNeed avgjør om kortet er et behov eller en ressurs.
+    */
+    var examples = new[]
+    {
+        new { IsNeed = true,  Title = "Strømaggregat til evakueringssenter",   Meta = "Kristiansand · 2 stk · Haster",       Image = "~/images/types/power.svg" },
+        new { IsNeed = true,  Title = "Feltsenger til midlertidig overnatting", Meta = "Arendal · 40 stk",                    Image = "~/images/types/bed.svg" },
+        new { IsNeed = false, Title = "Firehjulstrekker med henger",            Meta = "Grimstad · 1 stk · Tilgjengelig nå", Image = "~/images/types/transport.svg" },
+        new { IsNeed = false, Title = "Tørrmat og drikkevann",                  Meta = "Lillesand · 200 porsjoner",          Image = "~/images/types/food.svg" }
+    };
+}
+
+@* Legger til forsidens egen CSS-fil i <head> gjennom Styles-seksjonen i _Layout. *@
+@section Styles {
+    <link rel="stylesheet" href="~/css/forside.css" asp-append-version="true" />
+}
+
+<div class="forside">
+
+    @* Øverste del med lys bakgrunn: topplinje, slogan og informasjonstekst. *@
+    <section class="forside-top">
+
+        <header class="forside-header">
+            @* Tomt felt til venstre, slik at logoen havner midt på. *@
+            <span aria-hidden="true"></span>
+
+            @* Logoen lenker tilbake til forsiden. *@
+            <a asp-controller="Home" asp-action="Forside"
+               class="forside-logo"
+               aria-label="Kriseportal – gå til forsiden">
+                <svg width="56" height="64" viewBox="0 0 56 64" aria-hidden="true" focusable="false">
+                    <path d="M28 2 L54 10 V30 C54 46 42 57 28 62 C14 57 2 46 2 30 V10 Z" fill="#15527c" />
+                    <path d="M28 2 L54 10 V30 C54 46 42 57 28 62 Z" fill="#2175b9" />
+                    <path d="M23 18h10v9h9v10h-9v9H23v-9h-9V27h9z" fill="#ffffff" />
+                </svg>
+            </a>
+
+            @*
+                "Logg inn" sender brukeren til innloggingssiden.
+                asp-controller og asp-action er tag-helpere som lager riktig adresse,
+                her /Account/Login.
+            *@
+            <a asp-controller="Account" asp-action="Login" class="forside-login" aria-label="Logg inn">
+                <span>Logg inn</span>
+                <svg width="22" height="24" viewBox="0 0 22 24" fill="none"
+                     stroke="currentColor" stroke-width="1.8"
+                     aria-hidden="true" focusable="false">
+                    <circle cx="11" cy="7" r="5" />
+                    <path d="M2 23c0-5 4-9 9-9s9 4 9 9" />
+                </svg>
+            </a>
+        </header>
+
+        @* Brødsmulesti: viser hvor i portalen brukeren befinner seg. *@
+        <nav aria-label="Brødsmulesti" class="forside-breadcrumb">
+            <a asp-controller="Home" asp-action="Forside">Forside</a>
+            <span aria-hidden="true">›</span>
+            <span aria-current="page">Kriseportal</span>
+        </nav>
+
+        @* Sloganet er sidens hovedoverskrift (h1). *@
+        <h1 class="forside-slogan">Samlet oversikt når det virkelig gjelder.</h1>
+
+        <p class="forside-intro">
+            Kriseportal er en felles portal for å koordinere behov og ressurser
+            når en krise oppstår. Offentlige aktører melder inn hva som trengs,
+            og ressurseiere tilbyr utstyr, transport og mannskap,
+            slik at riktig hjelp kommer raskt fram.
+        </p>
+    </section>
+
+    @* Boks med én tydelig handling: registrer deg. *@
+    <section class="forside-container" aria-labelledby="forside-cta-title">
+        <div class="forside-cta">
+            <h2 id="forside-cta-title">Registrer deg i Kriseportal</h2>
+            <p>Opprett en konto for å melde inn behov eller tilby ressurser.</p>
+
+            @* Sender brukeren til registreringssiden, /Account/Register. *@
+            <a asp-controller="Account" asp-action="Register" class="forside-cta-button">
+                Registrer nå
+            </a>
+        </div>
+    </section>
+
+    @*
+        Eksempler som viser hva portalen brukes til.
+        Kortene er bare illustrasjoner og hentes ikke fra databasen.
+    *@
+    <section class="forside-container forside-examples" aria-labelledby="forside-examples-title">
+        <h2 id="forside-examples-title">Eksempler på behov og ressurser</h2>
+
+        <div class="forside-example-grid">
+            @foreach (var example in examples)
+            {
+                <article class="forside-example">
+                    @* Bildet er pynt, derfor tom alt-tekst. *@
+                    <div class="forside-example-image">
+                        <img src="@Url.Content(example.Image)" alt="" />
+                    </div>
+
+                    <div class="forside-example-body">
+                        @* Etiketten får forskjellig farge for behov og ressurs. *@
+                        <span class="forside-tag @(example.IsNeed ? "need" : "resource")">
+                            @(example.IsNeed ? "Behov" : "Ressurs")
+                        </span>
+
+                        <h3>@example.Title</h3>
+                        <p>@example.Meta</p>
+                    </div>
+                </article>
+            }
+        </div>
+    </section>
+</div>
