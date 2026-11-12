@@ -1,0 +1,61 @@
+@using SemesterProsjekt.Models.ViewModels
+@model NotificationBellViewModel
+
+<div class="dropdown notification-bell">
+    <button type="button"
+            class="notification"
+            data-bs-toggle="dropdown"
+            data-bs-offset="0,10"
+            aria-expanded="false"
+            aria-label="Varsler, @Model.UnreadCount uleste">
+        <svg width="20" height="20" viewBox="0 0 24 24"
+             fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round"
+             aria-hidden="true" focusable="false">
+            <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+            <path d="M10 21h4" />
+        </svg>
+        @if (Model.UnreadCount > 0)
+        {
+            <strong class="notification-badge">@(Model.UnreadCount > 9 ? "9+" : Model.UnreadCount.ToString())</strong>
+        }
+    </button>
+
+    <div class="dropdown-menu dropdown-menu-end notification-panel">
+        <div class="notification-panel-header">
+            <strong>Varsler</strong>
+            @if (Model.UnreadCount > 0)
+            {
+                <form asp-controller="Notification" asp-action="MarkAllRead" method="post">
+                    <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
+                    <button type="submit" class="notification-mark-all">Merk alle som lest</button>
+                </form>
+            }
+        </div>
+
+        @if (Model.Items.Count == 0)
+        {
+            <p class="notification-empty">Ingen varsler ennå.</p>
+        }
+        else
+        {
+            <ul class="notification-list">
+                @foreach (var item in Model.Items)
+                {
+                    <li>
+                        <a asp-controller="Notification"
+                           asp-action="Open"
+                           asp-route-id="@item.NotificationId"
+                           class="notification-item @(item.IsRead ? "" : "unread")">
+                            <i class="notification-dot" aria-hidden="true"></i>
+                            <div>
+                                <p>@item.Message</p>
+                                <time>@NotificationBellViewModel.TimeAgo(item.CreatedAt)</time>
+                            </div>
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+</div>
