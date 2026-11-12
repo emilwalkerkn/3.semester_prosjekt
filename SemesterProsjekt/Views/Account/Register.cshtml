@@ -4,8 +4,9 @@
     Her kan brukeren:
     - Opprette en ny konto
     - Skrive inn kontaktinformasjon
-    - Velge hvilken rolle brukeren skal ha
+    - Registrere seg som ressurseier
     - Lage et passord
+    - Gå tilbake til den offentlige forsiden
 *@
 
 @using SemesterProsjekt.Models
@@ -36,24 +37,37 @@
           asp-append-version="true" />
 </head>
 
-<body class="login-page">
+<body class="login-page login-page-branded">
 
     @* Hovedinnholdet på siden. *@
     <main class="login-shell">
 
-        @* Informasjon om Kriseportal. *@
-        <section class="login-intro">
-            <div class="portal-brand">
-                <span class="portal-brand-mark">K</span>
-                <span>Kriseportal</span>
+        @* Samme logo og blåfarge som innloggingen gir et gjenkjennelig oppsett. *@
+        <section class="login-intro" aria-labelledby="register-brand-heading">
+            @* Lenken går direkte til forsiden uten å sende inn registreringsskjemaet. *@
+            <a asp-controller="Home" asp-action="Forside" class="login-back-link">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                     stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="M19 12H5m7-7-7 7 7 7" />
+                </svg>
+                <span>Tilbake til forsiden</span>
+            </a>
+
+            <div class="login-brand-content">
+                @* Den felles pin-logoen får sin lyse variant fra CSS. *@
+                <div class="login-brand">
+                    <partial name="_PortalPin" />
+                    <div class="login-brand-wordmark">
+                        <h1 id="register-brand-heading" class="login-brand-name">Krise<span>portal</span></h1>
+                        <p class="login-brand-tagline">Registrer behov · Del ressurser</p>
+                    </div>
+                </div>
+
+                <p class="login-brand-description">
+                    Opprett en konto for å registrere og følge opp det du kan bidra med.
+                </p>
             </div>
-
-            <h1>Bidra med behov eller ressurser når det trengs.</h1>
-
-            <p>
-                Opprett en konto for å registrere og følge opp
-                det du kan bidra med.
-            </p>
         </section>
 
         @* Boksen som inneholder registreringsskjemaet. *@
