@@ -1,0 +1,17 @@
+@*
+    Felles pin-symbol for forsiden, innloggingen og portalens toppmeny.
+    SVG holder logoen skarp i alle størrelser uten en egen bildefil.
+    CSS-variablene lar oss bruke en lys variant på blå bakgrunn.
+    Symbolet er dekorativt; lenken eller teksten rundt gir det et navn.
+*@
+<svg class="portal-pin" width="56" height="70" viewBox="0 0 200 250"
+     xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    @* To halvdeler gir samme todelte pin-form som i logoen. *@
+    <path d="M100 0C44.77 0 0 44.77 0 100C0 160 57 207 100 250Z"
+          fill="var(--pin-left, #15527c)" />
+    <path d="M100 0C155.23 0 200 44.77 200 100C200 160 143 207 100 250Z"
+          fill="var(--pin-right, #2175b9)" />
+    @* Korset tegnes samlet for å unngå skjøter mellom delene. *@
+    <path d="M91 49H109Q118 49 118 58V81H141Q150 81 150 90V108Q150 117 141 117H118V140Q118 149 109 149H91Q82 149 82 140V117H59Q50 117 50 108V90Q50 81 59 81H82V58Q82 49 91 49Z"
+          fill="var(--pin-cross, #ffffff)" />
+</svg>
