@@ -15,11 +15,10 @@ services:
       LocalDemo__Enabled: "true"
       LocalDemo__Password: "DemoPass123"
 
-      OrganizationAdminTestSeeder__Enabled: "false"
-
       Smtp__Host: "mailpit"
       Smtp__Port: "1025"
       Invitation__BaseUrl: "http://localhost:8080"
+
 
     volumes:
       - dataprotection_keys:/keys

@@ -189,21 +189,7 @@ public class MatchRepository : IMatchRepository
         transaction.Commit();
         return id;
     }
-
-
-    /// Oppdaterer status og avslutningstidspunkt.
-    /// Controlleren kontrollerer tilgang og statusovergang før lagring.
-
-    public async Task UpdateStatusAsync(
-        int id,
-        string status,
-        DateTime? resolvedAt)
-    {
-        var match = await GetByIdAsync(id);
-        if (match is null || match.Status == status) return;
-        if (!await TryUpdateStatusAsync(id, match.Status, status, resolvedAt))
-            throw new MatchAvailabilityException("Matchen er allerede endret. Last oversikten på nytt.");
-    }
+    
 
     
     /// Endrer match, behov og beholdning i én transaksjon: enten lagres alt,
