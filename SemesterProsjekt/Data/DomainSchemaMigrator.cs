@@ -94,6 +94,7 @@ public static class DomainSchemaMigrator
         }
 
         await MigrateMatchTableAsync(connection);
+        await CreateNotificationTableAsync(connection);
     }
 
    
@@ -174,6 +175,23 @@ public static class DomainSchemaMigrator
         await connection.ExecuteAsync("CREATE INDEX IF NOT EXISTS IX_Match_Need_Resource ON `Match` (NeedId, ResourceId);");
         if (await connection.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Match' AND INDEX_NAME = 'UQ_Match_Need_Resource';") > 0)
             await connection.ExecuteAsync("ALTER TABLE `Match` DROP INDEX UQ_Match_Need_Resource;");
+    }
+
+    /// Oppretter tabellen for varsler dersom den ikke finnes.
+    /// IF NOT EXISTS gjør at dette trygt kan kjøres ved hver oppstart.
+    private static async Task CreateNotificationTableAsync(IDbConnection connection)
+    {
+        await connection.ExecuteAsync("""
+            CREATE TABLE IF NOT EXISTS Notifications (
+                NotificationId INT AUTO_INCREMENT PRIMARY KEY,
+                UserId VARCHAR(255) NOT NULL,
+                Message VARCHAR(500) NOT NULL,
+                Link VARCHAR (255) NULL,
+                IsRead BOOLEAN NOT NULL DEFAULT FALSE,
+                CreatedAt DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                INDEX IX_Notifications_User (UserId, IsRead)
+            );
+            """);
     }
 
    

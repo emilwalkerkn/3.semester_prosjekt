@@ -17,6 +17,7 @@ public class TestMatchFlow
     private readonly Mock<IMatchRepository> _matcher = new();
     private readonly Mock<INeedRepository> _behov = new();
     private readonly Mock<IResourceRepository> _ressurser = new();
+    private readonly Mock<INotificationRepository> _varsler = new();
 
     private readonly Need _testbehov = new()
     {
@@ -228,7 +229,7 @@ public class TestMatchFlow
     private MatchController LagController(string brukerId, string rolle)
     {
         var controller = new MatchController(
-            _matcher.Object, _behov.Object, _ressurser.Object);
+            _matcher.Object, _behov.Object, _ressurser.Object, _varsler.Object);
 
         var identitet = new ClaimsIdentity(
             new[]
