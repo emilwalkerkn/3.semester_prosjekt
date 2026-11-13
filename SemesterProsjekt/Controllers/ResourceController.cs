@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SemesterProsjekt.Data;
 using SemesterProsjekt.Models;
+using SemesterProsjekt.Services;
 
 namespace SemesterProsjekt.Controllers;
 
@@ -26,24 +27,65 @@ public class ResourceController : Controller
     }
 
   
-    /// Viser bare ressursene brukeren har lesetilgang til i utskriften.
-    public async Task<IActionResult> Print(string? search = null, int? resourceTypeId = null, string? status = null) =>
-        View(ResourceSearch.Apply(ResourceVisibility.Filter(User, await _resourceRepository.GetAllAsync()), search, resourceTypeId, status).ToList());
-
-  
-    /// Kart og liste bygges fra ressursene brukeren har lesetilgang til.
-    public async Task<IActionResult> Overview(string? search = null, int? resourceTypeId = null, string? status = null)
+    public async Task<IActionResult> Print(
+        [FromServices] CountyFilter countyFilter,
+        string? search = null,
+        int? resourceTypeId = null,
+        string? status = null,
+        string? county = null)
     {
-        var visible = ResourceVisibility.Filter(User, await _resourceRepository.GetAllAsync()).ToList();
+        // Beholder bare ressurser brukeren har tilgang til.
+        var visible = ResourceVisibility.Filter(
+            User, await _resourceRepository.GetAllAsync());
+
+        // Bruker de eksisterende filtrene først.
+        var filtered = ResourceSearch.Apply(
+            visible, search, resourceTypeId, status);
+
+        // Beholder filtervalgene til utskriftssiden.
         ViewData["Search"] = search;
         ViewData["ResourceTypeId"] = resourceTypeId;
         ViewData["Status"] = status;
-        ViewData["ResourceTypes"] = (await _resourceRepository.GetResourceTypesAsync())
-            .Select(type => new SelectListItem(type.Name, type.ResourceTypeId.ToString(), type.ResourceTypeId == resourceTypeId))
-            .OrderBy(item => item.Value == CategoryCatalog.OtherId.ToString()).ThenBy(item => item.Text).ToList();
-        return View(ResourceSearch.Apply(visible, search, resourceTypeId, status).ToList());
+        ViewData["County"] = county;
+
+        // Bruker fylkesfilteret på det samme utvalget.
+        return View(filtered
+            .Where(resource => countyFilter.IsInCounty(resource, county))
+            .ToList());
     }
 
+    public async Task<IActionResult> Overview(
+        [FromServices] CountyFilter countyFilter,
+        string? search = null,
+        int? resourceTypeId = null,
+        string? status = null,
+        string? county = null)
+    {
+        var visible = ResourceVisibility.Filter(
+            User, await _resourceRepository.GetAllAsync()).ToList();
+
+        ViewData["Search"] = search;
+        ViewData["ResourceTypeId"] = resourceTypeId;
+        ViewData["Status"] = status;
+        ViewData["County"] = county;
+
+        ViewData["ResourceTypes"] =
+            (await _resourceRepository.GetResourceTypesAsync())
+            .Select(type => new SelectListItem(
+                type.Name,
+                type.ResourceTypeId.ToString(),
+                type.ResourceTypeId == resourceTypeId))
+            .OrderBy(item => item.Value == CategoryCatalog.OtherId.ToString())
+            .ThenBy(item => item.Text)
+            .ToList();
+
+        var filtered = ResourceSearch.Apply(
+            visible, search, resourceTypeId, status);
+
+        return View(filtered
+            .Where(resource => countyFilter.IsInCounty(resource, county))
+            .ToList());
+    }
   
     /// Viser et tomt registreringsskjema med ressurstyper hentet fra databasen.
     /// Bare ressurseiere og administratorer kan registrere ressurser.
