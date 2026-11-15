@@ -90,6 +90,10 @@ builder.Services.AddScoped<
     IMatchRepository,
     MatchRepository>();
 
+builder.Services.AddScoped<
+    INotificationRepository,
+    NotificationRepository>();
+
 
 // I produksjonsmiljøet lagres nøklene for databeskyttelse i en egen mappe, slik at de bevares ved omstart.
 

@@ -22,15 +22,18 @@ public class MatchController : Controller
     private readonly IMatchRepository _matchRepository;
     private readonly INeedRepository _needRepository;
     private readonly IResourceRepository _resourceRepository;
+    private readonly INotificationRepository _notificationRepository;
 
     public MatchController(
         IMatchRepository matchRepository,
         INeedRepository needRepository,
-        IResourceRepository resourceRepository)
+        IResourceRepository resourceRepository,
+        INotificationRepository notificationRepository)
     {
         _matchRepository = matchRepository;
         _needRepository = needRepository;
         _resourceRepository = resourceRepository;
+        _notificationRepository = notificationRepository;
     }
 
 
@@ -140,6 +143,13 @@ public class MatchController : Controller
                     DeliveryAt = model.DeliveryAt, DeliveryLocation = model.DeliveryLocation.Trim(),
                     DeliveryContact = model.DeliveryContact.Trim(), Notes = model.Notes
                 });
+
+                // Varsler ressurseier om at ressurs er etterspurt.
+                await _notificationRepository.CreateAsync(
+                    resource.UserId,
+                    $"Ny forespørsel: «{need.Title}» ønsker ressursen «{resource.Title}».",
+                    "/Match/overview"); 
+                
                 TempData["DeliverySuccess"] = "Forespørselen er sendt. Venter på svar fra ressurseier.";
                 return RedirectToAction(nameof(Overview));
             }
@@ -288,6 +298,17 @@ public class MatchController : Controller
         catch (MatchAvailabilityException error)
         {
             return Conflict(error.Message);
+        }
+
+        // Varsler behovseier når ressurseier har svart
+        // match.Status er fortsatt den gamle verdien, så et gjentatt svar gir ikke nytt varsel.
+        if (isResponse && match.Status != status && need.UserId != CurrentUserId)
+        {
+            var answer = status == MatchStatuses.Approved ? "godtatt" : "avslått";
+            await _notificationRepository.CreateAsync(
+                need.UserId,
+                $"«{resource.Title}» har {answer} forespørselen din for «{need.Title}».",
+                status == MatchStatuses.Approved ? "/Match/Overview" : "/Match/History");       
         }
 
         TempData["DeliverySuccess"] = status switch

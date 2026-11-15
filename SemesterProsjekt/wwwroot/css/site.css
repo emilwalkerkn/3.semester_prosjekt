@@ -994,4 +994,32 @@ html.dark-mode .need-form textarea::placeholder {
   .login-page-branded .login-brand-tagline { font-size: clamp(7px, 1.8vw, 10px); letter-spacing: .1em; }
   .login-page-branded .login-brand-description { margin-top: 26px; font-size: 16px; }
 }
-
+/* Varsler i toppmeny */
+.notification-bell { position:relative; }
+.notification-bell .notification { padding:0; background:#fff; cursor:pointer; transition:background .15s, border-color .15s, transform .15s; }
+.notification-bell .notification:hover, .notification-bell .notification[aria-expanded="true"] { background:#eaf4fb; border-color:var(--portal-blue); }
+.notification-bell .notification:active { transform:scale(.94); }
+.notification-badge { position:absolute; top:-5px; right:-5px; display:grid; place-items:center; min-width:19px; height:19px; padding:0 5px; border:2px solid #fff; border-radius:999px; background:var(--portal-danger); color:#fff; font-size:10px; font-weight:800; line-height:1; animation:notification-pop .35s ease-out; }
+.notification-panel { z-index:1100; width:340px; max-width:calc(100vw - 32px); padding:0; overflow:hidden; border:1px solid var(--portal-border); border-radius:12px; box-shadow:0 14px 34px rgb(21 79 124 / 16%); }
+.notification-panel.show { animation:notification-fade .18s ease-out; }
+.notification-panel-header { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid var(--portal-border); color:var(--portal-ink); }
+.notification-panel .notification-mark-all { min-height:0; padding:0; border:0; background:none; box-shadow:none; color:var(--portal-blue); font-size:12px; font-weight:700; }
+.notification-panel .notification-mark-all:hover { background:none; color:var(--portal-blue-dark); text-decoration:underline; }
+.notification-list { max-height:360px; margin:0; padding:0; overflow-y:auto; list-style:none; }
+.notification-item { display:flex; gap:12px; padding:12px 16px; color:var(--portal-text); text-decoration:none; transition:background .15s; }
+.notification-item.unread { background:#f4f9fd; }
+.notification-item:hover { background:#e8f3fa; }
+.notification-item p { margin:0 0 3px; font-size:13px; line-height:1.4; }
+.notification-item.unread p { color:var(--portal-ink); font-weight:600; }
+.notification-item time { font-size:11px; }
+.notification-dot { flex:0 0 8px; height:8px; margin-top:6px; border-radius:50%; }
+.notification-item.unread .notification-dot { background:var(--portal-blue); }
+.notification-empty { margin:0; padding:24px 16px; text-align:center; font-size:13px; }
+@keyframes notification-pop { 0% { transform:scale(0); } 70% { transform:scale(1.2); } 100% { transform:scale(1); } }
+@keyframes notification-fade { from { opacity:0; translate:0 -6px; } to { opacity:1; translate:0 0; } }
+@media (prefers-reduced-motion:reduce) { .notification-badge, .notification-panel.show { animation:none; } }
+html.dark-mode .notification-bell .notification { background:#131e2b; }
+html.dark-mode .notification-bell .notification:hover { background:#1d3348; }
+html.dark-mode .notification-badge { border-color:#0d1520; }
+html.dark-mode .notification-panel { background:#131e2b; border-color:#2c4055; }
+html.dark-mode .notification-item.unread, html.dark-mode .notification-item:hover { background:#1a2a3b; }
