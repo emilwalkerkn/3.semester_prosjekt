@@ -69,18 +69,20 @@
 
     @* Overskriften og introduksjonen til siden. *@
     <header class="overview-heading">
-        <div>
+        <div class="resource-overview-title">
             <p class="eyebrow">Oversikt</p>
             <h1>@pageTitle</h1>
-
-            <p class="page-intro">
-                @(ownResourcesOnly ? "Se og administrer ressursene du selv har registrert." : "Finn ressurser som kan brukes for å løse registrerte behov.")
-            </p>
+            
+            @if (canRegister)
+            {
+                <a asp-action="Create"
+                   class="portal-button resource-register-button">
+                    + Registrer ressurs
+                </a>
+            }
         </div>
 
         <div class="overview-heading-actions">
-
-            @* Sender brukeren til en utskriftsvennlig side. *@
             <a asp-action="Print"
                asp-route-search="@search"
                asp-route-resourceTypeId="@typeId"
@@ -89,18 +91,6 @@
                class="portal-button secondary">
                 Skriv ut liste
             </a>
-
-            @*
-                Knappen vises bare for ressurseiere
-                og administratorer.
-            *@
-            @if (canRegister)
-            {
-                <a asp-action="Create"
-                   class="portal-button">
-                    + Registrer ressurs
-                </a>
-            }
         </div>
     </header>
 
@@ -151,7 +141,7 @@
             <div>
                 <p class="eyebrow">Kart</p>
 
-                <h2 id="resource-map-heading">
+                <h2 id="resource-map-heading" class="visually-hidden">
                     @pageTitle
                 </h2>
             </div>

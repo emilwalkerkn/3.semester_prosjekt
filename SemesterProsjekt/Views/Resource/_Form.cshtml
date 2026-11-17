@@ -7,11 +7,10 @@
 }
 
 @* Viser skjemaet for registrering eller redigering av ressurser. *@
-<section class="registration-page need-registration">
+<section class="registration-page need-registration resource-registration">
 
     @* Viser riktig overskrift basert på om ressursen opprettes eller redigeres. *@
     <header class="registration-heading">
-        <p class="home-eyebrow">Ressurseier</p>
         <h1>@heading</h1>
         <p>Beskriv hva dere kan bidra med, når ressursen er tilgjengelig og hvor den finnes.</p>
     </header>
@@ -23,7 +22,7 @@
           method="post"
           class="need-registration-layout">
 
-        <input asp-for="ResourceId" type="hidden" />
+        <input asp-for="ResourceId" type="hidden"/>
 
         <div class="portal-card registration-card">
 
@@ -62,7 +61,7 @@
                     <label asp-for="Title">Tittel</label>
 
                     <input asp-for="Title"
-                           placeholder="For eksempel: Førstehjelpsutstyr" />
+                           placeholder="For eksempel: Førstehjelpsutstyr"/>
 
                     <span asp-validation-for="Title"></span>
                 </div>
@@ -85,7 +84,7 @@
                            type="number"
                            min="0"
                            step="0.01"
-                           placeholder="10" />
+                           placeholder="10"/>
 
                     <span asp-validation-for="Quantity"></span>
                 </div>
@@ -94,7 +93,7 @@
                     <label asp-for="Unit">Enhet</label>
 
                     <input asp-for="Unit"
-                           placeholder="liter eller stk" />
+                           placeholder="liter eller stk"/>
 
                     <span asp-validation-for="Unit"></span>
                 </div>
@@ -106,7 +105,7 @@
 
                     <input asp-for="AvailableFrom"
                            type="datetime-local"
-                           data-use-local-now="@(!editing && Context.Request.Method == "GET" ? "true" : "false")" />
+                           data-use-local-now="@(!editing && Context.Request.Method == "GET" ? "true" : "false")"/>
 
                     <small>
                         @(editing
@@ -131,24 +130,31 @@
                     <label asp-for="ContactPoint">Kontaktinformasjon</label>
 
                     <input asp-for="ContactPoint"
-                           placeholder="Navn, telefonnummer eller e-postadresse" />
+                           placeholder="Navn, telefonnummer eller e-postadresse"/>
 
                     <span asp-validation-for="ContactPoint"></span>
                 </div>
             </div>
 
             @* Lar brukeren lagre ressursen eller avbryte registreringen. *@
-            <div class="registration-actions">
-                <a asp-action="Overview" class="portal-button secondary">
-                    Avbryt
-                </a>
-
-                <button type="submit" class="portal-button">
+            <div class="registration-actions resource-submit-actions">
+                <p class="resource-map-reminder" id="resource-map-reminder">
+                    <strong>Husk plassering på kartet</strong>
+                    Velg markørikonet i kartets verktøylinje, og trykk der ressursen finnes.
+                    Du kan også bruke linjeverktøyet for å tegne en strekning.
+                </p>
+                <button type="submit"
+                        class="portal-button"
+                        aria-describedby="resource-map-reminder">
                     @(editing ? "Lagre endringer" : "Registrer ressurs")
                 </button>
+
+                <a asp-action="Overview" class="resource-cancel-link">
+                    Avbryt og gå tilbake
+                </a>
             </div>
         </div>
-
+        
         @* Viser Leaflet-kartet hvor brukeren må velge ressursens plassering. *@
         <aside class="portal-card need-map-panel" id="need-map-panel">
 
@@ -176,8 +182,8 @@
             </div>
 
             @* Lagrer geografiske data i skjulte felter som sendes til controlleren. *@
-            <input asp-for="GeometryType" type="hidden" id="GeometryType" />
-            <input asp-for="GeometryData" type="hidden" id="GeometryData" />
+            <input asp-for="GeometryType" type="hidden" id="GeometryType"/>
+            <input asp-for="GeometryData" type="hidden" id="GeometryData"/>
 
             @* Viser om brukeren har valgt en plassering på kartet. *@
             <p id="ResourceMapStatus"
