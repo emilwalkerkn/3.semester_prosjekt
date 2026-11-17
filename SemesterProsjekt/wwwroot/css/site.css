@@ -1023,3 +1023,193 @@ html.dark-mode .notification-bell .notification:hover { background:#1d3348; }
 html.dark-mode .notification-badge { border-color:#0d1520; }
 html.dark-mode .notification-panel { background:#131e2b; border-color:#2c4055; }
 html.dark-mode .notification-item.unread, html.dark-mode .notification-item:hover { background:#1a2a3b; }
+
+/* Fremhever hovedhandlingen i ressursoversikten. */
+.portal-button.resource-register-button {
+  min-height: 60px;
+  padding: 16px 28px;
+  font-size: 20px;
+  font-weight: 750;
+  border-radius: 10px;
+}
+
+.resource-register-button:focus-visible {
+  outline: 3px solid var(--portal-ink);
+  outline-offset: 4px;
+}
+
+@media (max-width: 640px) {
+  .portal-button.resource-register-button {
+    width: 100%;
+  }
+}
+
+/* Luft mellom overskriften og registreringsknappen. */
+.portal-button.resource-register-button {
+  margin-top: 20px;
+}
+
+/* Jevn plassering av søk, filtre og handlinger. */
+.resource-search {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr)) auto auto;
+  align-items: end;
+  gap: 16px;
+  padding: 24px;
+}
+
+.resource-search .form-field {
+  min-width: 0;
+  margin: 0;
+}
+
+.resource-search .form-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+.resource-search input,
+.resource-search select {
+  width: 100%;
+  max-width: none;
+  height: 52px;
+  margin: 0;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+.resource-search > .portal-button {
+  min-height: 52px;
+  margin: 0;
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+/* To kolonner når skjermen blir smalere. */
+@media (max-width: 1200px) {
+  .resource-search {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Ett felt per rad på mobil. */
+@media (max-width: 640px) {
+  .resource-search {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 18px;
+  }
+
+  .resource-search > .portal-button {
+    width: 100%;
+  }
+}
+/* La feltene bruke hele bredden i ressursskjemaet. */
+.resource-registration .form-field input,
+.resource-registration .form-field select,
+.resource-registration .form-field textarea {
+  max-width: none;
+}
+
+/* Tydelig avslutning på skjemaet. */
+.resource-registration .resource-submit-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--portal-border);
+}
+
+.resource-registration .resource-submit-actions .portal-button {
+  width: 100%;
+  min-height: 60px;
+  padding: 16px 24px;
+  font-size: 20px;
+  border-radius: 10px;
+}
+
+.resource-registration .resource-cancel-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  min-height: 44px;
+  padding: 8px 16px;
+  color: var(--portal-ink);
+  font-size: 16px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.resource-registration .resource-submit-actions a:focus-visible,
+.resource-registration .resource-submit-actions button:focus-visible {
+  outline: 3px solid var(--portal-ink);
+  outline-offset: 4px;
+}
+
+.resource-map-reminder {
+  margin: 0;
+  padding: 16px 18px;
+  border-left: 4px solid var(--portal-blue);
+  border-radius: 8px;
+  background: var(--portal-bg);
+  color: var(--portal-ink);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.resource-map-reminder strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* Kompakt overskrift på ressursoversikten. */
+.resource-overview-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+}
+
+.resource-overview-title > .eyebrow {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.resource-overview-title > h1 {
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+.resource-overview-title > .resource-register-button {
+  margin-top: 0;
+}
+
+/* Mindre plass over registreringsskjemaet. */
+.resource-registration .registration-heading {
+  max-width: none;
+  margin-bottom: 20px;
+}
+
+.resource-registration .registration-heading h1 {
+  margin-bottom: 6px;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+.resource-registration .registration-heading > p:last-child {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .resource-overview-title {
+    width: 100%;
+  }
+
+  .resource-overview-title > h1 {
+    flex-basis: 100%;
+  }
+}
