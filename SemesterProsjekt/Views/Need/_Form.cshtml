@@ -7,10 +7,9 @@
 }
 
 @* Viser skjemaet for registrering eller redigering av behov. *@
-<section class="registration-page need-registration">
+<section class="registration-page need-registration need-form-page">
 
     <header class="registration-heading">
-        <p class="home-eyebrow">@AppRoles.PublicActorDisplayName</p>
         <h1>@heading</h1>
         <p>Beskriv hva dere trenger, når det trengs og hvor hjelpen skal leveres.</p>
     </header>
@@ -148,14 +147,22 @@
             <input asp-for="Status" type="hidden" />
 
             @* Lar brukeren lagre behovet eller avbryte registreringen. *@
-            <div class="registration-actions">
-                <a asp-action="Overview" class="portal-button secondary">
-                    Avbryt
-                </a>
+            <div class="registration-actions need-submit-actions">
+                <p class="need-map-reminder" id="need-map-reminder">
+                    <strong>Husk plassering på kartet</strong>
+                    Velg markørikonet i kartets verktøylinje, og trykk der hjelpen trengs.
+                    Du kan også bruke linjeverktøyet for å tegne en strekning.
+                </p>
 
-                <button type="submit" class="portal-button">
+                <button type="submit"
+                        class="portal-button"
+                        aria-describedby="need-map-reminder">
                     @(editing ? "Lagre endringer" : "Registrer behov")
                 </button>
+
+                <a asp-action="Overview" class="need-cancel-link">
+                    Avbryt og gå tilbake
+                </a>
             </div>
         </div>
 

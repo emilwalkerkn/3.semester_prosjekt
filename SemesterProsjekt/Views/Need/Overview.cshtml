@@ -73,34 +73,19 @@
 
     @* Overskrift og registreringsknapp. *@
     <header class="overview-heading">
-        <div>
+        <div class="need-overview-title">
             <p class="eyebrow">Oversikt</p>
 
-            <h1>Behov</h1>
+            <h1>@(history ? "Behovshistorikk" : "Behov")</h1>
 
-            <p class="page-intro">
-                @if (history)
-                {
-                    <text>
-                        Se tidligere behov som er løst og avsluttet.
-                    </text>
-                }
-                else
-                {
-                    <text>
-                        Finn og følg opp aktive behov etter type,
-                        tidspunkt, status og prioritet.
-                    </text>
-                }
-            </p>
+            @if (canRegister)
+            {
+                <a asp-action="Create"
+                   class="portal-button need-register-button">
+                    + Registrer behov
+                </a>
+            }
         </div>
-
-        @if (canRegister)
-        {
-            <a asp-action="Create" class="portal-button">
-                + Registrer behov
-            </a>
-        }
     </header>
 
     @* Bytter mellom aktive behov og historikk. *@
@@ -124,7 +109,7 @@
     @* Søk og filtrering for valgt visning. *@
     <form asp-action="Overview"
           method="get"
-          class="portal-card resource-search"
+          class="portal-card resource-search need-search"
           role="search"
           aria-label="Søk og filtrer behov">
 
@@ -265,7 +250,7 @@
                 <div>
                     <p class="eyebrow">Kart</p>
 
-                    <h2 id="need-map-heading">
+                    <h2 id="need-map-heading" class="visually-hidden">
                         @(history ? "Løste behov" : "Registrerte behov")
                     </h2>
                 </div>

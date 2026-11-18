@@ -1213,3 +1213,148 @@ html.dark-mode .notification-item.unread, html.dark-mode .notification-item:hove
     flex-basis: 100%;
   }
 }
+
+/* Samler behovstittelen og hovedhandlingen. */
+.need-overview-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+}
+
+.need-overview-title > .eyebrow {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.need-overview-title > h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+.portal-button.need-register-button {
+  min-height: 60px;
+  padding: 16px 28px;
+  font-size: 20px;
+  font-weight: 750;
+  border-radius: 10px;
+}
+
+.need-register-button:focus-visible {
+  outline: 3px solid var(--portal-ink);
+  outline-offset: 4px;
+}
+
+/* Behov har fem filterfelt og to handlingsknapper. */
+.resource-search.need-search {
+  grid-template-columns:
+        minmax(0, 1.6fr) repeat(4, minmax(0, 1fr)) auto auto;
+}
+
+@media (max-width: 1400px) {
+  .resource-search.need-search {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .need-search .resource-search-text {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .need-overview-title {
+    width: 100%;
+  }
+
+  .need-overview-title > h1 {
+    flex-basis: 100%;
+  }
+
+  .portal-button.need-register-button {
+    width: 100%;
+  }
+
+  .resource-search.need-search {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Kompakt overskrift og skjemafelt som bruker tilgjengelig bredde. */
+.need-form-page .registration-heading {
+  max-width: none;
+  margin-bottom: 20px;
+}
+
+.need-form-page .registration-heading h1 {
+  margin-bottom: 6px;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+.need-form-page .registration-heading > p:last-child {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.need-form-page .form-field input,
+.need-form-page .form-field select,
+.need-form-page .form-field textarea {
+  max-width: none;
+}
+
+/* Påminnelse, hovedknapp og avbryt vises under hverandre. */
+.need-form-page .need-submit-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--portal-border);
+}
+
+.need-form-page .need-submit-actions .portal-button {
+  width: 100%;
+  min-height: 60px;
+  padding: 16px 24px;
+  font-size: 20px;
+  border-radius: 10px;
+}
+
+.need-form-page .need-cancel-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  min-height: 44px;
+  padding: 8px 16px;
+  color: var(--portal-ink);
+  font-size: 16px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.need-form-page .need-submit-actions a:focus-visible,
+.need-form-page .need-submit-actions button:focus-visible {
+  outline: 3px solid var(--portal-ink);
+  outline-offset: 4px;
+}
+
+.need-map-reminder {
+  margin: 0;
+  padding: 16px 18px;
+  border-left: 4px solid var(--portal-blue);
+  border-radius: 8px;
+  background: var(--portal-bg);
+  color: var(--portal-ink);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.need-map-reminder strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+
