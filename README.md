@@ -409,6 +409,75 @@ I tillegg til enhetstestene har vi gjennomført manuelle tester av applikasjonen
 | BRU-03 | Be testpersonen finne og redigere ressursen de nettopp opprettet. | Personen finner funksjonen og forstår om endringen ble lagret. | gjerne gjøre at en ressursleverandør bare kan se egne ressurser | Bestått|
 
 
+### Rollebaserte sikkerhetstester for OrganizationAdmin
+
+Ved implementeringen av rollen `OrganizationAdmin` ble det gjennomført automatiserte og manuelle sikkerhetstester. Formålet var å kontrollere at organisasjonsadministratorer bare kan administrere ansatte i egen organisasjon, at administratorrettigheter ikke tildeles feilaktig, og at invitasjonssystemet beskytter mot uautorisert tilgang.
+
+#### Automatiserte sikkerhetstester
+
+Testene er skrevet med xUnit, Moq og Entity Framework Core InMemory.
+
+| Test | Hva testes? | Forventet resultat |
+|---|---|---|
+| `Admin_CannotRemoveRole_FromAnotherOrganization` | Organisasjonsadministrator forsøker å fjerne Behovsaktør-rollen fra en ansatt i en annen organisasjon. | Handlingen avvises med `Forbid`, og rollen fjernes ikke. |
+| `Admin_CannotRemoveRole_WhenOrganizationIsNotApproved` | Organisasjonen har status `Pending` eller `Rejected`. | Administratoren får ikke endre ansattes roller. |
+| `CannotAssignAdmin_FromAnotherOrganization` | En bruker fra en annen organisasjon forsøkes utpekt som organisasjonsadministrator. | Handlingen avvises med `Forbid`. |
+| `CannotAssignAdmin_WhenOrganizationIsNotApproved` | Administratorrolle forsøkes tildelt i en organisasjon som ikke er godkjent. | Handlingen avvises, og rollen tildeles ikke. |
+| `CannotAssignOrganizationAdmin_ToSystemAdmin` | En systemadministrator forsøkes utpekt som organisasjonsadministrator. | Rolletildelingen avvises. |
+| `Invite_RejectsWrongEmailDomain` | Ansatt inviteres med feil e-postdomene. | Invitasjonen avvises og lagres ikke. |
+| `PostRegister_RejectsWrongEmailDomain` | Bruker forsøker registrering med feil e-postdomene. | Ingen konto eller rolle opprettes. |
+| `Register_RejectsInactiveInvitation` | En brukt, utløpt eller tilbakekalt invitasjon åpnes. | Invitasjonen avvises. |
+| `PostRegister_RejectsInactiveInvitation` | Registrering forsøkes med en brukt, utløpt eller tilbakekalt invitasjon. | Registreringen avvises. |
+
+Testene ligger i følgende filer:
+
+- `SemesterProsjekt.UnitTests/OrganizationAdminSecurityTests.cs`
+- `SemesterProsjekt.UnitTests/OrganizationApprovalSecurityTests.cs`
+- `SemesterProsjekt.UnitTests/OrganizationInvitationSecurityTests.cs`
+
+#### Manuelle sikkerhetstester
+
+Testene ble gjennomført lokalt med Docker, ASP.NET Core Identity, MariaDB og Mailpit.
+
+| Testscenario | Forventet resultat | Resultat |
+|---|---|---|
+| Innlogging som organisasjonsadministrator | Brukeren får tilgang til administrasjon av egen organisasjon. | Bestått |
+| Administrasjon av ansatte | Organisasjonsadministrator kan se ansatte i egen organisasjon. | Bestått |
+| Invitasjon av ansatte | Organisasjonsadministrator kan sende invitasjoner via Mailpit. | Bestått |
+| Registrering gjennom invitasjon | Den ansatte knyttes til riktig organisasjon og får rollen `Behovsaktør`. | Bestått |
+| Rollebasert tilgang | Behovsaktør og Ressurseier får ikke tilgang til hverandres registreringsfunksjoner. | Bestått |
+| Gjenbruk av invitasjon | En allerede brukt invitasjon kan ikke benyttes på nytt. | Bestått |
+| Tilbakekalling av invitasjon | En tilbakekalt invitasjon avvises. | Bestått |
+| Feil e-postdomene | Ansatte utenfor organisasjonens godkjente domene kan ikke inviteres. | Bestått |
+| Administratorinvitasjon | Kontaktpersonen kan opprette konto via invitasjon etter organisasjonsgodkjenning. | Bestått |
+| Flere roller | Kontaktpersonen får både `OrganizationAdmin` og `Behovsaktør`. | Bestått |
+| Gjenbruk av administratorinvitasjon | En brukt administratorinvitasjon kan ikke benyttes på nytt. | Bestått |
+
+#### Sikkerhetstiltak
+
+- **Organisasjonsisolasjon:** Administratorer kan bare administrere ansatte med samme `OrganizationId`.
+- **Godkjenningskontroll:** Organisasjonen må ha status `Approved`.
+- **Rollebasert autorisasjon:** Administratorfunksjoner krever riktig Identity-rolle.
+- **Beskyttelse mot uautorisert rolletildeling:** Vanlig registrering skal ikke gi administratorrettigheter.
+- **E-postdomenekontroll:** Inviterte ansatte må tilhøre organisasjonens godkjente e-postdomene.
+- **Sikre invitasjoner:** Invitasjonstoken lagres som hash, utløper etter 24 timer og kan bare brukes én gang.
+- **Transaksjonssikkerhet:** Registrering og rolletildeling håndteres i en databasetransaksjon for å unngå delvis lagrede endringer.
+
+#### Testresultat
+
+Ved den dokumenterte testkjøringen bestod **67 av 67 automatiserte tester**.
+
+Testene ble kjørt med:
+
+```bash
+dotnet build
+dotnet test
+```
+
+De automatiserte testene kontrollerer sikkerhetslogikken i controllerne og databaseoperasjonene. Manuelle tester ble brukt for å kontrollere den faktiske brukerflyten gjennom nettleseren.
+
+
+
 
 ## Dokumentasjon i koden
 Vi bruker korte kommentarer på sentrale klasser og metoder for å forklare hva koden gjør. Fokuset ligger spesielt på controller-metodene og ViewModel-klassene. Dokumentasjonen i koden er kort og forklarer hensikten med sentrale deler av løsningen, og forklarer ikke hver enkelt linje.
