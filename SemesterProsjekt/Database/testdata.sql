@@ -764,8 +764,18 @@ FROM (
              15, 'Avslått',
              '2026-11-01 10:00:00', '2026-11-02 10:00:00'
      ) AS t
-         JOIN Needs AS n ON n.Title = t.Behov
-         JOIN Resources AS r ON r.Title = t.Ressurs;
+         JOIN Needs AS n
+             ON n.Title = t.Behov
+            AND n.UserId IN (
+                '2', '3', '4', '5', '6', '7', '8', '9', '10', '11',
+                '12', '13', '14', '15', '16', '17', '18', '19', '20', '21'
+            )
+         JOIN Resources AS r
+             ON r.Title = t.Ressurs
+            AND r.UserId IN (
+                '22', '23', '24', '25', '26', '27',
+                '28', '29', '30', '31', '32'
+            );
 
 -- ====================================================
 -- Oppretter én claim per testbruker: 32 rader.
